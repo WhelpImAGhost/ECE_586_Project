@@ -6,30 +6,33 @@
 
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <string.h>
+#include "defines.c"
 
-int main(int argc, char *argv[]){
-       // Set default filename
-    char *default_filename = "Other_dins/Default.din";
-    char *filename = default_filename;
+// Function to load memory image from file into memory 
+int loadMemImage(const char *filename, uint32_t *memory, size_t mem_size){
+    FILE *file = fopen(filename, "r");
 
-    // Cache usage and tracking variables
-    int cache_size = CACHE_SIZE;
-    int tag, set_index, byte_select;
-    int CacheResult;
-    int SnoopReply;
-
-
-    // Flags for setting non-default variable vvalues
-    for( argc--, argv++; argc > 0; argc-=2, argv+=2 ) {
-        if (strcmp(argv[0], "-m" ) == 0 ) 
-            mode = atoi(argv[1]); // Set normal operation
-        else if (strcmp(argv[0], "-f" ) == 0 ) 
-            filename = argv[1]; // Set input file
-        else if (strcmp(argv[0], "-c") == 0)
-            cache_size = atoi(argv[1]);
-        else { 
-            printf("\nInvalid Arguments\n"); exit(-1); 
-        }
+    // If the provided file can't be opened, try the default file
+    if (file == NULL){
+        fprintf(stderr, "The '%s' file provided can't be opened. Attempting to open defult file '%s'. \n", filename, default_filename);
+        filename = default_filename;
+        file = fopen(filename, "r");
     }
+
+    // Check if the file (either provided or default) was successfully opened
+    if (file == NULL) {
+        perror("Error opening file");
+        // Exit the program if file opening fails
+        return 1;
+    }
+
+};
+
+int main(){
+
     return 0;
 }
