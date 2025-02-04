@@ -404,3 +404,7 @@ FodyWeavers.xsd
 .vscode/launch.json
 .vscode/settings.json
 
+*
+!main.c
+!defines.c
+!Test Memory Files/*
