@@ -1,1 +1,1 @@
-#define MEMORY_SIZE 65536 //64KB memory size
+#define MEMORY_SIZE 16 //2^16 Bytes of Memory
