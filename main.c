@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <math.h>
 #include "defines.c"
 
 
@@ -21,17 +22,27 @@ int main(int argc, char *argv[]){
     // Set default mode
     int mode = 0;
 
+    uint32_t stack_address = STACK_ADDRESS, prog_start = START_ADDRESS;
+
     // Set default filename
     char *default_filename = "Test Memory Files/prog.mem";
     char *filename = default_filename;
 
 
-    // Flags for setting non-default variable vvalues
+    // Flags for setting non-default variable values
     for( argc--, argv++; argc > 0; argc-=2, argv+=2 ) {
-        if (strcmp(argv[0], "-f" ) == 0 ) 
+        if (strcmp(argv[0], "-f" ) == 0 ) {
             filename = argv[1]; // Set input file
-        else if (strcmp(argv[0], "-m" ) == 0 ) 
+        }
+        else if (strcmp(argv[0], "-m" ) == 0 ) {
             mode = atoi(argv[1]); // Set operation mode
+        }
+        else if (strcmp(argv[0], "-sp")) {
+            stack_address = atoi(argv[1]);  // Set stack pointer
+        }
+        else if (strcmp(argv[0], "-s")){
+            prog_start = atoi(argv[1]); // Set starting address
+        }
         else { 
             printf("\nInvalid Arguments\n"); exit(-1); 
         }
@@ -59,6 +70,9 @@ int main(int argc, char *argv[]){
     fprintf(stderr, "Using file: '%s'\n", filename);
     #endif
 
+    const int MEM_ALLOC = pow(2, MEMORY_SIZE);
+
+
     // Begin parsing instructions
     while (fscanf(file, "%x: %x", &address, &instruction ) == 2){
 
@@ -74,5 +88,5 @@ int main(int argc, char *argv[]){
 
     return 0;
 
-};
+}
 
