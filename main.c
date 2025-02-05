@@ -21,7 +21,7 @@ uint32_t readByte(uint32_t array[], int size, int address);
 uint32_t readHalfWord(uint32_t array[], int size, int address);
 uint32_t readWord(uint32_t array[], int size, int address);
 int writeByte(uint32_t array[], int size, int address, uint32_t value);
-int writeHalfWord(uint32_t array[], int size, int address, int value);
+int writeHalfWord(uint32_t array[], int size, int address, uint32_t value);
 int writeWord(uint32_t array[], int size, int address, uint32_t value);
 
 int main(int argc, char *argv[]){
@@ -130,7 +130,7 @@ for (int i = 0; i < size; i++){
     return;
 }
 
-
+// Function to read a specific byte from memory
 uint32_t readByte(uint32_t array[], int size, int address) {
 
     int target_block = address / 4;
@@ -144,6 +144,7 @@ uint32_t readByte(uint32_t array[], int size, int address) {
 
 }
 
+// Function to read a specific half-word (alligned) from memory
 uint32_t readHalfWord(uint32_t array[], int size, int address){
 
 /*    #ifdef DEBUG
@@ -175,6 +176,7 @@ uint32_t readHalfWord(uint32_t array[], int size, int address){
 
 }
 
+// Function to read a specific word from memory
 uint32_t readWord(uint32_t array[], int size, int address){
 
     int target_block = address / 4;
@@ -184,21 +186,21 @@ uint32_t readWord(uint32_t array[], int size, int address){
 
 }
 
+// Function to write to a specific byte from memory
 int writeByte(uint32_t array[], int size, int address, uint32_t value) {
 
     int target_block = address / 4;
     int target_byte = address % 4;
 
-    array[target_block] =  ( array[target_block] & ~( 0xFF << (8*target_byte) )) ;
-    array[target_block] = array[target_block] | ( value << (8 * target_byte));
-
-
+    array[target_block] = (array[target_block] & ~(0xFF << (8 * target_byte)));
+    array[target_block] = array[target_block] | (value << (8 * target_byte));
 
     return 0;
 
 }
 
-int writeHalfWord(uint32_t array[], int size, int address, int value) {
+// Function to write to a specific half-word in memory
+int writeHalfWord(uint32_t array[], int size, int address, uint32_t value) {
 
     if (address % 2 != 0) {
         fprintf(stderr, "Misaligned reference at 0x%08d\n", address);
@@ -227,6 +229,7 @@ int writeHalfWord(uint32_t array[], int size, int address, int value) {
 
 }
 
+// Function to write to a specific word in memory
 int writeWord(uint32_t array[], int size, int address, uint32_t value) {
 
     int target_block = address / 4;
