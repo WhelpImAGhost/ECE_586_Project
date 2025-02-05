@@ -50,6 +50,19 @@ int main(int argc, char *argv[]){
     }
     FILE *file = fopen(filename, "r");
 
+    
+    // Function to calculate number of words that can be stored in memory array
+    const int MemWords = (pow(2,MEMORY_SIZE) / 32);
+
+    uint32_t MainMem[MemWords];
+    for (int i = 0; i < MemWords; i++){
+        MainMem[i] = 0;
+    }
+
+    #ifdef DEBUG
+
+    #endif
+
     // If the provided file can't be opened, try the default file
     if (file == NULL){
         fprintf(stderr, "The '%s' file provided can't be opened. Attempting to open defult file '%s'. \n", filename, default_filename);
@@ -70,7 +83,7 @@ int main(int argc, char *argv[]){
     fprintf(stderr, "Using file: '%s'\n", filename);
     #endif
 
-    const int MEM_ALLOC = pow(2, MEMORY_SIZE);
+    const int MemAlloc = pow(2, MEMORY_SIZE);
 
 
     // Begin parsing instructions
