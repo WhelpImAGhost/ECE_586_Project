@@ -13,8 +13,9 @@
 #include <math.h>
 #include "defines.c"
 
-// Debug function to print memory table
+// Debug function to print memory info
 void printAllMem(uint32_t array[], int size);
+void printAllReg(uint32_t regs[32] );
 
 // Function to load in an individual byte from memory
 uint32_t readByte(uint32_t array[], int size, int address);
@@ -27,9 +28,17 @@ int writeWord(uint32_t array[], int size, int address, uint32_t value);
 int main(int argc, char *argv[]){
 
     uint32_t test_word;
+    char test_str[10];
 
     // Local variables for function use
-    uint32_t address, instruction, pc = 0, sp = 0, ra = 0;
+    uint32_t address, instruction, pc = 0;
+
+    // Register declarations
+    uint32_t x[32];
+    //for (int i = 0; i < 32; i++) x[i] = -1;
+    x[0] = 0;
+    x[1] = 0;
+    x[2] = 0;
 
     // Set default mode
     int mode = 0;
@@ -106,18 +115,14 @@ int main(int argc, char *argv[]){
         #endif
 
     }
-    
+  
+    printAllReg(x);
 
-    test_word = readHalfWord(MainMem, MemWords, 2);
-    printf("Extracted byte: 0x%08X\n", test_word);
-
-    writeHalfWord(MainMem, MemWords, 14, 0xDEAD);
-    printAllMem(MainMem, MemWords);
-    
     return 0;
 
 }
 
+// Function to display all memory locations and values
 void printAllMem(uint32_t array[], int size){
 #ifdef DEBUG
 fprintf(stderr,"\n");
@@ -128,6 +133,17 @@ for (int i = 0; i < size; i++){
 }
 #endif
     return;
+}
+
+// Function to display all register values
+void printAllReg(uint32_t regs[32] ){
+
+    for (int i = 0; i < 32; i++){
+        printf("Register: x%02d   Contents: ", i);
+        if (regs[i] == -1) printf("NULL\n");
+        else printf("%08X\n", regs[i]);
+
+    }
 }
 
 // Function to read a specific byte from memory
@@ -154,7 +170,7 @@ uint32_t readHalfWord(uint32_t array[], int size, int address){
     #endif */
 
     if (address % 2 != 0) {
-        printf("Misaligned reference at 0x%08d\n", address);
+        fprintf(stderr, "Misaligned reference at 0x%08d\n", address);
         exit(1);
     }
     else{
