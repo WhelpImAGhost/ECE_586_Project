@@ -57,6 +57,10 @@ int main(int argc, char *argv[]){
     // Function to calculate number of words that can be stored in memory array
     const int MemWords = (pow(2,MEMORY_SIZE) / 32);
 
+    #ifdef DEBUG
+        fprintf(stderr,"The memory array has space allocated for %d words \n",MemWords);
+    #endif
+
     uint32_t MainMem[MemWords];
     for (int i = 0; i < MemWords; i++){
         MainMem[i] = 0;
@@ -96,10 +100,10 @@ int main(int argc, char *argv[]){
 
         fprintf(stderr, "Extracted memory addresss:      0x%08X\n", address);
         fprintf(stderr, "Extracted instruction contents: 0x%08X\n", instruction);
-        fprintf(stderr, "")    
         #endif
 
     }
+    printAllMem(MainMem, MemWords);
 
     return 0;
 
@@ -110,12 +114,10 @@ void printAllMem(uint32_t array[], int size){
 fprintf(stderr,"\n");
 for (int i = 0; i < size; i++){
 
-    fprintf(stderr, "Memory Address: 0x%08X     Contents: 0x%08X\n", 4*i, array[i]);
+    fprintf(stderr, "Array Member: %d     Memory Address: 0x%08X     Contents: 0x%08X\n", i, 4*i, array[i]);
 
 }
-
 #endif
-
 
     return;
 }
