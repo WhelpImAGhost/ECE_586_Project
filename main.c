@@ -62,18 +62,12 @@ int main(int argc, char *argv[]){
         MainMem[i] = 0;
     }
 
-    #ifdef DEBUG
-
-    #endif
-
     // If the provided file can't be opened, try the default file
     if (file == NULL){
         fprintf(stderr, "The '%s' file provided can't be opened. Attempting to open defult file '%s'. \n", filename, default_filename);
         filename = default_filename;
         file = fopen(filename, "r");
     }
-
-
 
     // Check if the file (either provided or default) was successfully opened
     if (file == NULL) {
@@ -102,7 +96,7 @@ int main(int argc, char *argv[]){
 
         fprintf(stderr, "Extracted memory addresss:      0x%08X\n", address);
         fprintf(stderr, "Extracted instruction contents: 0x%08X\n", instruction);
-
+        fprintf(stderr, "")    
         #endif
 
     }
