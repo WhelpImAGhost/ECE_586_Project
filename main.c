@@ -17,7 +17,9 @@
 void printAllMem(uint32_t array[], int size);
 
 // Function to load in an individual byte from memory
-uint32_t loadByte(uint32_t array[], int size, int address);
+uint32_t readByte(uint32_t array[], int size, int address);
+uint32_t readHalfWord(uint32_t array[], int size, int address);
+uint32_t readWord(uint32_t array[], int size, int address);
 
 int main(int argc, char *argv[]){
 
@@ -57,7 +59,6 @@ int main(int argc, char *argv[]){
     }
     FILE *file = fopen(filename, "r");
 
-    
     // Function to calculate number of words that can be stored in memory array
     const int MemWords = (int) (pow(2,MEMORY_SIZE) / 32);
 
@@ -97,16 +98,15 @@ int main(int argc, char *argv[]){
 
         // Body for parsing lines
         #ifdef DEBUG
-
         fprintf(stderr, "Extracted memory addresss:      0x%08X\n", address);
         fprintf(stderr, "Extracted instruction contents: 0x%08X\n", instruction);
         #endif
 
     }
     printAllMem(MainMem, MemWords);
-    test_word = readByte(MainMem, MemWords, 3);
 
-    fprintf(stderr, "Extracted byte: 0x%08X\n", test_word);
+    test_word = readWord(MainMem, MemWords, address);
+    printf("Extracted byte: 0x%08X\n", test_word);
 
     return 0;
 
@@ -121,7 +121,6 @@ for (int i = 0; i < size; i++){
 
 }
 #endif
-
     return;
 }
 
@@ -137,19 +136,44 @@ uint32_t readByte(uint32_t array[], int size, int address) {
 
     return selected_byte;
 
-
 }
 
 uint32_t readHalfWord(uint32_t array[], int size, int address){
 
-    #ifdef DEBUG
+/*    #ifdef DEBUG
     if (address % 2 != 0) {
         fprintf(stderr, "Loading unaligned value\n");
     }
-    #endif
+    #endif */
+
+    if (address % 2 != 0) {
+        printf("Misaligned reference at 0x%08d\n", address);
+        // ToDo: MAKE IT EXIT W/ ERROR CODE
+    }
+    else{
+    int target_block = address / 4;
+    int target_hw;
+    
+    if (((address + 16) / 4) == (address / 4)) {
+        target_hw = 0;
+    } else {
+        target_hw = 2;
+    }
+
+    uint32_t selected_word = array[target_block];
+    selected_word = selected_word >> (8 * target_hw);
+    uint32_t selected_hw = selected_word & 0x0000FFFF;
+
+    return selected_hw;
+    }
+
+}
+
+uint32_t readWord(uint32_t array[], int size, int address){
 
     int target_block = address / 4;
-    int target_hw = address % 2;
-    
+    uint32_t selected_word = array[target_block];
+
+    return selected_word;
 
 }
