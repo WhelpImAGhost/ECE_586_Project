@@ -14,6 +14,9 @@
 #include "defines.c"
 
 
+void printAllMem(uint32_t array[], int size);
+
+
 int main(int argc, char *argv[]){
 
     // Local variables for function use
@@ -103,3 +106,17 @@ int main(int argc, char *argv[]){
 
 }
 
+void printAllMem(uint32_t array[], int size){
+#ifdef DEBUG
+fprintf(stderr,"\n");
+for (int i = 0; i < size; i++){
+
+    fprintf(stderr, "Memory Address: 0x%08X     Contents: 0x%08X\n", 4*i, array[i]);
+
+}
+
+#endif
+
+
+    return;
+}
