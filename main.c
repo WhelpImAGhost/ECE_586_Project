@@ -127,7 +127,7 @@ for (int i = 0; i < size; i++){
     return;
 }
 
-
+// Function to read a specific byte from memory
 uint32_t readByte(uint32_t array[], int size, int address) {
 
     int target_block = address / 4;
@@ -141,6 +141,7 @@ uint32_t readByte(uint32_t array[], int size, int address) {
 
 }
 
+// Function to read a specific half-word (alligned) from memory
 uint32_t readHalfWord(uint32_t array[], int size, int address){
 
 /*    #ifdef DEBUG
@@ -172,6 +173,7 @@ uint32_t readHalfWord(uint32_t array[], int size, int address){
 
 }
 
+// Function to read a specific word from memory
 uint32_t readWord(uint32_t array[], int size, int address){
 
     int target_block = address / 4;
@@ -181,19 +183,20 @@ uint32_t readWord(uint32_t array[], int size, int address){
 
 }
 
+// Function to write to a specific byte from memory
 int writeByte(uint32_t array[], int size, int address, uint32_t value) {
 
     int target_block = address / 4;
     int target_byte = address % 4;
 
-    uint32_t selected_word = array[target_block];
-    selected_word = selected_word >> (8 * target_byte);
-    uint32_t selected_byte = selected_word & 0x000000FF;
+    array[target_block] = (array[target_block] & ~(0xFF << (8 * target_byte)));
+    array[target_block] = array[target_block] | (value << (8 * target_byte));
 
     return 0;
 
 }
 
+// Function to write to a specific half-word in memory
 int writeHalfWord(uint32_t array[], int size, int address, uint32_t value) {
 
     if (address % 2 != 0) {
@@ -223,6 +226,7 @@ int writeHalfWord(uint32_t array[], int size, int address, uint32_t value) {
 
 }
 
+// Function to write to a specific word in memory
 int writeWord(uint32_t array[], int size, int address, uint32_t value) {
 
     int target_block = address / 4;
