@@ -88,9 +88,14 @@ int main(int argc, char *argv[]){
 
     const int MemAlloc = pow(2, MEMORY_SIZE);
 
-
     // Begin parsing instructions
     while (fscanf(file, "%x: %x", &address, &instruction ) == 2){
+
+        if (address >= MemAlloc){
+            fprintf(stderr, "Address 0x%08X is out of memory bounds\n", address);
+        }
+
+        MainMem[address / 4] = instruction;
 
         // Body for parsing lines
         #ifdef DEBUG
