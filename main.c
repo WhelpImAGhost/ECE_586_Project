@@ -20,8 +20,8 @@ void printAllMem(uint32_t array[], int size);
 uint32_t readByte(uint32_t array[], int size, int address);
 uint32_t readHalfWord(uint32_t array[], int size, int address);
 uint32_t readWord(uint32_t array[], int size, int address);
-int writeByte(uint32_t array[], int size, int address, int value);
-int writeHalfWord(uint32_t array[], int size, int address, int value);
+int writeByte(uint32_t array[], int size, int address, uint32_t value);
+int writeHalfWord(uint32_t array[], int size, int address, uint32_t value);
 int writeWord(uint32_t array[], int size, int address, uint32_t value);
 
 int main(int argc, char *argv[]){
@@ -181,7 +181,7 @@ uint32_t readWord(uint32_t array[], int size, int address){
 
 }
 
-int writeByte(uint32_t array[], int size, int address) {
+int writeByte(uint32_t array[], int size, int address, uint32_t value) {
 
     int target_block = address / 4;
     int target_byte = address % 4;
@@ -190,11 +190,11 @@ int writeByte(uint32_t array[], int size, int address) {
     selected_word = selected_word >> (8 * target_byte);
     uint32_t selected_byte = selected_word & 0x000000FF;
 
-    return selected_byte;
+    return 0;
 
 }
 
-int writeHalfWord(uint32_t array[], int size, int address, int value) {
+int writeHalfWord(uint32_t array[], int size, int address, uint32_t value) {
 
     if (address % 2 != 0) {
         printf("Misaligned reference at 0x%08d\n", address);
