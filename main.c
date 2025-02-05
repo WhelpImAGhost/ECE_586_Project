@@ -20,7 +20,9 @@ void printAllMem(uint32_t array[], int size);
 uint32_t readByte(uint32_t array[], int size, int address);
 uint32_t readHalfWord(uint32_t array[], int size, int address);
 uint32_t readWord(uint32_t array[], int size, int address);
-uint32_t writeByte(uint32_t array[], int size, int address);
+int writeByte(uint32_t array[], int size, int address, int value);
+int writeHalfWord(uint32_t array[], int size, int address, int value);
+int writeWord(uint32_t array[], int size, int address, uint32_t value);
 
 int main(int argc, char *argv[]){
 
@@ -106,7 +108,7 @@ int main(int argc, char *argv[]){
     }
     printAllMem(MainMem, MemWords);
 
-    test_word = readHalfWord(MainMem, MemWords, 1);
+    test_word = readHalfWord(MainMem, MemWords, 2);
     printf("Extracted byte: 0x%08X\n", test_word);
 
     return 0;
@@ -179,7 +181,7 @@ uint32_t readWord(uint32_t array[], int size, int address){
 
 }
 
-uint32_t writeByte(uint32_t array[], int size, int address) {
+int writeByte(uint32_t array[], int size, int address) {
 
     int target_block = address / 4;
     int target_byte = address % 4;
@@ -189,5 +191,43 @@ uint32_t writeByte(uint32_t array[], int size, int address) {
     uint32_t selected_byte = selected_word & 0x000000FF;
 
     return selected_byte;
+
+}
+
+int writeHalfWord(uint32_t array[], int size, int address, int value) {
+
+    if (address % 2 != 0) {
+        printf("Misaligned reference at 0x%08d\n", address);
+        exit(1);
+    }
+    else{
+    int target_block = address / 4;
+    int target_hw;
+    
+    if (address % 4 == 2) {
+        target_hw = 2;
+        uint32_t selected_word = array[target_block];
+        selected_word = selected_word & 0x0000FFFF;
+        value = value << 16;
+        array[target_block] = value | selected_word;
+        
+    } else {
+        target_hw = 0;
+        uint32_t selected_word = array[target_block];
+        selected_word = selected_word & 0xFFFF0000;
+        array[target_block] = value | selected_word;
+    }
+
+    return 0;
+    }
+
+}
+
+int writeWord(uint32_t array[], int size, int address, uint32_t value) {
+
+    int target_block = address / 4;
+    array[target_block] = value;
+
+    return 0;
 
 }
