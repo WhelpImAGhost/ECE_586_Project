@@ -20,6 +20,7 @@ void printAllMem(uint32_t array[], int size);
 uint32_t readByte(uint32_t array[], int size, int address);
 uint32_t readHalfWord(uint32_t array[], int size, int address);
 uint32_t readWord(uint32_t array[], int size, int address);
+uint32_t writeByte(uint32_t array[], int size, int address);
 
 int main(int argc, char *argv[]){
 
@@ -175,5 +176,18 @@ uint32_t readWord(uint32_t array[], int size, int address){
     uint32_t selected_word = array[target_block];
 
     return selected_word;
+
+}
+
+uint32_t writeByte(uint32_t array[], int size, int address) {
+
+    int target_block = address / 4;
+    int target_byte = address % 4;
+
+    uint32_t selected_word = array[target_block];
+    selected_word = selected_word >> (8 * target_byte);
+    uint32_t selected_byte = selected_word & 0x000000FF;
+
+    return selected_byte;
 
 }
