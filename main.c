@@ -20,7 +20,7 @@ void printAllMem(uint32_t array[], int size);
 uint32_t readByte(uint32_t array[], int size, int address);
 uint32_t readHalfWord(uint32_t array[], int size, int address);
 uint32_t readWord(uint32_t array[], int size, int address);
-int writeByte(uint32_t array[], int size, int address, int value);
+int writeByte(uint32_t array[], int size, int address, uint32_t value);
 int writeHalfWord(uint32_t array[], int size, int address, int value);
 int writeWord(uint32_t array[], int size, int address, uint32_t value);
 
@@ -106,11 +106,14 @@ int main(int argc, char *argv[]){
         #endif
 
     }
-    printAllMem(MainMem, MemWords);
+    
 
     test_word = readHalfWord(MainMem, MemWords, 2);
     printf("Extracted byte: 0x%08X\n", test_word);
 
+    writeHalfWord(MainMem, MemWords, 14, 0xDEAD);
+    printAllMem(MainMem, MemWords);
+    
     return 0;
 
 }
@@ -181,23 +184,24 @@ uint32_t readWord(uint32_t array[], int size, int address){
 
 }
 
-int writeByte(uint32_t array[], int size, int address) {
+int writeByte(uint32_t array[], int size, int address, uint32_t value) {
 
     int target_block = address / 4;
     int target_byte = address % 4;
 
-    uint32_t selected_word = array[target_block];
-    selected_word = selected_word >> (8 * target_byte);
-    uint32_t selected_byte = selected_word & 0x000000FF;
+    array[target_block] =  ( array[target_block] & ~( 0xFF << (8*target_byte) )) ;
+    array[target_block] = array[target_block] | ( value << (8 * target_byte));
 
-    return selected_byte;
+
+
+    return 0;
 
 }
 
 int writeHalfWord(uint32_t array[], int size, int address, int value) {
 
     if (address % 2 != 0) {
-        printf("Misaligned reference at 0x%08d\n", address);
+        fprintf(stderr, "Misaligned reference at 0x%08d\n", address);
         exit(1);
     }
     else{
