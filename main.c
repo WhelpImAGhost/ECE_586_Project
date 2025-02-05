@@ -13,11 +13,15 @@
 #include <math.h>
 #include "defines.c"
 
-
+// Debug function to print memory table
 void printAllMem(uint32_t array[], int size);
 
+// Function to load in an individual byte from memory
+uint32_t loadByte(uint32_t array[], int size, int address);
 
 int main(int argc, char *argv[]){
+
+    uint32_t test_word;
 
     // Local variables for function use
     uint32_t address, instruction, pc = 0, sp = 0, ra = 0;
@@ -100,6 +104,9 @@ int main(int argc, char *argv[]){
 
     }
     printAllMem(MainMem, MemWords);
+    test_word = readByte(MainMem, MemWords, 3);
+
+    fprintf(stderr, "Extracted byte: 0x%08X\n", test_word);
 
     return 0;
 
@@ -110,10 +117,39 @@ void printAllMem(uint32_t array[], int size){
 fprintf(stderr,"\n");
 for (int i = 0; i < size; i++){
 
-    fprintf(stderr, "Array Member: %d     Memory Address: 0x%08X     Contents: 0x%08X\n", i, 4*i, array[i]);
+    printf( "Array Member: %4d     Memory Address: 0x%08X     Contents: 0x%08X\n", i, 4*i, array[i]);
 
 }
 #endif
 
     return;
+}
+
+
+uint32_t readByte(uint32_t array[], int size, int address) {
+
+    int target_block = address / 4;
+    int target_byte = address % 4;
+
+    uint32_t selected_word = array[target_block];
+    selected_word = selected_word >> (8 * target_byte);
+    uint32_t selected_byte = selected_word & 0x000000FF;
+
+    return selected_byte;
+
+
+}
+
+uint32_t readHalfWord(uint32_t array[], int size, int address){
+
+    #ifdef DEBUG
+    if (address % 2 != 0) {
+        fprintf(stderr, "Loading unaligned value\n");
+    }
+    #endif
+
+    int target_block = address / 4;
+    int target_hw = address % 2;
+    
+
 }
