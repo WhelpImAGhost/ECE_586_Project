@@ -154,7 +154,7 @@ uint32_t readHalfWord(uint32_t array[], int size, int address){
     #endif */
 
     if (address % 2 != 0) {
-        printf("Misaligned reference at 0x%08d\n", address);
+        fprintf(stderr, "Misaligned reference at 0x%08d\n", address);
         exit(1);
     }
     else{
