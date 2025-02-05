@@ -106,7 +106,7 @@ int main(int argc, char *argv[]){
     }
     printAllMem(MainMem, MemWords);
 
-    test_word = readWord(MainMem, MemWords, address);
+    test_word = readHalfWord(MainMem, MemWords, 1);
     printf("Extracted byte: 0x%08X\n", test_word);
 
     return 0;
@@ -149,16 +149,16 @@ uint32_t readHalfWord(uint32_t array[], int size, int address){
 
     if (address % 2 != 0) {
         printf("Misaligned reference at 0x%08d\n", address);
-        // ToDo: MAKE IT EXIT W/ ERROR CODE
+        exit(1);
     }
     else{
     int target_block = address / 4;
     int target_hw;
     
-    if (((address + 16) / 4) == (address / 4)) {
-        target_hw = 0;
-    } else {
+    if (address % 4 == 2) {
         target_hw = 2;
+    } else {
+        target_hw = 0;
     }
 
     uint32_t selected_word = array[target_block];
