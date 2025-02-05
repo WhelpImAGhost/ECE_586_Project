@@ -16,7 +16,7 @@
 // Debug function to print memory table
 void printAllMem(uint32_t array[], int size);
 
-// Function to load in an individual byte from memory
+// Function Prototypes
 uint32_t readByte(uint32_t array[], int size, int address);
 uint32_t readHalfWord(uint32_t array[], int size, int address);
 uint32_t readWord(uint32_t array[], int size, int address);
@@ -34,6 +34,7 @@ int main(int argc, char *argv[]){
     // Set default mode
     int mode = 0;
 
+    // Memory & Stack Starting Addresses
     uint32_t stack_address = STACK_ADDRESS, prog_start = START_ADDRESS;
 
     // Set default filename
@@ -62,9 +63,10 @@ int main(int argc, char *argv[]){
     }
     FILE *file = fopen(filename, "r");
 
-    // Function to calculate number of words that can be stored in memory array
+    // Number of words that can be stored in memory array (2048 by default)
     const int MemWords = (int) (pow(2,MEMORY_SIZE) / 32);
 
+    // Initialization of memory array
     uint32_t MainMem[MemWords];
     for (int i = 0; i < MemWords; i++){
         MainMem[i] = 0;
@@ -84,19 +86,23 @@ int main(int argc, char *argv[]){
         return -1;
     }
 
+    // File used for execution
     #ifdef DEBUG
     fprintf(stderr, "Using file: '%s'\n", filename);
     #endif
 
+    // Allocating Memory Size (64KB by default)
     const int MemAlloc = pow(2, MEMORY_SIZE);
 
     // Begin parsing instructions
     while (fscanf(file, "%x: %x", &address, &instruction ) == 2){
 
+        // Error whem memory address is outside the bounds of memory size declared
         if (address >= MemAlloc){
             fprintf(stderr, "Address 0x%08X is out of memory bounds\n", address);
         }
 
+        // Size of instruction
         MainMem[address / 4] = instruction;
 
         // Body for parsing lines
@@ -118,6 +124,7 @@ int main(int argc, char *argv[]){
 
 }
 
+// Memory dump function for debugging (using a log file)
 void printAllMem(uint32_t array[], int size){
 #ifdef DEBUG
 fprintf(stderr,"\n");
@@ -146,12 +153,6 @@ uint32_t readByte(uint32_t array[], int size, int address) {
 
 // Function to read a specific half-word (alligned) from memory
 uint32_t readHalfWord(uint32_t array[], int size, int address){
-
-/*    #ifdef DEBUG
-    if (address % 2 != 0) {
-        fprintf(stderr, "Loading unaligned value\n");
-    }
-    #endif */
 
     if (address % 2 != 0) {
         fprintf(stderr, "Misaligned reference at 0x%08d\n", address);
