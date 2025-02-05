@@ -41,10 +41,10 @@ int main(int argc, char *argv[]){
             mode = atoi(argv[1]); // Set operation mode
         }
         else if (strcmp(argv[0], "-sp")) {
-            stack_address = atoi(argv[1]);  // Set stack pointer
+            stack_address = (uint32_t)atoi(argv[1]);  // Set stack pointer
         }
         else if (strcmp(argv[0], "-s")){
-            prog_start = atoi(argv[1]); // Set starting address
+            prog_start = (uint32_t) atoi(argv[1]); // Set starting address
         }
         else { 
             printf("\nInvalid Arguments\n"); exit(-1); 
@@ -55,7 +55,7 @@ int main(int argc, char *argv[]){
 
     
     // Function to calculate number of words that can be stored in memory array
-    const int MemWords = (pow(2,MEMORY_SIZE) / 32);
+    const int MemWords = (int) (pow(2,MEMORY_SIZE) / 32);
 
     uint32_t MainMem[MemWords];
     for (int i = 0; i < MemWords; i++){
@@ -106,6 +106,7 @@ int main(int argc, char *argv[]){
         #endif
 
     }
+    printAllMem(MainMem, MemWords);
 
     return 0;
 
@@ -116,7 +117,7 @@ void printAllMem(uint32_t array[], int size){
 fprintf(stderr,"\n");
 for (int i = 0; i < size; i++){
 
-    fprintf(stderr, "Memory Address: 0x%08X     Contents: 0x%08X\n", 4*i, array[i]);
+    printf("Memory Address: 0x%08X     Contents: 0x%08X\n", 4*i, array[i]);
 
 }
 
