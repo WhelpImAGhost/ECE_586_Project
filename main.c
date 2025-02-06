@@ -205,9 +205,8 @@ int main(int argc, char *argv[]){
 
     }
 
-    printAllReg(x);
-    printAllMem(MainMem, MemWords);
-
+    //printAllReg(x);
+    //printAllMem(MainMem, MemWords);
 
     return 0;
 
@@ -428,9 +427,13 @@ void j_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
     uint32_t imm = (instruction >> 12);
     uint32_t imm20 = imm & 0x80000;
     uint32_t immlow = (imm & 0x7FE00) >> 9;
-    uint32_t imm11 = ((imm >> 7) & 0x00000001) << 10;
+    uint32_t imm11 = ((imm >> 8) & 0x00000001) << 10;
     uint32_t immhigh = (imm & 0x000000FF) << 11;
     imm = ((imm20 + immhigh + imm11 + immlow) << 1);
+
+    #ifdef DEBUG
+    fprintf(stderr, "J-Type instruction breakdown:\n    Opcode: 0x%02X\n    R_Des: 0x%02X\n    Immediate: 0x%08X\n", opcode, rd, imm);
+    #endif
 
     return;
 }
