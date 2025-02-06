@@ -149,6 +149,7 @@ int main(int argc, char *argv[]){
                 #ifdef DEBUG
                 fprintf(stderr, "0x%02X is a Register Instruction\n", current_opcode);
                 #endif
+                r_type(MainMem, MemWords, pc, x);
                 break;
             case IMMS_OP:
             case JALR_OP:
@@ -165,11 +166,13 @@ int main(int argc, char *argv[]){
                 #ifdef DEBUG
                 fprintf(stderr, "0x%02X is a Store Instruction\n", current_opcode);
                 #endif
+                s_type(MainMem, MemWords, pc, x);
                 break;
             case BRAN_OP:
                 #ifdef DEBUG
                 fprintf(stderr, "0x%02X is a Branch Instruction\n", current_opcode);
                 #endif
+                b_type(MainMem, MemWords, pc, x);
                 break;
             case JAL_OP:
                 #ifdef DEBUG
@@ -349,6 +352,20 @@ void fetch_and_decode(uint32_t array[], uint32_t pc, uint32_t *opcode){
 
 void r_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]){
 
+    uint8_t func7, rs2, rs1, func3, rd, opcode;
+    uint32_t instruction = mem_array[pc / 4];
+
+    opcode = instruction & 0x7F;
+    rd = (instruction >> 7 ) & 0x1F;
+    func3 = (instruction >> 12) & 0x7;
+    rs1 = (instruction >> 15) & 0x1F;
+    rs2 = (instruction >> 20) & 0x1F;
+    func7 = (instruction >> 25) & 0x7F;
+
+    #ifdef DEBUG
+    fprintf(stderr, "R-Type instruction breakdown:\n    Opcode: 0x%02X\n    R_Des: 0x%02X\n    Func3: 0x%02X\n    R_S1: 0x%02X\n    R_S2: 0x%02X\n    Func7: 0x%02X\n", opcode, rd, func3, rs1, rs2, func7);
+    #endif
+
     return;
 }
 void i_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]){
@@ -357,9 +374,43 @@ void i_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
 }
 void s_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]){
 
+    uint8_t imm11_5, rs2, rs1, func3, imm4_0, opcode;
+    uint16_t imm;
+    uint32_t instruction = mem_array[pc / 4];
+
+    opcode = instruction & 0x7F;
+    imm4_0 = (instruction >> 7 ) & 0x1F;
+    func3 = (instruction >> 12) & 0x7;
+    rs1 = (instruction >> 15) & 0x1F;
+    rs2 = (instruction >> 20) & 0x1F;
+    imm11_5 = (instruction >> 25) & 0x7F;
+    imm = (imm11_5 << 5) + imm4_0;
+
+    #ifdef DEBUG
+    fprintf(stderr, "S-Type instruction breakdown:\n    Opcode: 0x%02X\n    Func3: 0x%02X\n    R_S1: 0x%02X\n    R_S2: 0x%02X\n    Immediate: 0x%04X\n", opcode, func3, rs1, rs2, imm);
+    #endif
+
     return;
 }
 void b_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]){
+
+    uint8_t imm12, imm10_5, rs2, rs1, func3, imm4_1, imm11, opcode;
+    uint16_t imm;
+    uint32_t instruction = mem_array[pc / 4];
+
+    opcode = instruction & 0x7F;
+    imm4_1 = (instruction >> 8 ) & 0xF;
+    imm11 = (instruction >> 7) & 0x1;
+    func3 = (instruction >> 12) & 0x7;
+    rs1 = (instruction >> 15) & 0x1F;
+    rs2 = (instruction >> 20) & 0x1F;
+    imm10_5 = (instruction >> 25) & 0x3F;
+    imm12 = (instruction >> 31) & 0x1;
+    imm = (imm12 << 12) + (imm11 << 11) + (imm10_5 << 5) + (imm4_1 << 1);
+    #ifdef DEBUG
+    fprintf(stderr, "B-Type instruction breakdown:\n    Opcode: 0x%02X\n    Func3: 0x%02X\n    R_S1: 0x%02X\n    R_S2: 0x%02X\n    Immediate: 0x%04X\n", opcode, func3, rs1, rs2, imm);
+    #endif
+
 
     return;
 }
