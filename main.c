@@ -175,6 +175,7 @@ int main(int argc, char *argv[]){
                 #ifdef DEBUG
                 fprintf(stderr, "0x%02X is a Jump Instruction\n", current_opcode);
                 #endif
+                j_type(MainMem,MemWords,pc,x);
                 break;
             case LUI_OP:
             case AUIPC:
@@ -341,7 +342,7 @@ void fetch_and_decode(uint32_t array[], uint32_t pc, uint32_t *opcode){
 
     uint32_t selected_instruction = array[pc / 4];
 
-    *opcode = selected_instruction & 0x7F;
+    *opcode = selected_instruction & 0x0000007F;
 
     return;
 }
@@ -368,6 +369,17 @@ void u_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
     return;
 }
 void j_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]){
+
+    uint32_t instruction = mem_array[pc/4];
+
+    uint8_t opcode = instruction & 0x0000007F;
+    uint8_t rd = (instruction >> 7) & 0x0000001F;
+    uint32_t imm = (instruction >> 12);
+    uint32_t imm20 = imm & 0x80000;
+    uint32_t immlow = (imm & 0x7FE00) >> 9;
+    uint32_t imm11 = ((imm >> 7) & 0x00000001) << 10;
+    uint32_t immhigh = (imm & 0x000000FF) << 11;
+    imm = ((imm20 + immhigh + imm11 + immlow) << 1);
 
     return;
 }
