@@ -28,13 +28,6 @@ int writeWord(uint32_t array[], int size, int address, uint32_t value);
 
 void fetch_and_decode(uint32_t array[], uint32_t pc, uint32_t* opcode);
 
-void r_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]);
-void i_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]);
-void s_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]);
-void b_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]);
-void u_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]);
-void j_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]);
-
 int main(int argc, char *argv[]){
 
     uint32_t test_word;
@@ -151,7 +144,6 @@ int main(int argc, char *argv[]){
                 #endif
                 break;
             case IMMS_OP:
-            case JALR_OP:
                 #ifdef DEBUG
                 fprintf(stderr, "0x%02X is an Immediate Instruction\n", current_opcode);
                 #endif
@@ -172,6 +164,7 @@ int main(int argc, char *argv[]){
                 #endif
                 break;
             case JAL_OP:
+            case JALR_OP:
                 #ifdef DEBUG
                 fprintf(stderr, "0x%02X is a Jump Instruction\n", current_opcode);
                 #endif
@@ -181,10 +174,6 @@ int main(int argc, char *argv[]){
                 #ifdef DEBUG
                 fprintf(stderr, "0x%02X is an 'Upper Immediate' Instruction\n", current_opcode);
                 #endif
-                break;
-            case ZERO_OP:
-                fprintf(stderr, "End of Program\n");
-                continue_program = false;
                 break;
             case ENVIRO:
                 #ifdef DEBUG
@@ -201,7 +190,10 @@ int main(int argc, char *argv[]){
 
     }
 
+    
 
+
+    fprintf(stderr, "Extracted Opcode: 0x%02X\n", current_opcode);
   
     printAllReg(x);
     printAllMem(MainMem, MemWords);
