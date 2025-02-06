@@ -13,3 +13,4 @@
 #define LUI_OP  0b0110111
 #define AUIPC   0b0010111
 #define ENVIRO  0b1110011
+#define ZERO_OP 0b0000000

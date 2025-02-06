@@ -175,6 +175,10 @@ int main(int argc, char *argv[]){
                 fprintf(stderr, "0x%02X is an 'Upper Immediate' Instruction\n", current_opcode);
                 #endif
                 break;
+            case ZERO_OP:
+                fprintf(stderr, "End of Program\n");
+                continue_program = false;
+                break;
             case ENVIRO:
                 #ifdef DEBUG
                 fprintf(stderr, "0x%02X is an Environment Instruction\n", current_opcode);
@@ -190,10 +194,7 @@ int main(int argc, char *argv[]){
 
     }
 
-    
 
-
-    fprintf(stderr, "Extracted Opcode: 0x%02X\n", current_opcode);
   
     printAllReg(x);
     printAllMem(MainMem, MemWords);
@@ -335,7 +336,8 @@ void fetch_and_decode(uint32_t array[], uint32_t pc, uint32_t *opcode){
 
     uint32_t selected_instruction = array[pc / 4];
 
-    *opcode = selected_instruction & 0b111111;
+    *opcode = selected_instruction & 0x7F;
 
     return;
 }
+
