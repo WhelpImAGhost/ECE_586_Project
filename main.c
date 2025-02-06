@@ -351,6 +351,11 @@ void fetch_and_decode(uint32_t array[], uint32_t pc, uint32_t *opcode){
 
 void r_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]){
 
+    // Bit map
+    // |31 - 25|24 - 20|19 - 15|14 - 12|11 - 7|6 - 0|
+    
+    uint32_t instruction = mem_array[pc / 4];
+
     return;
 }
 void i_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]){
