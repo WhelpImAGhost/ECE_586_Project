@@ -139,28 +139,54 @@ int main(int argc, char *argv[]){
 
         switch (current_opcode) {
             case REGS_OP:
+                #ifdef DEBUG
+                fprintf(stderr, "0x%02X is a Register Instruction\n", current_opcode);
+                #endif
                 break;
             case IMMS_OP:
+                #ifdef DEBUG
+                fprintf(stderr, "0x%02X is an Immediate Instruction\n", current_opcode);
+                #endif
                 break;
             case LOAD_OP:
+                #ifdef DEBUG
+                fprintf(stderr, "0x%02X is a Load Instruction\n", current_opcode);
+                #endif
                 break;
             case STOR_OP:
+                #ifdef DEBUG
+                fprintf(stderr, "0x%02X is a Store Instruction\n", current_opcode);
+                #endif
                 break;
             case BRAN_OP:
+                #ifdef DEBUG
+                fprintf(stderr, "0x%02X is a Branch Instruction\n", current_opcode);
+                #endif
                 break;
             case JAL_OP:
             case JALR_OP:
+                #ifdef DEBUG
+                fprintf(stderr, "0x%02X is a Jump Instruction\n", current_opcode);
+                #endif
                 break;
             case LUI_OP:
             case AUIPC:
+                #ifdef DEBUG
+                fprintf(stderr, "0x%02X is an 'Upper Immediate' Instruction\n", current_opcode);
+                #endif
                 break;
             case ENVIRO:
+                #ifdef DEBUG
+                fprintf(stderr, "0x%02X is an Environment Instruction\n", current_opcode);
                 fprintf(stderr, "Not implemented yet\n");
+                #endif
             default:
                 fprintf(stderr, "0x%02X is an invalid op code.\n", current_opcode);
                 exit(1);
         }
             
+        // For development purposes only
+        pc += 4;
 
     }
 
