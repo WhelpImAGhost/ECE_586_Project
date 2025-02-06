@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <string.h>
 #include <math.h>
 #include "defines.c"
@@ -25,13 +26,22 @@ int writeByte(uint32_t array[], int size, int address, uint32_t value);
 int writeHalfWord(uint32_t array[], int size, int address, uint32_t value);
 int writeWord(uint32_t array[], int size, int address, uint32_t value);
 
+void fetch_and_decode(uint32_t array[], uint32_t pc, uint32_t* opcode);
+
 int main(int argc, char *argv[]){
 
     uint32_t test_word;
     char test_str[10];
 
+
     // Local variables for function use
     uint32_t address, instruction, pc = 0;
+    uint32_t current_opcode;
+    bool continue_program = true;
+
+    // Opcode array
+    uint32_t opcodes[10] = {REGS_OP, IMMS_OP,LOAD_OP, STOR_OP, BRAN_OP, 
+                            JAL_OP, JALR_OP, LUI_OP, AUIPC, ENVIRO };
 
     // Register declarations
     uint32_t x[32];
@@ -102,7 +112,7 @@ int main(int argc, char *argv[]){
     // Allocating Memory Size (64KB by default)
     const int MemAlloc = pow(2, MEMORY_SIZE);
 
-    // Begin parsing instructions
+    // Load instructions into memory array
     while (fscanf(file, "%x: %x", &address, &instruction ) == 2){
 
         // Error whem memory address is outside the bounds of memory size declared
@@ -120,8 +130,48 @@ int main(int argc, char *argv[]){
         #endif
 
     }
+
+    // Begin fetching and decoding instructions
+
+    while(continue_program){
+        fetch_and_decode(MainMem, pc, &current_opcode);
+
+
+        switch (current_opcode) {
+            case REGS_OP:
+                break;
+            case IMMS_OP:
+                break;
+            case LOAD_OP:
+                break;
+            case STOR_OP:
+                break;
+            case BRAN_OP:
+                break;
+            case JAL_OP:
+            case JALR_OP:
+                break;
+            case LUI_OP:
+            case AUIPC:
+                break;
+            case ENVIRO:
+                fprintf(stderr, "Not implemented yet\n");
+            default:
+                fprintf(stderr, "0x%02X is an invalid op code.\n", current_opcode);
+                exit(1);
+        }
+            
+
+    }
+
+    
+
+
+    fprintf(stderr, "Extracted Opcode: 0x%02X\n", current_opcode);
   
     printAllReg(x);
+    printAllMem(MainMem, MemWords);
+
 
     return 0;
 
@@ -252,4 +302,14 @@ int writeWord(uint32_t array[], int size, int address, uint32_t value) {
 
     return 0;
 
+}
+
+
+void fetch_and_decode(uint32_t array[], uint32_t pc, uint32_t *opcode){
+
+    uint32_t selected_instruction = array[pc / 4];
+
+    *opcode = selected_instruction & 0b111111;
+
+    return;
 }
