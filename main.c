@@ -335,7 +335,7 @@ void fetch_and_decode(uint32_t array[], uint32_t pc, uint32_t *opcode){
 
     uint32_t selected_instruction = array[pc / 4];
 
-    *opcode = selected_instruction & 0b111111;
+    *opcode = selected_instruction & 0x0000007F;
 
     return;
 }
