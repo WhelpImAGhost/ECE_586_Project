@@ -35,7 +35,6 @@ int main(int argc, char *argv[]){
 
     // Register declarations
     uint32_t x[32];
-    //for (int i = 0; i < 32; i++) x[i] = -1;
     x[0] = 0;
     x[1] = 0;
     x[2] = 0;
