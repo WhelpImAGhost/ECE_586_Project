@@ -178,6 +178,7 @@ int main(int argc, char *argv[]){
                 j_type(MainMem,MemWords,pc,x);
                 break;
             case LUI_OP:
+                u_type(MainMem, MemWords, pc, x);
             case AUIPC:
                 #ifdef DEBUG
                 fprintf(stderr, "0x%02X is an 'Upper Immediate' Instruction\n", current_opcode);
@@ -400,6 +401,31 @@ void i_type(uint32_t mem_array[], int size, uint32_t pc, int32_t reg_array[32]){
 
     return;
 }
+
+void load(uint8_t function, uint8_t destination, uint8_t source, uint16_t immediate, uint32_t array[], int size, int32_t reg_array[32]){
+    switch (function){
+        case 0x0:
+            reg_array[destination] = readByte(array, size, (reg_array[source] + immediate));
+            break;
+        case 0x1:
+            reg_array[destination] = readHalfWord(array, size, (reg_array[source] + immediate));
+            break;
+        case 0x2:
+            reg_array[destination] = readWord(array, size, (reg_array[source] + immediate));
+            break;
+        case 0x4:
+            reg_array[destination] = readByte(array, size, (reg_array[source] + immediate));
+            break;
+        case 0x5:
+            reg_array[destination] = readHalfWord(array, size, (reg_array[source] + immediate));
+            break;
+        default:
+        printf("The provided instruction is invalid.\n");
+           return exit(1);
+    }
+    return;
+};
+
 void s_type(uint32_t mem_array[], int size, uint32_t pc, int32_t reg_array[32]){
 
     uint8_t imm11_5, rs2, rs1, func3, imm4_0, opcode;
@@ -490,6 +516,20 @@ void u_type(uint32_t mem_array[], int size, uint32_t pc, int32_t reg_array[32]){
     uint8_t rd = (instruction >> 7) & 0x0000001F;
     int32_t imm = (instruction & 0xFFFFF000);
 
+    switch (opcode)
+    {
+    case LUI_OP:
+        reg_array[rd] =  (imm << 12);
+        break;
+    case AUIPC:
+        reg_array[rd] = pc + (imm << 12);
+        break;
+    
+    default:
+        fprintf(stderr, "Invalid U-type instruction.\n", opcode);
+        break;
+    }
+
     #ifdef DEBUG
     fprintf(stderr, "U-Type instruction breakdown:\n    Opcode: 0x%02X\n    R_Des: 0x%02X\n    Immediate: 0x%08X\n", opcode, rd, imm);
     #endif
@@ -521,27 +561,3 @@ void j_type(uint32_t mem_array[], int size, uint32_t pc, int32_t reg_array[32]){
 
     return;
 }
-
-void load(uint8_t function, uint8_t destination, uint8_t source, uint16_t immediate, uint32_t array[], int size, int32_t reg_array[32]){
-    switch (function){
-        case 0x0:
-            reg_array[destination] = readByte(array, size, (reg_array[source] + immediate));
-            break;
-        case 0x1:
-            reg_array[destination] = readHalfWord(array, size, (reg_array[source] + immediate));
-            break;
-        case 0x2:
-            reg_array[destination] = readWord(array, size, (reg_array[source] + immediate));
-            break;
-        case 0x4:
-            reg_array[destination] = readByte(array, size, (reg_array[source] + immediate));
-            break;
-        case 0x5:
-            reg_array[destination] = readHalfWord(array, size, (reg_array[source] + immediate));
-            break;
-        default:
-        printf("The provided instruction is invalid.\n");
-           return exit(1);
-    }
-    return;
-};
