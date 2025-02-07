@@ -468,7 +468,7 @@ void load(uint8_t function, uint8_t destination, uint8_t source, uint16_t immedi
             reg_array[destination] = StoredWord & 0x0000FFFF;
             break;
         default:
-        printf("The provided instruction is invalid.\n");
+        printf("The provided load instruction is invalid.\n");
            return exit(1);
     }
     return;
