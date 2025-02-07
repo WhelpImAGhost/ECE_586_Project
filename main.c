@@ -422,10 +422,19 @@ void b_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
     fprintf(stderr, "B-Type instruction breakdown:\n    Opcode: 0x%02X\n    Func3: 0x%02X\n    R_S1: 0x%02X\n    R_S2: 0x%02X\n    Immediate: 0x%04X\n", opcode, func3, rs1, rs2, imm);
     #endif
 
-
     return;
 }
 void u_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]){
+
+    uint32_t instruction = mem_array[pc/4];
+
+    uint8_t opcode = instruction & 0x0000007F;
+    uint8_t rd = (instruction >> 7) & 0x0000001F;
+    uint32_t imm = (instruction >> 12);
+
+    #ifdef DEBUG
+    fprintf(stderr, "U-Type instruction breakdown:\n    Opcode: 0x%02X\n    R_Des: 0x%02X\n    Immediate: 0x%08X\n", opcode, rd, imm);
+    #endif
 
     return;
 }
