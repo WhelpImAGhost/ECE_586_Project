@@ -226,8 +226,7 @@ void printAllReg(int32_t regs[32] ){
 
     for (int i = 0; i < 32; i++){
         printf("Register: x%02d   Contents: ", i);
-        if (regs[i] == -1) printf("NULL\n");
-        else printf("%08X\n", regs[i]);
+        printf("%08X\n", regs[i]);
 
     }
 }
@@ -406,7 +405,6 @@ void immediateop(uint8_t function, uint8_t destination, uint8_t source, uint16_t
     switch (function)
     {
     case 0x0: //addi
-        reg_array[destination] = source + 
         break;
     case 0x4:
         
@@ -434,12 +432,13 @@ void immediateop(uint8_t function, uint8_t destination, uint8_t source, uint16_t
     }
 }
 
-void load(uint8_t function, uint8_t destination, uint8_t source, uint16_t immediate, uint32_t array[], int size, uint32_t reg_array[32]){
+void load(uint8_t function, uint8_t destination, uint8_t source, uint16_t immediate, uint32_t array[], int size, int32_t reg_array[32]){
     uint32_t StoredWord;
+    int sign;
     switch (function){
         case 0x0: //lb
             StoredWord = readByte(array, size, (reg_array[source] + immediate));
-            int sign = (StoredWord >> 7) & 0x00000001;
+            sign = (StoredWord >> 7) & 0x00000001;
             if (sign == 1){
                 StoredWord = StoredWord | 0xFFFFFF00;
             }else{
@@ -449,7 +448,7 @@ void load(uint8_t function, uint8_t destination, uint8_t source, uint16_t immedi
             break;
         case 0x1: //lh
             StoredWord = readHalfWord(array, size, (reg_array[source] + immediate));
-            int sign = (StoredWord >> 15) & 0x00000001;
+            sign = (StoredWord >> 15) & 0x00000001;
             if (sign == 1){
                 StoredWord = StoredWord | 0xFFFF0000;
             }else{
@@ -575,7 +574,7 @@ void u_type(uint32_t mem_array[], int size, uint32_t pc, int32_t reg_array[32]){
         break;
     
     default:
-        fprintf(stderr, "Invalid U-type instruction.\n", opcode);
+        fprintf(stderr, "Invalid U-type instruction.\n");
         break;
     }
 
