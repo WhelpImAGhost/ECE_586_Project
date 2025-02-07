@@ -375,7 +375,7 @@ void i_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
     rs1 = (instruction >> 15) & 0x1F;
     imm = (instruction >> 20) & 0xFFF;
 
-    int immmsb = (imm >> 12) & 0x00000001;
+    int immmsb = (imm >> 11) & 0x00000001;
     if (immmsb == 1){
         imm = imm | 0xFFFFF000;
     }else{
@@ -416,7 +416,7 @@ void s_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
     imm11_5 = (instruction >> 25) & 0x7F;
     imm = (imm11_5 << 5) + imm4_0;
 
-    int immmsb = (imm >> 12) & 0x00000001;
+    int immmsb = (imm >> 11) & 0x00000001;
     if (immmsb == 1){
         imm = imm | 0xFFFFF000;
     }else{
@@ -471,7 +471,7 @@ void b_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
     imm12 = (instruction >> 31) & 0x1;
     imm = (imm12 << 12) + (imm11 << 11) + (imm10_5 << 5) + (imm4_1 << 1);
 
-    int immmsb = (imm >> 13) & 0x00000001;
+    int immmsb = (imm >> 12) & 0x00000001;
     if (immmsb == 1){
         imm = imm | 0xFFFFE000;
     }else{
@@ -525,21 +525,38 @@ void j_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
 }
 
 void load(uint8_t function, uint8_t destination, uint8_t source, uint16_t immediate, uint32_t array[], int size, uint32_t reg_array[32]){
+    uint32_t StoredWord;
     switch (function){
-        case 0x0:
-            reg_array[destination] = readByte(array, size, (reg_array[source] + immediate));
+        case 0x0: //lb
+            StoredWord = readByte(array, size, (reg_array[source] + immediate));
+            int sign = (StoredWord >> 7) & 0x00000001;
+            if (sign == 1){
+                StoredWord = StoredWord | 0xFFFFFF00;
+            }else{
+                StoredWord = StoredWord & ~(0xFFFFFF00);
+            }
+            reg_array[destination] = StoredWord;
             break;
-        case 0x1:
-            reg_array[destination] = readHalfWord(array, size, (reg_array[source] + immediate));
+        case 0x1: //lh
+            StoredWord = readHalfWord(array, size, (reg_array[source] + immediate));
+            int sign = (StoredWord >> 15) & 0x00000001;
+            if (sign == 1){
+                StoredWord = StoredWord | 0xFFFF0000;
+            }else{
+                StoredWord = StoredWord & ~(0xFFFF0000);
+            }
+            reg_array[destination] = StoredWord;
             break;
-        case 0x2:
+        case 0x2: //lw
             reg_array[destination] = readWord(array, size, (reg_array[source] + immediate));
             break;
-        case 0x4:
-            reg_array[destination] = readByte(array, size, (reg_array[source] + immediate));
+        case 0x4: //lbu
+            StoredWord = readByte(array, size, (reg_array[source] + immediate));
+            reg_array[destination] = StoredWord & 0x000000FF;
             break;
-        case 0x5:
-            reg_array[destination] = readHalfWord(array, size, (reg_array[source] + immediate));
+        case 0x5: //lhu
+            StoredWord = readHalfWord(array, size, (reg_array[source] + immediate));
+            reg_array[destination] = StoredWord & 0x0000FFFF;
             break;
         default:
         printf("The provided instruction is invalid.\n");
