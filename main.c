@@ -15,7 +15,7 @@
 
 // Debug function to print memory info
 void printAllMem(uint32_t array[], int size);
-void printAllReg(uint32_t regs[32]);
+void printAllReg(int32_t regs[32]);
 
 // Function Prototypes
 uint32_t readByte(uint32_t array[], int size, int address);
@@ -36,7 +36,7 @@ void u_type(uint32_t mem_array[], int size, uint32_t pc, int32_t reg_array[32]);
 void j_type(uint32_t mem_array[], int size, uint32_t pc, int32_t reg_array[32]);
 
 //Instruction Function Protoytpes
-void load(uint8_t function, uint8_t destination, uint8_t source, uint16_t immediate, uint32_t array[], int size, uint32_t reg_array[32]);
+void load(uint8_t function, uint8_t destination, uint8_t source, uint16_t immediate, uint32_t array[], int size, int32_t reg_array[32]);
 
 int main(int argc, char *argv[]){
 
@@ -203,7 +203,7 @@ int main(int argc, char *argv[]){
     }
     //printAllReg(x);
     printAllMem(MainMem, MemWords);
-
+    printAllReg(x);
     return 0;
 
 }
@@ -220,7 +220,7 @@ for (int i = 0; i < size; i++){
 }
 
 // Function to display all register values
-void printAllReg(uint32_t regs[32] ){
+void printAllReg(int32_t regs[32] ){
 
     for (int i = 0; i < 32; i++){
         printf("Register: x%02d   Contents: ", i);
@@ -522,7 +522,7 @@ void j_type(uint32_t mem_array[], int size, uint32_t pc, int32_t reg_array[32]){
     return;
 }
 
-void load(uint8_t function, uint8_t destination, uint8_t source, uint16_t immediate, uint32_t array[], int size, uint32_t reg_array[32]){
+void load(uint8_t function, uint8_t destination, uint8_t source, uint16_t immediate, uint32_t array[], int size, int32_t reg_array[32]){
     switch (function){
         case 0x0:
             reg_array[destination] = readByte(array, size, (reg_array[source] + immediate));
