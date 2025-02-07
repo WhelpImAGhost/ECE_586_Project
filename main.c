@@ -228,7 +228,6 @@ void printAllReg(int32_t regs[32] ){
         printf("Register: x%02d   Contents: ", i);
         if (regs[i] == -1) printf("NULL\n");
         else printf("%08X\n", regs[i]);
-
     }
 }
 
@@ -406,7 +405,6 @@ void immediateop(uint8_t function, uint8_t destination, uint8_t source, uint16_t
     switch (function)
     {
     case 0x0: //addi
-        reg_array[destination] = source + 
         break;
     case 0x4:
         
@@ -434,7 +432,7 @@ void immediateop(uint8_t function, uint8_t destination, uint8_t source, uint16_t
     }
 }
 
-void load(uint8_t function, uint8_t destination, uint8_t source, uint16_t immediate, uint32_t array[], int size, uint32_t reg_array[32]){
+void load(uint8_t function, uint8_t destination, uint8_t source, uint16_t immediate, uint32_t array[], int size, int32_t reg_array[32]){
     uint32_t StoredWord;
     switch (function){
         case 0x0: //lb
@@ -469,7 +467,7 @@ void load(uint8_t function, uint8_t destination, uint8_t source, uint16_t immedi
             reg_array[destination] = StoredWord & 0x0000FFFF;
             break;
         default:
-        printf("The provided instruction is invalid.\n");
+        printf("The provided load instruction is invalid.\n");
            return exit(1);
     }
     return;
