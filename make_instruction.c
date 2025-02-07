@@ -8,7 +8,7 @@
 
 int main(int argc, char *argv[]){
 
-    u_int32_t func7, rs2, rs1, func3, rd, opcode, imm_21, imm_13, imm_12, instruction;
+    uint32_t func7, rs2, rs1, func3, rd, opcode, imm_21, imm_13, imm_12, instruction;
 
 
     for( argc--, argv++; argc > 0; argc-=2, argv+=2 ) {
