@@ -380,6 +380,7 @@ void i_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
         imm = imm | 0xFFFFF000;
     }else{
         imm = imm & ~(0xFFFFF000);
+    }
 
     #ifdef DEBUG
     fprintf(stderr, "I-Type instruction breakdown:\n    Opcode: 0x%02X\n    R_Des: 0x%02X\n    Func3: 0x%02X\n    R_S1: 0x%02X\n    Immediate: 0x%03X\n", opcode, rd, func3, rs1, imm);
@@ -420,6 +421,7 @@ void s_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
         imm = imm | 0xFFFFF000;
     }else{
         imm = imm & ~(0xFFFFF000);
+    }
 
     #ifdef DEBUG
     fprintf(stderr, "S-Type instruction breakdown:\n    Opcode: 0x%02X\n    Func3: 0x%02X\n    R_S1: 0x%02X\n    R_S2: 0x%02X\n    Immediate: 0x%04X\n", opcode, func3, rs1, rs2, imm);
