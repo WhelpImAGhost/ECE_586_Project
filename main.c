@@ -28,15 +28,15 @@ int writeWord(uint32_t array[], int size, int address, uint32_t value);
 void fetch_and_decode(uint32_t array[], uint32_t pc, uint32_t* opcode);
 
 //Addressing Mode Function Prototypes
-void r_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]);
-void i_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]);
-void s_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]);
-void b_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]);
-void u_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]);
-void j_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]);
+void r_type(uint32_t mem_array[], int size, uint32_t pc, int32_t reg_array[32]);
+void i_type(uint32_t mem_array[], int size, uint32_t pc, int32_t reg_array[32]);
+void s_type(uint32_t mem_array[], int size, uint32_t pc, int32_t reg_array[32]);
+void b_type(uint32_t mem_array[], int size, uint32_t pc, int32_t reg_array[32]);
+void u_type(uint32_t mem_array[], int size, uint32_t pc, int32_t reg_array[32]);
+void j_type(uint32_t mem_array[], int size, uint32_t pc, int32_t reg_array[32]);
 
 //Instruction Function Protoytpes
-void load(uint8_t function, uint8_t destination, uint8_t source, uint16_t immediate, uint32_t array[], int size, uint32_t reg_array[32]);
+void load(uint8_t function, uint8_t destination, uint8_t source, uint16_t immediate, uint32_t array[], int size, int32_t reg_array[32]);
 
 int main(int argc, char *argv[]){
 
@@ -53,7 +53,7 @@ int main(int argc, char *argv[]){
                             JAL_OP, JALR_OP, LUI_OP, AUIPC, ENVIRO };
 
     // Register declarations
-    uint32_t x[32];
+    int32_t x[32];
     x[0] = 0;
     x[1] = 0;
     x[2] = 0;
@@ -344,7 +344,7 @@ void fetch_and_decode(uint32_t array[], uint32_t pc, uint32_t *opcode){
     return;
 }
 
-void r_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]){
+void r_type(uint32_t mem_array[], int size, uint32_t pc, int32_t reg_array[32]){
 
     uint8_t func7, rs2, rs1, func3, rd, opcode;
     uint32_t instruction = mem_array[pc / 4];
@@ -363,7 +363,7 @@ void r_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
     return;
 }
 
-void i_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]){
+void i_type(uint32_t mem_array[], int size, uint32_t pc, int32_t reg_array[32]){
 
     uint8_t rs1, func3, rd, opcode;
     int16_t imm;
@@ -402,7 +402,7 @@ void i_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
 
     return;
 }
-void s_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]){
+void s_type(uint32_t mem_array[], int size, uint32_t pc, int32_t reg_array[32]){
 
     uint8_t imm11_5, rs2, rs1, func3, imm4_0, opcode;
     int16_t imm;
@@ -455,7 +455,7 @@ void s_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
     return;
 }
 
-void b_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]){
+void b_type(uint32_t mem_array[], int size, uint32_t pc, int32_t reg_array[32]){
 
     uint8_t imm12, imm10_5, rs2, rs1, func3, imm4_1, imm11, opcode;
     int16_t imm;
@@ -484,7 +484,7 @@ void b_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
 
     return;
 }
-void u_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]){
+void u_type(uint32_t mem_array[], int size, uint32_t pc, int32_t reg_array[32]){
 
     uint32_t instruction = mem_array[pc/4];
 
@@ -498,7 +498,7 @@ void u_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
 
     return;
 }
-void j_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]){
+void j_type(uint32_t mem_array[], int size, uint32_t pc, int32_t reg_array[32]){
 
     uint32_t instruction = mem_array[pc/4];
 
@@ -524,9 +524,10 @@ void j_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
     return;
 }
 
-void load(uint8_t function, uint8_t destination, uint8_t source, uint16_t immediate, uint32_t array[], int size, uint32_t reg_array[32]){
+void load(uint8_t function, uint8_t destination, uint8_t source, uint16_t immediate, uint32_t array[], int size, int32_t reg_array[32]){
     uint32_t StoredWord;
     switch (function){
+        uint32_t StoredWord;
         case 0x0: //lb
             StoredWord = readByte(array, size, (reg_array[source] + immediate));
             int sign = (StoredWord >> 7) & 0x00000001;
