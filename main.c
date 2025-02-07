@@ -178,6 +178,7 @@ int main(int argc, char *argv[]){
                 j_type(MainMem,MemWords,pc,x);
                 break;
             case LUI_OP:
+                u_type(MainMem, MemWords, pc, x);
             case AUIPC:
                 #ifdef DEBUG
                 fprintf(stderr, "0x%02X is an 'Upper Immediate' Instruction\n", current_opcode);
@@ -514,6 +515,20 @@ void u_type(uint32_t mem_array[], int size, uint32_t pc, int32_t reg_array[32]){
     uint8_t opcode = instruction & 0x0000007F;
     uint8_t rd = (instruction >> 7) & 0x0000001F;
     int32_t imm = (instruction & 0xFFFFF000);
+
+    switch (opcode)
+    {
+    case LUI_OP:
+        reg_array[rd] =  (imm << 12);
+        break;
+    case AUIPC:
+        reg_array[rd] = pc + (imm << 12);
+        break;
+    
+    default:
+        fprintf(stderr, "Invalid U-type instruction.\n", opcode);
+        break;
+    }
 
     #ifdef DEBUG
     fprintf(stderr, "U-Type instruction breakdown:\n    Opcode: 0x%02X\n    R_Des: 0x%02X\n    Immediate: 0x%08X\n", opcode, rd, imm);
