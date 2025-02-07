@@ -208,7 +208,7 @@ int main(int argc, char *argv[]){
     }
 
     //printAllReg(x);
-    //printAllMem(MainMem, MemWords);
+    printAllMem(MainMem, MemWords);
 
     return 0;
 
@@ -374,14 +374,14 @@ void r_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
 void i_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]){
 
     uint8_t rs1, func3, rd, opcode;
-    uint16_t imm;
+    int16_t imm;
     uint32_t instruction = mem_array[pc / 4];
 
     opcode = instruction & 0x7F;
     rd = (instruction >> 7 ) & 0x1F;
     func3 = (instruction >> 12) & 0x7;
     rs1 = (instruction >> 15) & 0x1F;
-    imm = (instruction >> 20) & 0x7FF;
+    imm = (instruction >> 20) & 0xFFF;
 
     #ifdef DEBUG
     fprintf(stderr, "I-Type instruction breakdown:\n    Opcode: 0x%02X\n    R_Des: 0x%02X\n    Func3: 0x%02X\n    R_S1: 0x%02X\n    Immediate: 0x%03X\n", opcode, rd, func3, rs1, imm);
@@ -396,7 +396,7 @@ void i_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
         case JALR_OP:
             break;
         default:
-            fprintf(stderr, "Invalid IMM opcode\n");
+            fprintf(stderr, "0x%02X is not a valid I-type opcode.\n", opcode);
             exit(1);
     }
 
@@ -405,7 +405,7 @@ void i_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
 void s_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]){
 
     uint8_t imm11_5, rs2, rs1, func3, imm4_0, opcode;
-    uint16_t imm;
+    int16_t imm;
     uint32_t instruction = mem_array[pc / 4];
 
     opcode = instruction & 0x7F;
@@ -420,12 +420,38 @@ void s_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
     fprintf(stderr, "S-Type instruction breakdown:\n    Opcode: 0x%02X\n    Func3: 0x%02X\n    R_S1: 0x%02X\n    R_S2: 0x%02X\n    Immediate: 0x%04X\n", opcode, func3, rs1, rs2, imm);
     #endif
 
+    // Run different stores depending on func3 value;
+    switch(func3){
+        case 0x0:
+            #ifdef DEBUG
+            fprintf(stderr, "Storing 0x%02X @ 0x%08X\n", reg_array[rs2], reg_array[rs1] + imm);
+            #endif
+            writeByte(mem_array, size, reg_array[rs1] + imm, reg_array[rs2]);
+            break;
+        case 0x1:
+            #ifdef DEBUG
+            fprintf(stderr, "Storing 0x%04X @ 0x%08X\n", reg_array[rs2], reg_array[rs1] + imm);
+            #endif
+            writeHalfWord(mem_array, size, reg_array[rs1] + imm, reg_array[rs2]);
+            break;
+        case 0x2:
+            #ifdef DEBUG
+            fprintf(stderr, "Storing 0x%08X @ 0x%08X\n", reg_array[rs2], reg_array[rs1] + imm);
+            #endif
+            writeWord(mem_array, size, reg_array[rs1] + imm, reg_array[rs2]);
+            break;
+        default:
+            fprintf(stderr, "0x%02X is not a valid S-type Function3 value.\n", func3);
+            //exit(1);
+    }
+
     return;
 }
+
 void b_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]){
 
     uint8_t imm12, imm10_5, rs2, rs1, func3, imm4_1, imm11, opcode;
-    uint16_t imm;
+    int16_t imm;
     uint32_t instruction = mem_array[pc / 4];
 
     opcode = instruction & 0x7F;
@@ -449,7 +475,7 @@ void u_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
 
     uint8_t opcode = instruction & 0x0000007F;
     uint8_t rd = (instruction >> 7) & 0x0000001F;
-    uint32_t imm = (instruction >> 12);
+    int32_t imm = (instruction >> 12);
 
     #ifdef DEBUG
     fprintf(stderr, "U-Type instruction breakdown:\n    Opcode: 0x%02X\n    R_Des: 0x%02X\n    Immediate: 0x%08X\n", opcode, rd, imm);
@@ -463,7 +489,7 @@ void j_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
 
     uint8_t opcode = instruction & 0x0000007F;
     uint8_t rd = (instruction >> 7) & 0x0000001F;
-    uint32_t imm = (instruction >> 12);
+    int32_t imm = (instruction >> 12);
     uint32_t imm20 = imm & 0x80000;
     uint32_t immlow = (imm & 0x7FE00) >> 9;
     uint32_t imm11 = ((imm >> 8) & 0x00000001) << 10;
@@ -471,7 +497,7 @@ void j_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
     imm = ((imm20 + immhigh + imm11 + immlow) << 1);
 
     #ifdef DEBUG
-    fprintf(stderr, "J-Type instruction breakdown:\n    Opcode: 0x%02X\n    R_Des: 0x%02X\n    Immediate: 0x%08X\n", opcode, rd, imm);
+    fprintf(stderr, "J-Type instruction breakdown:\n    Opcode: 0x%02X\n    R_Des: 0x%02X\n    Immediate: 0x%06X\n", opcode, rd, imm);
     #endif
 
     return;
