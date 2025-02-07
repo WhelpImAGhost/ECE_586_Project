@@ -213,9 +213,7 @@ void printAllMem(uint32_t array[], int size){
 #ifdef DEBUG
 fprintf(stderr,"\n");
 for (int i = 0; i < size; i++){
-
     printf( "Array Member: %4d     Memory Address: 0x%08X     Contents: 0x%08X\n", i, 4*i, array[i]);
-
 }
 #endif
     return;
