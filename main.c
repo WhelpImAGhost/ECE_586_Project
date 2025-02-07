@@ -152,15 +152,12 @@ int main(int argc, char *argv[]){
                 r_type(MainMem, MemWords, pc, x);
                 break;
             case IMMS_OP:
+            case LOAD_OP:
             case JALR_OP:
                 #ifdef DEBUG
                 fprintf(stderr, "0x%02X is an Immediate Instruction\n", current_opcode);
                 #endif
-                break;
-            case LOAD_OP:
-                #ifdef DEBUG
-                fprintf(stderr, "0x%02X is a Load Instruction\n", current_opcode);
-                #endif
+                i_type(MainMem, MemWords, pc, x);
                 break;
             case STOR_OP:
                 #ifdef DEBUG
@@ -369,6 +366,20 @@ void r_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
     return;
 }
 void i_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]){
+
+    uint8_t imm, rs1, func3, rd, opcode;
+    uint32_t instruction = mem_array[pc / 4];
+
+    opcode = instruction & 0x7F;
+    rd = (instruction >> 7 ) & 0x1F;
+    func3 = (instruction >> 12) & 0x7;
+    rs1 = (instruction >> 15) & 0x1F;
+    imm = (instruction >> 20) & 0x7FF;
+
+    #ifdef DEBUG
+    fprintf(stderr, "I-Type instruction breakdown:\n    Opcode: 0x%02X\n    R_Des: 0x%02X\n    Func3: 0x%02X\n    R_S1: 0x%02X\n    Immediate: 0x%03X\n", opcode, rd, func3, rs1, imm);
+    #endif
+
 
     return;
 }
