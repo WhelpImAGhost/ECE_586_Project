@@ -186,6 +186,7 @@ int main(int argc, char *argv[]){
                 #ifdef DEBUG
                 fprintf(stderr, "0x%02X is an 'Upper Immediate' Instruction\n", current_opcode);
                 #endif
+                u_type(MainMem, MemWords, pc, x);
                 break;
             case ZERO_OP:
                 fprintf(stderr, "End of Program\n");
@@ -369,6 +370,7 @@ void r_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
 
     return;
 }
+
 void i_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]){
 
     uint8_t rs1, func3, rd, opcode;
@@ -385,6 +387,18 @@ void i_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
     fprintf(stderr, "I-Type instruction breakdown:\n    Opcode: 0x%02X\n    R_Des: 0x%02X\n    Func3: 0x%02X\n    R_S1: 0x%02X\n    Immediate: 0x%03X\n", opcode, rd, func3, rs1, imm);
     #endif
 
+    // Split up function call for different I-type opcodes
+    switch (opcode){
+        case LOAD_OP:
+            break;
+        case IMMS_OP:
+            break;
+        case JALR_OP:
+            break;
+        default:
+            fprintf(stderr, "Invalid IMM opcode\n");
+            exit(1);
+    }
 
     return;
 }
@@ -466,4 +480,4 @@ void j_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
 void load(uint8_t function, uint8_t destination, uint8_t source, uint16_t immediate){
 
     
-}
+};
