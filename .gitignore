@@ -408,3 +408,4 @@ FodyWeavers.xsd
 !main.c
 !defines.c
 !Test Memory Files/*
+!make_instruction.c
