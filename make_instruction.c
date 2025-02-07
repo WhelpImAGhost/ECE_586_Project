@@ -22,7 +22,7 @@ int main(int argc, char *argv[]){
             printf("Opcode val: "); scanf("%x", &opcode);
 
             instruction = (func7 << 25) + (rs2 << 20) + (rs1 << 15) + (func3 << 12) + (rd << 7) + opcode;
-            printf("Register instruction: 0X%08X\n", instruction);
+            printf("Register instruction: %08X\n", instruction);
         }
         else if (strcmp(argv[0], "-i" ) == 0 ) {
             printf("Immediate Mode\n");
@@ -33,7 +33,7 @@ int main(int argc, char *argv[]){
             printf("Opcode val: "); scanf("%x", &opcode);
 
             instruction = (imm_12 << 20) | (rs1 << 15) | (func3 << 12) | (rd << 7) | opcode;
-            printf("Immediate instruction: 0x%08X\n", instruction);
+            printf("Immediate instruction: %08X\n", instruction);
         }
         else if (strcmp(argv[0], "-s" ) == 0 ) {
             printf("Store Mode\n");
@@ -51,7 +51,7 @@ int main(int argc, char *argv[]){
                         | ((imm_12 & 0x1F) << 7)    // Lower 5 bits of immediate (bits 11-7)
                         | opcode;                   // Opcode (bits 6-0)
 
-            printf("Store instruction: 0x%08X\n", instruction);
+            printf("Store instruction: %08X\n", instruction);
         }
         else if (strcmp(argv[0], "-b" ) == 0 ) {
             printf("Branch Mode\n");
@@ -71,7 +71,7 @@ int main(int argc, char *argv[]){
                         | ((imm_13 & 0x800) >> 4)   // Bit 11 -> bit 7
                         | opcode;                   // Opcode (bits 6-0)
 
-            printf("Branch instruction: 0x%08X\n", instruction);
+            printf("Branch instruction: %08X\n", instruction);
 
         }
         else if (strcmp(argv[0], "-u" ) == 0 ) {
@@ -84,7 +84,7 @@ int main(int argc, char *argv[]){
                 | (rd << 7)      // Destination register (bits 11-7)
                 | opcode;        // Opcode (bits 6-0)
 
-            printf("Upper instruction: 0x%08X\n", instruction);
+            printf("Upper instruction: %08X\n", instruction);
 
         }
         else if (strcmp(argv[0], "-j" ) == 0 ) {
@@ -101,7 +101,7 @@ int main(int argc, char *argv[]){
                         | (rd << 7)                   // Destination register (bits 11-7)
                         | opcode;                     // Opcode (bits 6-0)
 
-            printf("Jump instruction: 0x%08X\n", instruction);
+            printf("Jump instruction: %08X\n", instruction);
         }
         else { 
             printf("\nInvalid Arguments\n"); exit(-1); 

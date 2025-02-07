@@ -65,7 +65,7 @@ int main(int argc, char *argv[]){
     uint32_t stack_address = STACK_ADDRESS, prog_start = START_ADDRESS;
 
     // Set default filename
-    char *default_filename = "Test Memory Files/prog.mem";
+    char *default_filename = "Mem_files/prog.mem";
     char *filename = default_filename;
 
     // Flags for setting non-default variable values
