@@ -5,7 +5,6 @@
  Objective: Simulate a RISCV-32I processor Instruction Set Architecture
 
  */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -16,7 +15,7 @@
 
 // Debug function to print memory info
 void printAllMem(uint32_t array[], int size);
-void printAllReg(uint32_t regs[32] );
+void printAllReg(uint32_t regs[32]);
 
 // Function Prototypes
 uint32_t readByte(uint32_t array[], int size, int address);
@@ -37,13 +36,12 @@ void u_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
 void j_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]);
 
 //Instruction Function Protoytpes
-void load(uint8_t function, uint8_t destination, uint8_t source, uint16_t immediate);
+void load(uint8_t function, uint8_t destination, uint8_t source, uint16_t immediate, uint32_t array[], int size, uint32_t reg_array[32]);
 
 int main(int argc, char *argv[]){
 
     uint32_t test_word;
     char test_str[10];
-
 
     // Local variables for function use
     uint32_t address, instruction, pc = 0;
@@ -69,7 +67,6 @@ int main(int argc, char *argv[]){
     // Set default filename
     char *default_filename = "Test Memory Files/prog.mem";
     char *filename = default_filename;
-
 
     // Flags for setting non-default variable values
     for( argc--, argv++; argc > 0; argc-=2, argv+=2 ) {
@@ -143,7 +140,6 @@ int main(int argc, char *argv[]){
     }
 
     // Begin fetching and decoding instructions
-
     while(continue_program){
         fetch_and_decode(MainMem, pc, &current_opcode);
 
@@ -201,12 +197,10 @@ int main(int argc, char *argv[]){
                 fprintf(stderr, "0x%02X is an invalid op code.\n", current_opcode);
                 exit(1);
         }
-            
         // For development purposes only
         pc += 4;
 
     }
-
     //printAllReg(x);
     printAllMem(MainMem, MemWords);
 
@@ -341,7 +335,6 @@ int writeWord(uint32_t array[], int size, int address, uint32_t value) {
 
 }
 
-
 void fetch_and_decode(uint32_t array[], uint32_t pc, uint32_t *opcode){
 
     uint32_t selected_instruction = array[pc / 4];
@@ -350,7 +343,6 @@ void fetch_and_decode(uint32_t array[], uint32_t pc, uint32_t *opcode){
 
     return;
 }
-
 
 void r_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]){
 
@@ -390,6 +382,7 @@ void i_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
     // Split up function call for different I-type opcodes
     switch (opcode){
         case LOAD_OP:
+            load(func3, rd, rs1, imm, mem_array, size, reg_array);
             break;
         case IMMS_OP:
             break;
@@ -495,6 +488,12 @@ void j_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
     uint32_t imm11 = ((imm >> 8) & 0x00000001) << 10;
     uint32_t immhigh = (imm & 0x000000FF) << 11;
     imm = ((imm20 + immhigh + imm11 + immlow) << 1);
+    int immmsb = (imm >> 20) & 0x00000001;
+    if (immmsb == 1){
+        imm = imm | 0xFFE00000;
+    }else{
+        imm = imm & ~(0xFFE00000);
+    }
 
     #ifdef DEBUG
     fprintf(stderr, "J-Type instruction breakdown:\n    Opcode: 0x%02X\n    R_Des: 0x%02X\n    Immediate: 0x%06X\n", opcode, rd, imm);
@@ -503,7 +502,26 @@ void j_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
     return;
 }
 
-void load(uint8_t function, uint8_t destination, uint8_t source, uint16_t immediate){
-
-    
+void load(uint8_t function, uint8_t destination, uint8_t source, uint16_t immediate, uint32_t array[], int size, uint32_t reg_array[32]){
+    switch (function){
+        case 0x0:
+            reg_array[destination] = readByte(array, size, (reg_array[source] + immediate));
+            break;
+        case 0x1:
+            reg_array[destination] = readHalfWord(array, size, (reg_array[source] + immediate));
+            break;
+        case 0x2:
+            reg_array[destination] = readWord(array, size, (reg_array[source] + immediate));
+            break;
+        case 0x4:
+            reg_array[destination] = readByte(array, size, (reg_array[source] + immediate));
+            break;
+        case 0x5:
+            reg_array[destination] = readHalfWord(array, size, (reg_array[source] + immediate));
+            break;
+        default:
+        printf("The provided instruction is invalid.\n");
+           return exit(1);
+    }
+    return;
 };
