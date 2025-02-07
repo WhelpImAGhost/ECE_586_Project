@@ -375,6 +375,12 @@ void i_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
     rs1 = (instruction >> 15) & 0x1F;
     imm = (instruction >> 20) & 0xFFF;
 
+    int immmsb = (imm >> 12) & 0x00000001;
+    if (immmsb == 1){
+        imm = imm | 0xFFFFF000;
+    }else{
+        imm = imm & ~(0xFFFFF000);
+
     #ifdef DEBUG
     fprintf(stderr, "I-Type instruction breakdown:\n    Opcode: 0x%02X\n    R_Des: 0x%02X\n    Func3: 0x%02X\n    R_S1: 0x%02X\n    Immediate: 0x%03X\n", opcode, rd, func3, rs1, imm);
     #endif
@@ -408,6 +414,12 @@ void s_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
     rs2 = (instruction >> 20) & 0x1F;
     imm11_5 = (instruction >> 25) & 0x7F;
     imm = (imm11_5 << 5) + imm4_0;
+
+    int immmsb = (imm >> 12) & 0x00000001;
+    if (immmsb == 1){
+        imm = imm | 0xFFFFF000;
+    }else{
+        imm = imm & ~(0xFFFFF000);
 
     #ifdef DEBUG
     fprintf(stderr, "S-Type instruction breakdown:\n    Opcode: 0x%02X\n    Func3: 0x%02X\n    R_S1: 0x%02X\n    R_S2: 0x%02X\n    Immediate: 0x%04X\n", opcode, func3, rs1, rs2, imm);
@@ -456,6 +468,14 @@ void b_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
     imm10_5 = (instruction >> 25) & 0x3F;
     imm12 = (instruction >> 31) & 0x1;
     imm = (imm12 << 12) + (imm11 << 11) + (imm10_5 << 5) + (imm4_1 << 1);
+
+    int immmsb = (imm >> 13) & 0x00000001;
+    if (immmsb == 1){
+        imm = imm | 0xFFFFE000;
+    }else{
+        imm = imm & ~(0xFFFFE000);
+    }
+
     #ifdef DEBUG
     fprintf(stderr, "B-Type instruction breakdown:\n    Opcode: 0x%02X\n    Func3: 0x%02X\n    R_S1: 0x%02X\n    R_S2: 0x%02X\n    Immediate: 0x%04X\n", opcode, func3, rs1, rs2, imm);
     #endif
