@@ -400,6 +400,31 @@ void i_type(uint32_t mem_array[], int size, uint32_t pc, int32_t reg_array[32]){
 
     return;
 }
+
+void load(uint8_t function, uint8_t destination, uint8_t source, uint16_t immediate, uint32_t array[], int size, int32_t reg_array[32]){
+    switch (function){
+        case 0x0:
+            reg_array[destination] = readByte(array, size, (reg_array[source] + immediate));
+            break;
+        case 0x1:
+            reg_array[destination] = readHalfWord(array, size, (reg_array[source] + immediate));
+            break;
+        case 0x2:
+            reg_array[destination] = readWord(array, size, (reg_array[source] + immediate));
+            break;
+        case 0x4:
+            reg_array[destination] = readByte(array, size, (reg_array[source] + immediate));
+            break;
+        case 0x5:
+            reg_array[destination] = readHalfWord(array, size, (reg_array[source] + immediate));
+            break;
+        default:
+        printf("The provided instruction is invalid.\n");
+           return exit(1);
+    }
+    return;
+};
+
 void s_type(uint32_t mem_array[], int size, uint32_t pc, int32_t reg_array[32]){
 
     uint8_t imm11_5, rs2, rs1, func3, imm4_0, opcode;
@@ -521,27 +546,3 @@ void j_type(uint32_t mem_array[], int size, uint32_t pc, int32_t reg_array[32]){
 
     return;
 }
-
-void load(uint8_t function, uint8_t destination, uint8_t source, uint16_t immediate, uint32_t array[], int size, int32_t reg_array[32]){
-    switch (function){
-        case 0x0:
-            reg_array[destination] = readByte(array, size, (reg_array[source] + immediate));
-            break;
-        case 0x1:
-            reg_array[destination] = readHalfWord(array, size, (reg_array[source] + immediate));
-            break;
-        case 0x2:
-            reg_array[destination] = readWord(array, size, (reg_array[source] + immediate));
-            break;
-        case 0x4:
-            reg_array[destination] = readByte(array, size, (reg_array[source] + immediate));
-            break;
-        case 0x5:
-            reg_array[destination] = readHalfWord(array, size, (reg_array[source] + immediate));
-            break;
-        default:
-        printf("The provided instruction is invalid.\n");
-           return exit(1);
-    }
-    return;
-};
