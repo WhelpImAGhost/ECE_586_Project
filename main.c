@@ -28,12 +28,16 @@ int writeWord(uint32_t array[], int size, int address, uint32_t value);
 
 void fetch_and_decode(uint32_t array[], uint32_t pc, uint32_t* opcode);
 
+//Addressing Mode Function Prototypes
 void r_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]);
 void i_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]);
 void s_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]);
 void b_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]);
 void u_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]);
 void j_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]);
+
+//Instruction Function Protoytpes
+void load(uint8_t function, uint8_t destination, uint8_t source, uint16_t immediate);
 
 int main(int argc, char *argv[]){
 
@@ -367,7 +371,8 @@ void r_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
 }
 void i_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]){
 
-    uint8_t imm, rs1, func3, rd, opcode;
+    uint8_t rs1, func3, rd, opcode;
+    uint16_t imm;
     uint32_t instruction = mem_array[pc / 4];
 
     opcode = instruction & 0x7F;
@@ -456,4 +461,9 @@ void j_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
     #endif
 
     return;
+}
+
+void load(uint8_t function, uint8_t destination, uint8_t source, uint16_t immediate){
+
+    
 }
