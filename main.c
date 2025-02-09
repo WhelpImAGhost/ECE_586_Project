@@ -54,7 +54,7 @@ int main(int argc, char *argv[]){
                             JAL_OP, JALR_OP, LUI_OP, AUIPC, ENVIRO };
 
     // Register declarations
-    int32_t x[32];
+    uint32_t x[32];
     x[0] = 0;
     x[1] = 0;
     x[2] = 0;
