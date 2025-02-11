@@ -403,6 +403,8 @@ void i_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
     return;
 }
 void immediateop(uint8_t function, uint8_t destination, uint8_t source, uint16_t immediate, uint32_t array[], int size, uint32_t reg_array[32]){
+    uint8_t func7 = (immediate >> 5) & 0x7F; 
+    uint8_t shamt = immediate & 0x1F;
     switch (function)
     {
     case 0x0: //addi
@@ -431,8 +433,6 @@ void immediateop(uint8_t function, uint8_t destination, uint8_t source, uint16_t
         break;
     case 0x1:
         reg_array[destination] = reg_array[source] & immediate;
-        uint8_t func7 = (immediate >> 5) & 0x7F; 
-        uint8_t shamt = immediate & 0x1F;
         reg_array[destination] = reg_array[source] << shamt;
         #ifdef DEBUG
         fprintf(stderr, "Logical Shifting 0x%08X Left (the contents of register x%d) by %d and placing the result at 0x%08X (register x%d)\n", reg_array[source], source, shamt, reg_array[destination], destination);
@@ -440,8 +440,6 @@ void immediateop(uint8_t function, uint8_t destination, uint8_t source, uint16_t
         break;
     case 0x5:
         reg_array[destination] = reg_array[source] & immediate;
-        uint8_t func7 = (immediate >> 5) & 0x7F; 
-        uint8_t shamt = immediate & 0x1F;
         switch (func7)
         {
         case 0x00:
