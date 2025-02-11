@@ -15,7 +15,7 @@
 
 // Debug function to print memory info
 void printAllMem(uint32_t array[], int size);
-void printAllReg(int32_t regs[32]);
+void printAllReg(uint32_t regs[32]);
 
 // Function Prototypes
 uint32_t readByte(uint32_t array[], int size, int address);
@@ -215,14 +215,14 @@ void printAllMem(uint32_t array[], int size){
 #ifdef DEBUG
 fprintf(stderr,"\n");
 for (int i = 0; i < size; i++){
-    printf( "Array Member: %4d     Memory Address: 0x%08X     Contents: 0x%08X\n", i, 4*i, array[i]);
+    if (array[i] != 0x0) printf( "Array Member: %4d     Memory Address: 0x%08X     Contents: 0x%08X\n", i, 4*i, array[i]);
 }
 #endif
     return;
 }
 
 // Function to display all register values
-void printAllReg(int32_t regs[32] ){
+void printAllReg(uint32_t regs[32] ){
 
     for (int i = 0; i < 32; i++){
         printf("Register: x%02d   Contents: ", i);
