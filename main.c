@@ -405,64 +405,61 @@ void i_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
 void immediateop(uint8_t function, uint8_t destination, uint8_t source, uint16_t immediate, uint32_t array[], int size, uint32_t reg_array[32]){
     uint8_t func7 = (immediate >> 5) & 0x7F; 
     uint8_t shamt = immediate & 0x1F;
+    int32_t signedsource;
     switch (function)
     {
     case 0x0: //addi
-        reg_array[destination] = reg_array[source] + immediate;
         #ifdef DEBUG
         fprintf(stderr, "Adding 0x%08X (the contents of register x%d) and 0x%08X and placing the result at 0x%08X (register x%d)\n", reg_array[source], source, immediate, reg_array[destination], destination);
         #endif
+        reg_array[destination] = reg_array[source] + immediate;
         break;
     case 0x4:
-        reg_array[destination] = reg_array[source] ^ immediate;
         #ifdef DEBUG
         fprintf(stderr, "Bitwise XORing 0x%08X (the contents of register x%d) and 0x%08X and placing the result at 0x%08X (register x%d)\n", reg_array[source], source, immediate, reg_array[destination], destination);
         #endif
+        reg_array[destination] = reg_array[source] ^ immediate;
         break;
     case 0x6:
-        reg_array[destination] = reg_array[source] | immediate;
         #ifdef DEBUG
         fprintf(stderr, "Bitwise ORing 0x%08X (the contents of register x%d) and 0x%08X and placing the result at 0x%08X (register x%d)\n", reg_array[source], source, immediate, reg_array[destination], destination);
-        #endif        
+        #endif  
+        reg_array[destination] = reg_array[source] | immediate;      
         break;
     case 0x7:
-        reg_array[destination] = reg_array[source] & immediate;
         #ifdef DEBUG
         fprintf(stderr, "Bitwise ANDing 0x%08X (the contents of register x%d) and 0x%08X and placing the result at 0x%08X (register x%d)\n", reg_array[source], source, immediate, reg_array[destination], destination);
         #endif
+        reg_array[destination] = reg_array[source] & immediate;
         break;
     case 0x1:
-        reg_array[destination] = reg_array[source] & immediate;
-        reg_array[destination] = reg_array[source] << shamt;
         #ifdef DEBUG
         fprintf(stderr, "Logical Shifting 0x%08X Left (the contents of register x%d) by %d and placing the result at 0x%08X (register x%d)\n", reg_array[source], source, shamt, reg_array[destination], destination);
         #endif
+        reg_array[destination] = reg_array[source] & immediate;
+        reg_array[destination] = reg_array[source] << shamt;
         break;
     case 0x5:
         reg_array[destination] = reg_array[source] & immediate;
         switch (func7)
         {
         case 0x00:
-        reg_array[destination] = reg_array[source] >> shamt;
-        #ifdef DEBUG
-        fprintf(stderr, "Logical Shifting 0x%08X Right (the contents of register x%d) by %d and placing the result at 0x%08X (register x%d)\n", reg_array[source], source, shamt, reg_array[destination], destination);
-        #endif
+            #ifdef DEBUG
+            fprintf(stderr, "Logical Shifting 0x%08X Right (the contents of register x%d) by %d and placing the result at 0x%08X (register x%d)\n", reg_array[source], source, shamt, reg_array[destination], destination);
+            #endif
+            reg_array[destination] = reg_array[source] >> shamt;
             break;
         case 0x20:
-        int32_t signedsource = reg_array[source];
-        reg_array[destination] = signedsource >> shamt;
-        #ifdef DEBUG
-        fprintf(stderr, "Arithmetic Shifting 0x%08X Right (the contents of register x%d) by %d and placing the result at 0x%08X (register x%d)\n", reg_array[source], source, shamt, reg_array[destination], destination);
-        #endif 
+            #ifdef DEBUG
+            fprintf(stderr, "Arithmetic Shifting 0x%08X Right (the contents of register x%d) by %d and placing the result at 0x%08X (register x%d)\n", reg_array[source], source, shamt, reg_array[destination], destination);
+            #endif 
+            signedsource = reg_array[source];
+            reg_array[destination] = signedsource >> shamt;
             break;
         default:
             printf("The provided shift instruction is invalid.\n");
             break;
         }
-        reg_array[destination] = reg_array[source] >> shamt;
-        #ifdef DEBUG
-        fprintf(stderr, "Logical Shifting 0x%08X Right (the contents of register x%d) by %d and placing the result at 0x%08X (register x%d)\n", reg_array[source], source, shamt, reg_array[destination], destination);
-        #endif
         break;  
     case 0x2:
         
