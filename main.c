@@ -407,21 +407,64 @@ void immediateop(uint8_t function, uint8_t destination, uint8_t source, uint16_t
     {
     case 0x0: //addi
         reg_array[destination] = reg_array[source] + immediate;
+        #ifdef DEBUG
+        fprintf(stderr, "Adding 0x%08X (the contents of register x%d) and 0x%08X and placing the result at 0x%08X (register x%d)\n", reg_array[source], source, immediate, reg_array[destination], destination);
+        #endif
         break;
     case 0x4:
-        
+        reg_array[destination] = reg_array[source] ^ immediate;
+        #ifdef DEBUG
+        fprintf(stderr, "Bitwise XORing 0x%08X (the contents of register x%d) and 0x%08X and placing the result at 0x%08X (register x%d)\n", reg_array[source], source, immediate, reg_array[destination], destination);
+        #endif
         break;
     case 0x6:
-        
+        reg_array[destination] = reg_array[source] | immediate;
+        #ifdef DEBUG
+        fprintf(stderr, "Bitwise ORing 0x%08X (the contents of register x%d) and 0x%08X and placing the result at 0x%08X (register x%d)\n", reg_array[source], source, immediate, reg_array[destination], destination);
+        #endif        
         break;
     case 0x7:
-        
+        reg_array[destination] = reg_array[source] & immediate;
+        #ifdef DEBUG
+        fprintf(stderr, "Bitwise ANDing 0x%08X (the contents of register x%d) and 0x%08X and placing the result at 0x%08X (register x%d)\n", reg_array[source], source, immediate, reg_array[destination], destination);
+        #endif
         break;
     case 0x1:
-        
+        reg_array[destination] = reg_array[source] & immediate;
+        uint8_t func7 = (immediate >> 5) & 0x7F; 
+        uint8_t shamt = immediate & 0x1F;
+        reg_array[destination] = reg_array[source] << shamt;
+        #ifdef DEBUG
+        fprintf(stderr, "Logical Shifting 0x%08X Left (the contents of register x%d) by %d and placing the result at 0x%08X (register x%d)\n", reg_array[source], source, shamt, reg_array[destination], destination);
+        #endif
         break;
     case 0x5:
-        //THIS WILL HAVE 2 INSTRUCTIONS
+        reg_array[destination] = reg_array[source] & immediate;
+        uint8_t func7 = (immediate >> 5) & 0x7F; 
+        uint8_t shamt = immediate & 0x1F;
+        switch (func7)
+        {
+        case 0x00:
+        reg_array[destination] = reg_array[source] >> shamt;
+        #ifdef DEBUG
+        fprintf(stderr, "Logical Shifting 0x%08X Right (the contents of register x%d) by %d and placing the result at 0x%08X (register x%d)\n", reg_array[source], source, shamt, reg_array[destination], destination);
+        #endif
+            break;
+        case 0x20:
+        int32_t signedsource = reg_array[source];
+        reg_array[destination] = signedsource >> shamt;
+        #ifdef DEBUG
+        fprintf(stderr, "Arithmetic Shifting 0x%08X Right (the contents of register x%d) by %d and placing the result at 0x%08X (register x%d)\n", reg_array[source], source, shamt, reg_array[destination], destination);
+        #endif 
+            break;
+        default:
+            printf("The provided shift instruction is invalid.\n");
+            break;
+        }
+        reg_array[destination] = reg_array[source] >> shamt;
+        #ifdef DEBUG
+        fprintf(stderr, "Logical Shifting 0x%08X Right (the contents of register x%d) by %d and placing the result at 0x%08X (register x%d)\n", reg_array[source], source, shamt, reg_array[destination], destination);
+        #endif
         break;  
     case 0x2:
         
@@ -430,6 +473,7 @@ void immediateop(uint8_t function, uint8_t destination, uint8_t source, uint16_t
         
         break;   
     default:
+        printf("The provided immediate instruction is invalid.\n");
         break;
     }
 }
@@ -447,7 +491,7 @@ void load(uint8_t function, uint8_t destination, uint8_t source, uint16_t immedi
                 StoredWord = StoredWord & ~(0xFFFFFF00);
             }
             #ifdef DEBUG
-            fprintf(stderr, "Loading 0x%08X @ 0x%08X\n", StoredWord, reg_array[destination] + imm);
+            fprintf(stderr, "Loading 0x%08X @ 0x%08X\n", StoredWord, reg_array[destination] + immediate);
             #endif
             reg_array[destination] = StoredWord;
             break;
@@ -460,32 +504,32 @@ void load(uint8_t function, uint8_t destination, uint8_t source, uint16_t immedi
                 StoredWord = StoredWord & ~(0xFFFF0000);
             }
             #ifdef DEBUG
-            fprintf(stderr, "Loading 0x%08X @ 0x%08X\n", StoredWord, reg_array[destination] + imm);
+            fprintf(stderr, "Loading 0x%08X @ 0x%08X\n", StoredWord, reg_array[destination] + immediate);
             #endif
             reg_array[destination] = StoredWord;
             break;
         case 0x2: //lw
             #ifdef DEBUG
-            fprintf(stderr, "Loading 0x%08X @ 0x%08X\n", readWord(array, size, (reg_array[source] + immediate)), reg_array[destination] + imm);
+            fprintf(stderr, "Loading 0x%08X @ 0x%08X\n", readWord(array, size, (reg_array[source] + immediate)), reg_array[destination] + immediate);
             #endif
             reg_array[destination] = readWord(array, size, (reg_array[source] + immediate));
             break;
         case 0x4: //lbu
             StoredWord = readByte(array, size, (reg_array[source] + immediate));
             #ifdef DEBUG
-            fprintf(stderr, "Loading 0x%08X @ 0x%08X\n", StoredWord, reg_array[destination] + imm);
+            fprintf(stderr, "Loading 0x%08X @ 0x%08X\n", StoredWord, reg_array[destination] + immediate);
             #endif
             reg_array[destination] = StoredWord & 0x000000FF;
             break;
         case 0x5: //lhu
             StoredWord = readHalfWord(array, size, (reg_array[source] + immediate));
             #ifdef DEBUG
-            fprintf(stderr, "Loading 0x%08X @ 0x%08X\n", StoredWord, reg_array[destination] + imm);
+            fprintf(stderr, "Loading 0x%08X @ 0x%08X\n", StoredWord, reg_array[destination] + immediate);
             #endif
             reg_array[destination] = StoredWord & 0x0000FFFF;
             break;
         default:
-        printf("The provided load instruction is invalid.\n");
+            printf("The provided load instruction is invalid.\n");
            return exit(1);
     }
     return;
