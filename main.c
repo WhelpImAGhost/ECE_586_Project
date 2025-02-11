@@ -488,7 +488,7 @@ void load(uint8_t function, uint8_t destination, uint8_t source, int32_t immedia
                 StoredWord = StoredWord & ~(0xFFFFFF00);
             }
             #ifdef DEBUG
-            fprintf(stderr, "Loading 0x%08X @ register x%d\n", StoredWord, destination);
+            fprintf(stderr, "Loading 0x%08X from memory location 0x%08X to register x%d\n", StoredWord, reg_array[source] + immediate, destination);
             #endif
             reg_array[destination] = StoredWord;
             break;
@@ -501,27 +501,27 @@ void load(uint8_t function, uint8_t destination, uint8_t source, int32_t immedia
                 StoredWord = StoredWord & ~(0xFFFF0000);
             }
             #ifdef DEBUG
-            fprintf(stderr, "Loading 0x%08X @ register x%d\n", StoredWord, destination);
+            fprintf(stderr, "Loading 0x%08X from memory location 0x%08X to register x%d\n", StoredWord, reg_array[source] + immediate, destination);
             #endif
             reg_array[destination] = StoredWord;
             break;
         case 0x2: //lw
             #ifdef DEBUG
-            fprintf(stderr, "Loading 0x%08X @ register x%d\n", readWord(array, size, (reg_array[source] + immediate)), destination);
+            fprintf(stderr, "Loading 0x%08X from memory location 0x%08X to register x%d\n", readWord(array, size, (reg_array[source] + immediate)), reg_array[source] + immediate, destination);
             #endif
             reg_array[destination] = readWord(array, size, (reg_array[source] + immediate));
             break;
         case 0x4: //lbu
             StoredWord = readByte(array, size, (reg_array[source] + immediate));
             #ifdef DEBUG
-            fprintf(stderr, "Loading 0x%08X @ register x%d\n", StoredWord, destination);
+            fprintf(stderr, "Loading 0x%08X from memory location 0x%08X to register x%d\n", StoredWord, reg_array[source] + immediate, destination);
             #endif
             reg_array[destination] = StoredWord & 0x000000FF;
             break;
         case 0x5: //lhu
             StoredWord = readHalfWord(array, size, (reg_array[source] + immediate));
             #ifdef DEBUG
-            fprintf(stderr, "Loading 0x%08X @ register x%d\n", StoredWord, destination);
+            fprintf(stderr, "Loading 0x%08X from memory location 0x%08X to register x%d\n", StoredWord, reg_array[source] + immediate, destination);
             #endif
             reg_array[destination] = StoredWord & 0x0000FFFF;
             break;
