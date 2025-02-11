@@ -15,7 +15,7 @@
 
 // Debug function to print memory info
 void printAllMem(uint32_t array[], int size);
-void printAllReg(int32_t regs[32]);
+void printAllReg(uint32_t regs[32]);
 
 // Function Prototypes
 uint32_t readByte(uint32_t array[], int size, int address);
@@ -222,7 +222,7 @@ for (int i = 0; i < size; i++){
 }
 
 // Function to display all register values
-void printAllReg(int32_t regs[32] ){
+void printAllReg(uint32_t regs[32] ){
 
     for (int i = 0; i < 32; i++){
         printf("Register: x%02d   Contents: ", i);
@@ -391,6 +391,7 @@ void i_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
             load(func3, rd, rs1, imm, mem_array, size, reg_array);
             break;
         case IMMS_OP:
+            immediateop(func3, rd, rs1, imm, mem_array, size, reg_array);
             break;
         case JALR_OP:
             break;
@@ -405,7 +406,7 @@ void immediateop(uint8_t function, uint8_t destination, uint8_t source, uint16_t
     switch (function)
     {
     case 0x0: //addi
-
+        reg_array[destination] = reg_array[source] + immediate;
         break;
     case 0x4:
         
@@ -445,6 +446,9 @@ void load(uint8_t function, uint8_t destination, uint8_t source, uint16_t immedi
             }else{
                 StoredWord = StoredWord & ~(0xFFFFFF00);
             }
+            #ifdef DEBUG
+            fprintf(stderr, "Loading 0x%08X @ 0x%08X\n", StoredWord, reg_array[destination] + imm);
+            #endif
             reg_array[destination] = StoredWord;
             break;
         case 0x1: //lh
@@ -455,17 +459,29 @@ void load(uint8_t function, uint8_t destination, uint8_t source, uint16_t immedi
             }else{
                 StoredWord = StoredWord & ~(0xFFFF0000);
             }
+            #ifdef DEBUG
+            fprintf(stderr, "Loading 0x%08X @ 0x%08X\n", StoredWord, reg_array[destination] + imm);
+            #endif
             reg_array[destination] = StoredWord;
             break;
         case 0x2: //lw
+            #ifdef DEBUG
+            fprintf(stderr, "Loading 0x%08X @ 0x%08X\n", readWord(array, size, (reg_array[source] + immediate)), reg_array[destination] + imm);
+            #endif
             reg_array[destination] = readWord(array, size, (reg_array[source] + immediate));
             break;
         case 0x4: //lbu
             StoredWord = readByte(array, size, (reg_array[source] + immediate));
+            #ifdef DEBUG
+            fprintf(stderr, "Loading 0x%08X @ 0x%08X\n", StoredWord, reg_array[destination] + imm);
+            #endif
             reg_array[destination] = StoredWord & 0x000000FF;
             break;
         case 0x5: //lhu
             StoredWord = readHalfWord(array, size, (reg_array[source] + immediate));
+            #ifdef DEBUG
+            fprintf(stderr, "Loading 0x%08X @ 0x%08X\n", StoredWord, reg_array[destination] + imm);
+            #endif
             reg_array[destination] = StoredWord & 0x0000FFFF;
             break;
         default:
