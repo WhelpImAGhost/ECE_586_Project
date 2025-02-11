@@ -284,7 +284,7 @@ uint32_t readWord(uint32_t array[], int size, int address){
 // Function to write to a specific byte from memory
 int writeByte(uint32_t array[], int size, int address, uint32_t value) {
 
-    int target_block = address / 32;
+    int target_block = address / 4;
     int target_byte = address % 4;
 
     array[target_block] = (array[target_block] & ~(0xFF << (8 * target_byte)));
@@ -302,7 +302,7 @@ int writeHalfWord(uint32_t array[], int size, int address, uint32_t value) {
         exit(1);
     }
     else{
-    int target_block = address / 32;
+    int target_block = address / 4;
     int target_hw;
     
     if (address % 4 == 2) {
@@ -327,7 +327,7 @@ int writeHalfWord(uint32_t array[], int size, int address, uint32_t value) {
 // Function to write to a specific word in memory
 int writeWord(uint32_t array[], int size, int address, uint32_t value) {
 
-    int target_block = address / 32;
+    int target_block = address / 4;
     array[target_block] = value;
 
     return 0;
