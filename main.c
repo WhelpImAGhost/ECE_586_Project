@@ -327,7 +327,9 @@ int writeHalfWord(uint32_t array[], int size, int address, uint32_t value) {
 // Function to write to a specific word in memory
 int writeWord(uint32_t array[], int size, int address, uint32_t value) {
 
-    int target_block = address / 32;
+    
+    int target_block = address;
+    fprintf(stderr, "Address to print to: 0x%08X\n\n", target_block);
     array[target_block] = value;
 
     return 0;
