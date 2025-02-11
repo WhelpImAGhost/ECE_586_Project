@@ -55,9 +55,9 @@ int main(int argc, char *argv[]){
 
     // Register declarations
     uint32_t x[32];
-    x[0] = 0;
-    x[1] = 0;
-    x[2] = 0;
+    x[0] = 0; //zero
+    x[1] = 0; //ra
+    x[2] = 0; //sp
 
     // Set default mode
     int mode = 0;
@@ -284,7 +284,7 @@ uint32_t readWord(uint32_t array[], int size, int address){
 // Function to write to a specific byte from memory
 int writeByte(uint32_t array[], int size, int address, uint32_t value) {
 
-    int target_block = address / 4;
+    int target_block = address / 32;
     int target_byte = address % 4;
 
     array[target_block] = (array[target_block] & ~(0xFF << (8 * target_byte)));
@@ -302,7 +302,7 @@ int writeHalfWord(uint32_t array[], int size, int address, uint32_t value) {
         exit(1);
     }
     else{
-    int target_block = address / 4;
+    int target_block = address / 32;
     int target_hw;
     
     if (address % 4 == 2) {
@@ -327,7 +327,7 @@ int writeHalfWord(uint32_t array[], int size, int address, uint32_t value) {
 // Function to write to a specific word in memory
 int writeWord(uint32_t array[], int size, int address, uint32_t value) {
 
-    int target_block = address / 4;
+    int target_block = address / 32;
     array[target_block] = value;
 
     return 0;
@@ -488,7 +488,7 @@ void load(uint8_t function, uint8_t destination, uint8_t source, int32_t immedia
                 StoredWord = StoredWord & ~(0xFFFFFF00);
             }
             #ifdef DEBUG
-            fprintf(stderr, "Loading 0x%08X @ 0x%08X\n", StoredWord, reg_array[destination] + immediate);
+            fprintf(stderr, "Loading 0x%08X @ 0x%08X\n", StoredWord, reg_array[destination]);
             #endif
             reg_array[destination] = StoredWord;
             break;
@@ -501,27 +501,27 @@ void load(uint8_t function, uint8_t destination, uint8_t source, int32_t immedia
                 StoredWord = StoredWord & ~(0xFFFF0000);
             }
             #ifdef DEBUG
-            fprintf(stderr, "Loading 0x%08X @ 0x%08X\n", StoredWord, reg_array[destination] + immediate);
+            fprintf(stderr, "Loading 0x%08X @ 0x%08X\n", StoredWord, reg_array[destination]);
             #endif
             reg_array[destination] = StoredWord;
             break;
         case 0x2: //lw
             #ifdef DEBUG
-            fprintf(stderr, "Loading 0x%08X @ 0x%08X\n", readWord(array, size, (reg_array[source] + immediate)), reg_array[destination] + immediate);
+            fprintf(stderr, "Loading 0x%08X @ 0x%08X\n", readWord(array, size, (reg_array[source] + immediate)), reg_array[destination]);
             #endif
             reg_array[destination] = readWord(array, size, (reg_array[source] + immediate));
             break;
         case 0x4: //lbu
             StoredWord = readByte(array, size, (reg_array[source] + immediate));
             #ifdef DEBUG
-            fprintf(stderr, "Loading 0x%08X @ 0x%08X\n", StoredWord, reg_array[destination] + immediate);
+            fprintf(stderr, "Loading 0x%08X @ 0x%08X\n", StoredWord, reg_array[destination]);
             #endif
             reg_array[destination] = StoredWord & 0x000000FF;
             break;
         case 0x5: //lhu
             StoredWord = readHalfWord(array, size, (reg_array[source] + immediate));
             #ifdef DEBUG
-            fprintf(stderr, "Loading 0x%08X @ 0x%08X\n", StoredWord, reg_array[destination] + immediate);
+            fprintf(stderr, "Loading 0x%08X @ 0x%08X\n", StoredWord, reg_array[destination]);
             #endif
             reg_array[destination] = StoredWord & 0x0000FFFF;
             break;
