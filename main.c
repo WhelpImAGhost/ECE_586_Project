@@ -140,6 +140,8 @@ int main(int argc, char *argv[]){
 
     }
 
+    x[2] = stack_address - 1;
+
     // Begin fetching and decoding instructions
     while(continue_program){
         fetch_and_decode(MainMem, pc, &current_opcode);
