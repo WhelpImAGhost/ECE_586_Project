@@ -36,8 +36,8 @@ void u_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
 void j_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]);
 
 //Instruction Function Protoytpes
-void load(uint8_t function, uint8_t destination, uint8_t source, uint16_t immediate, uint32_t array[], int size, uint32_t reg_array[32]);
-void immediateop(uint8_t function, uint8_t destination, uint8_t source, uint16_t immediate, uint32_t array[], int size, uint32_t reg_array[32]);
+void load(uint8_t function, uint8_t destination, uint8_t source, int32_t immediate, uint32_t array[], int size, uint32_t reg_array[32]);
+void immediateop(uint8_t function, uint8_t destination, uint8_t source, int32_t immediate, uint32_t array[], int size, uint32_t reg_array[32]);
 
 int main(int argc, char *argv[]){
 
@@ -365,7 +365,7 @@ void r_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
 void i_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]){
 
     uint8_t rs1, func3, rd, opcode;
-    int16_t imm;
+    int32_t imm;
     uint32_t instruction = mem_array[pc / 4];
 
     opcode = instruction & 0x7F;
@@ -402,7 +402,7 @@ void i_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
 
     return;
 }
-void immediateop(uint8_t function, uint8_t destination, uint8_t source, uint16_t immediate, uint32_t array[], int size, uint32_t reg_array[32]){
+void immediateop(uint8_t function, uint8_t destination, uint8_t source, int32_t immediate, uint32_t array[], int size, uint32_t reg_array[32]){
     uint8_t func7 = (immediate >> 5) & 0x7F; 
     uint8_t shamt = immediate & 0x1F;
     int32_t signedsource;
@@ -410,13 +410,13 @@ void immediateop(uint8_t function, uint8_t destination, uint8_t source, uint16_t
     {
     case 0x0: //addi
         #ifdef DEBUG
-        fprintf(stderr, "Adding 0x%08X (the contents of register x%d) and 0x%08X and placing the result at 0x%08X (register x%d)\n", reg_array[source], source, immediate, reg_array[destination], destination);
+        fprintf(stderr, "Adding 0x%08X (the contents of register x%d) and 0x%08X and placing the result in (register x%d)\n", reg_array[source], source, immediate, destination);
         #endif
         reg_array[destination] = reg_array[source] + immediate;
         break;
     case 0x4:
         #ifdef DEBUG
-        fprintf(stderr, "Bitwise XORing 0x%08X (the contents of register x%d) and 0x%08X and placing the result at 0x%08X (register x%d)\n", reg_array[source], source, immediate, reg_array[destination], destination);
+        fprintf(stderr, "Bitwise XORing 0x%08X (the contents of register x%d) and 0x%08X and placing the result in (register x%d)\n", reg_array[source], source, immediate, destination);
         #endif
         reg_array[destination] = reg_array[source] ^ immediate;
         break;
@@ -454,6 +454,8 @@ void immediateop(uint8_t function, uint8_t destination, uint8_t source, uint16_t
             fprintf(stderr, "Arithmetic Shifting 0x%08X Right (the contents of register x%d) by %d and placing the result at 0x%08X (register x%d)\n", reg_array[source], source, shamt, reg_array[destination], destination);
             #endif 
             signedsource = reg_array[source];
+            
+            
             reg_array[destination] = signedsource >> shamt;
             break;
         default:
@@ -473,7 +475,7 @@ void immediateop(uint8_t function, uint8_t destination, uint8_t source, uint16_t
     }
 }
 
-void load(uint8_t function, uint8_t destination, uint8_t source, uint16_t immediate, uint32_t array[], int size, uint32_t reg_array[32]){
+void load(uint8_t function, uint8_t destination, uint8_t source, int32_t immediate, uint32_t array[], int size, uint32_t reg_array[32]){
     uint32_t StoredWord;
     int sign;
     switch (function){
@@ -533,7 +535,7 @@ void load(uint8_t function, uint8_t destination, uint8_t source, uint16_t immedi
 void s_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]){
 
     uint8_t imm11_5, rs2, rs1, func3, imm4_0, opcode;
-    int16_t imm;
+    int32_t imm;
     uint32_t instruction = mem_array[pc / 4];
 
     opcode = instruction & 0x7F;
@@ -586,7 +588,7 @@ void s_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
 void b_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]){
 
     uint8_t imm12, imm10_5, rs2, rs1, func3, imm4_1, imm11, opcode;
-    int16_t imm;
+    int32_t imm;
     uint32_t instruction = mem_array[pc / 4];
 
     opcode = instruction & 0x7F;
