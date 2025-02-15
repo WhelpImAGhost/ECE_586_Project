@@ -818,6 +818,10 @@ void u_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
     uint8_t rd = (instruction >> 7) & 0x0000001F;
     int32_t imm = (instruction & 0xFFFFF000);
 
+    #ifdef DEBUG
+    fprintf(stderr, "U-Type instruction breakdown:\n    Opcode: 0x%02X\n    R_Des: 0x%02X\n    Immediate: 0x%08X\n", opcode, rd, imm);
+    #endif
+
     switch (opcode)
     {
     case LUI_OP:
@@ -832,12 +836,9 @@ void u_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
         break;
     }
 
-    #ifdef DEBUG
-    fprintf(stderr, "U-Type instruction breakdown:\n    Opcode: 0x%02X\n    R_Des: 0x%02X\n    Immediate: 0x%08X\n", opcode, rd, imm);
-    #endif
-
     return;
 }
+
 void j_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]){
 
     uint32_t instruction = mem_array[pc/4];
@@ -859,7 +860,9 @@ void j_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
 
     #ifdef DEBUG
     fprintf(stderr, "J-Type instruction breakdown:\n    Opcode: 0x%02X\n    R_Des: 0x%02X\n    Immediate: 0x%06X\n", opcode, rd, imm);
+    fprintf(stderr, "Storing 0x%08X into register x%d, then adding 0x%05X to PC\n", pc + 4, rd, imm);
     #endif
+
 
     reg_array[rd] = pc + 4;
     pc += imm;
