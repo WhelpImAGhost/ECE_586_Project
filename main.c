@@ -407,7 +407,7 @@ void r_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
         case 0x2: // Set Less Than
             reg_array[rd] = (rs1_signed < rs2_signed) ? 1 : 0;
             break;
-        case 0x3: // Set Less Than Unsigned
+        case 0x3: // Set Less Than Unsigne
             reg_array[rd] = (reg_array[rs1] < reg_array[rs2]) ? 1 : 0;
             break;
         default:
@@ -636,7 +636,7 @@ void s_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
             break;
         default:
             fprintf(stderr, "0x%02X is not a valid S-type Function3 value.\n", func3);
-            //exit(1);
+            exit(1);
     }
 
     return;
