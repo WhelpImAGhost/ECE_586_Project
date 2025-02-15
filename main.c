@@ -357,9 +357,66 @@ void r_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
     rs2 = (instruction >> 20) & 0x1F;
     func7 = (instruction >> 25) & 0x7F;
 
+    int32_t rs1_signed = reg_array[rs1];
+    int32_t rs2_signed = reg_array[rs2];
+
     #ifdef DEBUG
     fprintf(stderr, "R-Type instruction breakdown:\n    Opcode: 0x%02X\n    R_Des: 0x%02X\n    Func3: 0x%02X\n    R_S1: 0x%02X\n    R_S2: 0x%02X\n    Func7: 0x%02X\n", opcode, rd, func3, rs1, rs2, func7);
     #endif
+
+    switch(func3){
+
+        case 0x0: // add and sub
+            switch(func7){
+                case 0x00: // add
+                    reg_array[rd] = reg_array[rs1] + reg_array[rs2];
+                    break;
+                case 0x20: // sub
+                    reg_array[rd] = reg_array[rs1] + reg_array[rs2];
+                    break;
+                default:
+                    fprintf(stderr, "0x%X is not a valid Add/Sub FUNC7 code\n", func7);
+                    exit(1);
+            }
+            break;
+        case 0x4: // xor
+            reg_array[rd] = reg_array[rs1] ^ reg_array[rs2];
+            break;
+        case 0x6: // or
+            reg_array[rd] = reg_array[rs1] | reg_array[rs2];
+            break;
+        case 0x7: // and
+            reg_array[rd] = reg_array[rs1] & reg_array[rs2];
+            break;
+        case 0x1: // Shift Left Logical
+            reg_array[rd] = reg_array[rs1] << reg_array[rs2];
+            break;
+        case 0x5: // Shift Right
+            switch (func7){
+                case 0x00: // Shift Right Logical
+                    reg_array[rd] = reg_array[rs1] >> reg_array[rs2];
+                    break;
+                case 0x20: // Shift Right Arithmetic
+                    reg_array[rd] = reg_array[rs1] >> reg_array[rs2];
+                    reg_array[rd] = reg_array[rd] | (0xFFFFFFFF << (32 - rs2) );
+                    break;
+                default:
+                    fprintf(stderr, "0x%X is not a valid Shift Right FUNC7 code\n", func7);
+                    exit(1);
+            }
+
+        case 0x2: // Set Less Than
+            
+
+            reg_array[rd] = (rs1_signed < rs2_signed) ? 1 : 0;
+            break;
+        case 0x3: // Set Less Than Unsigned
+            reg_array[rd] = (reg_array[rs1] < reg_array[rs2]) ? 1 : 0;
+            break;
+        default:
+        fprintf(stderr, "0x%X is not a valid Register FUNC3 code\n", func3);
+        exit(1);
+    }
 
     return;
 }
@@ -459,8 +516,8 @@ void immediateop(uint8_t function, uint8_t destination, uint8_t source, int32_t 
             reg_array[destination] = signedsource >> shamt;
             break;
         default:
-            printf("The provided shift instruction is invalid.\n");
-            break;
+            fprintf(stderr, "The provided shift instruction is invalid.\n");
+            exit(1);
         }
         break;  
     case 0x2:
@@ -470,8 +527,8 @@ void immediateop(uint8_t function, uint8_t destination, uint8_t source, int32_t 
         
         break;   
     default:
-        printf("The provided immediate instruction is invalid.\n");
-        break;
+        fprintf(stderr,"The provided immediate instruction is invalid.\n");
+        exit(1);
     }
 }
 
