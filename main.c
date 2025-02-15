@@ -369,10 +369,16 @@ void r_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
         case 0x0: // add and sub
             switch(func7){
                 case 0x00: // add
+                    #ifdef DEBUG
+                    fprintf(stderr, "Adding 0x%08X (the contents of register x%d) and 0x%08X (the contents of register x%d) and placing the result in register x%d \n",  reg_array[rs1], rs1, reg_array[rs2], rs2, rd);
+                    #endif
                     reg_array[rd] = reg_array[rs1] + reg_array[rs2];
                     break;
                 case 0x20: // sub
-                    reg_array[rd] = reg_array[rs1] + reg_array[rs2];
+                    #ifdef DEBUG
+                    fprintf(stderr, "Subtracting 0x%08X (the contents of register x%d) from 0x%08X (the contents of register x%d) and placing the result in register x%d \n",   reg_array[rs2], rs2, reg_array[rs1], rs1, rd);
+                    #endif
+                    reg_array[rd] = reg_array[rs1] - reg_array[rs2];
                     break;
                 default:
                     fprintf(stderr, "0x%X is not a valid Add/Sub FUNC7 code\n", func7);
@@ -380,23 +386,41 @@ void r_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
             }
             break;
         case 0x4: // xor
+            #ifdef DEBUG
+            fprintf(stderr, "XOR 0x%08X (the contents of register x%d) and 0x%08X (the contents of register x%d) and placing the result in register x%d \n",  reg_array[rs1], rs1, reg_array[rs2], rs2, rd);
+            #endif
             reg_array[rd] = reg_array[rs1] ^ reg_array[rs2];
             break;
         case 0x6: // or
+            #ifdef DEBUG
+            fprintf(stderr, "OR 0x%08X (the contents of register x%d) and 0x%08X (the contents of register x%d) and placing the result in register x%d \n",  reg_array[rs1], rs1, reg_array[rs2], rs2, rd);
+            #endif
             reg_array[rd] = reg_array[rs1] | reg_array[rs2];
             break;
         case 0x7: // and
+            #ifdef DEBUG
+            fprintf(stderr, "AND 0x%08X (the contents of register x%d) and 0x%08X (the contents of register x%d) and placing the result in register x%d \n",  reg_array[rs1], rs1, reg_array[rs2], rs2, rd);
+            #endif
             reg_array[rd] = reg_array[rs1] & reg_array[rs2];
             break;
         case 0x1: // Shift Left Logical
+            #ifdef DEBUG
+            fprintf(stderr, "Shift Left 0x%08X (the contents of register x%d) by 0x%08X (the contents of register x%d) and placing the result in register x%d \n",  reg_array[rs1], rs1, reg_array[rs2], rs2, rd);
+            #endif
             reg_array[rd] = reg_array[rs1] << reg_array[rs2];
             break;
         case 0x5: // Shift Right
             switch (func7){
                 case 0x00: // Shift Right Logical
+                    #ifdef DEBUG
+                    fprintf(stderr, "Shift Right (Logical) 0x%08X (the contents of register x%d) by 0x%08X (the contents of register x%d) and placing the result in register x%d \n",  reg_array[rs1], rs1, reg_array[rs2], rs2, rd);
+                    #endif
                     reg_array[rd] = reg_array[rs1] >> reg_array[rs2];
                     break;
                 case 0x20: // Shift Right Arithmetic
+                    #ifdef DEBUG
+                    fprintf(stderr, "Shift Right (Arithmetic) 0x%08X (the contents of register x%d) by 0x%08X (the contents of register x%d) and placing the result in register x%d \n",  reg_array[rs1], rs1, reg_array[rs2], rs2, rd);
+                    #endif
                     reg_array[rd] = rs1_signed >> reg_array[rs2];
                     break;
                 default:
@@ -405,9 +429,15 @@ void r_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
             }
 
         case 0x2: // Set Less Than
+            #ifdef DEBUG
+            fprintf(stderr, "Set register x%d to 1 if 0x%08X (the contents of x%d) is less than 0x%08X (the contents of x%d), otherwise set it to 0\n",rd, reg_array[rs1], rs1, reg_array[rs2], rs2);
+            #endif
             reg_array[rd] = (rs1_signed < rs2_signed) ? 1 : 0;
             break;
-        case 0x3: // Set Less Than Unsigne
+        case 0x3: // Set Less Than Unsigned
+            #ifdef DEBUG
+            fprintf(stderr, "(UNSIGNED) Set register x%d to 1 if 0x%08X (the contents of x%d) is less than 0x%08X (the contents of x%d), otherwise set it to 0\n",rd, reg_array[rs1], rs1, reg_array[rs2], rs2);
+            #endif
             reg_array[rd] = (reg_array[rs1] < reg_array[rs2]) ? 1 : 0;
             break;
         default:
@@ -450,6 +480,8 @@ void i_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
             immediateop(func3, rd, rs1, imm, mem_array, size, reg_array);
             break;
         case JALR_OP:
+            reg_array[rd] = pc + 4;
+            pc = reg_array[rs1] + imm;
             break;
         default:
             fprintf(stderr, "0x%02X is not a valid I-type opcode.\n", opcode);
