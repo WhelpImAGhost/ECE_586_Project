@@ -397,8 +397,7 @@ void r_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
                     reg_array[rd] = reg_array[rs1] >> reg_array[rs2];
                     break;
                 case 0x20: // Shift Right Arithmetic
-                    reg_array[rd] = reg_array[rs1] >> reg_array[rs2];
-                    reg_array[rd] = reg_array[rd] | (0xFFFFFFFF << (32 - rs2) );
+                    reg_array[rd] = rs1_signed >> reg_array[rs2];
                     break;
                 default:
                     fprintf(stderr, "0x%X is not a valid Shift Right FUNC7 code\n", func7);
@@ -406,8 +405,6 @@ void r_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
             }
 
         case 0x2: // Set Less Than
-            
-
             reg_array[rd] = (rs1_signed < rs2_signed) ? 1 : 0;
             break;
         case 0x3: // Set Less Than Unsigned
@@ -495,10 +492,13 @@ void immediateop(uint8_t function, uint8_t destination, uint8_t source, int32_t 
         #ifdef DEBUG
         fprintf(stderr, "Logical Shifting 0x%08X Left (the contents of register x%d) by %d and placing the result in register x%d\n", reg_array[source], source, shamt, destination);
         #endif
+        // This part below feels wrong
+        // TODO Check this
         reg_array[destination] = reg_array[source] & immediate;
         reg_array[destination] = reg_array[source] << shamt;
         break;
     case 0x5:
+        // TODO check this register thing?
         reg_array[destination] = reg_array[source] & immediate;
         switch (func7)
         {
@@ -665,9 +665,38 @@ void b_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
         imm = imm & ~(0xFFFFE000);
     }
 
+    int32_t rs1_signed = reg_array[rs1];
+    int32_t rs2_signed = reg_array[rs2];
+
     #ifdef DEBUG
     fprintf(stderr, "B-Type instruction breakdown:\n    Opcode: 0x%02X\n    Func3: 0x%02X\n    R_S1: 0x%02X\n    R_S2: 0x%02X\n    Immediate: 0x%04X\n", opcode, func3, rs1, rs2, imm);
     #endif
+
+
+    switch (func3){
+
+        case 0x0: // ==
+            if (reg_array[rs1] == reg_array[rs2]) pc += imm;
+            break;
+        case 0x1: // !=
+            if (reg_array[rs1] != reg_array[rs2]) pc += imm;
+            break;
+        case 0x4: // <
+            if (rs1_signed < rs2_signed) pc += imm;
+            break;
+        case 0x5: // >=
+            if (rs1_signed >= rs2_signed) pc += imm;
+            break;
+        case 0x6: // < unsigned
+            if (reg_array[rs1] < reg_array[rs2]) pc += imm;
+            break;
+        case 0x7: // >= unsigned
+            if (reg_array[rs1] >= reg_array[rs2]) pc += imm;
+            break;
+        default:
+            fprintf(stderr, "0x%X is not a valid Branch FUNC3 code\n", func3);
+            exit(1);
+    }
 
     return;
 }
@@ -722,5 +751,8 @@ void j_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
     fprintf(stderr, "J-Type instruction breakdown:\n    Opcode: 0x%02X\n    R_Des: 0x%02X\n    Immediate: 0x%06X\n", opcode, rd, imm);
     #endif
 
+    reg_array[rd] = pc + 4;
+    pc += imm;
+    
     return;
 }
