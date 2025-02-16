@@ -533,13 +533,13 @@ void immediateop(uint8_t function, uint8_t destination, uint8_t source, int32_t 
         #ifdef DEBUG
         fprintf(stderr, "Bitwise ORing 0x%08X (the contents of register x%d) and 0x%08X and placing the result in register x%d\n", reg_array[source], source, immediate, destination);
         #endif  
-        reg_array[destination] = reg_array[source] | immediate;      
+        reg_array[destination] = signedsource | immediate;      
         break;
     case 0x7: //andi
         #ifdef DEBUG
         fprintf(stderr, "Bitwise ANDing 0x%08X (the contents of register x%d) and 0x%08X and placing the result in register x%d\n", reg_array[source], source, immediate, destination);
         #endif
-        reg_array[destination] = reg_array[source] & immediate;
+        reg_array[destination] = signedsource & immediate;
         break;
     case 0x1: //slli
         #ifdef DEBUG
@@ -560,7 +560,6 @@ void immediateop(uint8_t function, uint8_t destination, uint8_t source, int32_t 
             #ifdef DEBUG
             fprintf(stderr, "Arithmetic Shifting 0x%08X Right (the contents of register x%d) by %d and placing the result at 0x%08X (register x%d)\n", reg_array[source], source, shamt, reg_array[destination], destination);
             #endif 
-            signedsource = reg_array[source];
             reg_array[destination] = signedsource >> shamt;
             break;
         default:
@@ -832,7 +831,7 @@ void u_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
 
     uint8_t opcode = instruction & 0x0000007F;
     uint8_t rd = (instruction >> 7) & 0x0000001F;
-    int32_t imm = (instruction & 0xFFFFF000);
+    int32_t imm = (instruction & 0xFFFFF000) >> 12;
 
     #ifdef DEBUG
     fprintf(stderr, "U-Type instruction breakdown:\n    Opcode: 0x%02X\n    R_Des: 0x%02X\n    Immediate: 0x%08X\n", opcode, rd, imm);
