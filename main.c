@@ -832,7 +832,7 @@ void u_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
 
     uint8_t opcode = instruction & 0x0000007F;
     uint8_t rd = (instruction >> 7) & 0x0000001F;
-    int32_t imm = (instruction & 0xFFFFF000);
+    int32_t imm = (instruction & 0xFFFFF000) >> 12;
 
     #ifdef DEBUG
     fprintf(stderr, "U-Type instruction breakdown:\n    Opcode: 0x%02X\n    R_Des: 0x%02X\n    Immediate: 0x%08X\n", opcode, rd, imm);
