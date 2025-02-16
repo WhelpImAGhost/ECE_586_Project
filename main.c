@@ -446,7 +446,7 @@ void r_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
                     fprintf(stderr, "0x%X is not a valid Shift Right FUNC7 code\n", func7);
                     exit(1);
             }
-
+            break;
         case 0x2: // Set Less Than
             #ifdef DEBUG
             fprintf(stderr, "Set register x%d to 1 if 0x%08X (the contents of x%d) is less than 0x%08X (the contents of x%d), otherwise set it to 0\n",rd, reg_array[rs1], rs1, reg_array[rs2], rs2);
