@@ -514,20 +514,20 @@ void i_type(uint32_t mem_array[], int size, uint32_t* pc, uint32_t reg_array[32]
 void immediateop(uint8_t function, uint8_t destination, uint8_t source, int32_t immediate, uint32_t array[], int size, uint32_t reg_array[32]){
     uint8_t func7 = (immediate >> 5) & 0x7F; 
     uint8_t shamt = immediate & 0x1F;
-    int32_t signedsource;
+    int32_t signedsource = reg_array[source];
     switch (function)
     {
     case 0x0: //addi
         #ifdef DEBUG
         fprintf(stderr, "Adding 0x%08X (the contents of register x%d) and 0x%08X and placing the result in register x%d \n", reg_array[source], source, immediate, destination);
         #endif
-        reg_array[destination] = reg_array[source] + immediate;
+        reg_array[destination] = signedsource + immediate;
         break;
     case 0x4: //xori
         #ifdef DEBUG
         fprintf(stderr, "Bitwise XORing 0x%08X (the contents of register x%d) and 0x%08X and placing the result in register x%d\n", reg_array[source], source, immediate, destination);
         #endif
-        reg_array[destination] = reg_array[source] ^ immediate;
+        reg_array[destination] = signedsource ^ immediate;
         break;
     case 0x6: //ori
         #ifdef DEBUG
