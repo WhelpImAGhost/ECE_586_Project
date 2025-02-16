@@ -140,13 +140,13 @@ int main(int argc, char *argv[]){
 
     }
 
-    x[2] = stack_address - 1;
+    x[2] = stack_address;
 
     // Begin fetching and decoding instructions
     while(continue_program){
         fetch_and_decode(MainMem, pc, &current_opcode);
 
-        fprintf(stderr, "Current pc: 0x%08X\n", pc);
+        
 
         switch (current_opcode) {
             case REGS_OP:
@@ -163,6 +163,10 @@ int main(int argc, char *argv[]){
                 fprintf(stderr, "0x%02X is an Immediate Instruction\n", current_opcode);
                 #endif
                 i_type(MainMem, MemWords, &pc, x);
+                if (pc == 0x0) {
+                    fprintf(stderr, "End of Program\n");
+                    continue_program = false;
+                }
                 break;
             case STOR_OP:
                 #ifdef DEBUG
@@ -181,7 +185,12 @@ int main(int argc, char *argv[]){
                 #ifdef DEBUG
                 fprintf(stderr, "0x%02X is a Jump Instruction\n", current_opcode);
                 #endif
-                j_type(MainMem,MemWords, &pc,x);
+                
+                j_type(MainMem,MemWords, &pc, x);
+                if (pc == 0x0) {
+                    fprintf(stderr, "End of Program\n");
+                    continue_program = false;
+                }
                 break;
             case LUI_OP:
             case AUIPC:
@@ -193,7 +202,7 @@ int main(int argc, char *argv[]){
                 break;
             case ZERO_OP:
                 fprintf(stderr, "End of Program\n");
-                continue_program = false;//WTF
+                continue_program = false;
                 break;
             case ENVIRO:
                 #ifdef DEBUG
