@@ -426,7 +426,7 @@ void r_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
             #ifdef DEBUG
             fprintf(stderr, "Shift Left 0x%08X (the contents of register x%d) by 0x%08X (the contents of register x%d) and placing the result in register x%d \n",  reg_array[rs1], rs1, reg_array[rs2], rs2, rd);
             #endif
-            reg_array[rd] = reg_array[rs1] << reg_array[rs2];
+            reg_array[rd] = reg_array[rs1] << (reg_array[rs2] & 0x1F);
             break;
         case 0x5: // Shift Right
             switch (func7){
@@ -434,13 +434,13 @@ void r_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
                     #ifdef DEBUG
                     fprintf(stderr, "Shift Right (Logical) 0x%08X (the contents of register x%d) by 0x%08X (the contents of register x%d) and placing the result in register x%d \n",  reg_array[rs1], rs1, reg_array[rs2], rs2, rd);
                     #endif
-                    reg_array[rd] = reg_array[rs1] >> reg_array[rs2];
+                    reg_array[rd] = reg_array[rs1] >> (reg_array[rs2] & 0x1F);
                     break;
                 case 0x20: // Shift Right Arithmetic
                     #ifdef DEBUG
                     fprintf(stderr, "Shift Right (Arithmetic) 0x%08X (the contents of register x%d) by 0x%08X (the contents of register x%d) and placing the result in register x%d \n",  reg_array[rs1], rs1, reg_array[rs2], rs2, rd);
                     #endif
-                    reg_array[rd] = rs1_signed >> reg_array[rs2];
+                    reg_array[rd] = rs1_signed >> (reg_array[rs2] & 0x1F);
                     break;
                 default:
                     fprintf(stderr, "0x%X is not a valid Shift Right FUNC7 code\n", func7);
