@@ -28,12 +28,12 @@ int writeWord(uint32_t array[], int size, int address, uint32_t value);
 void fetch_and_decode(uint32_t array[], uint32_t pc, uint32_t* opcode);
 
 //Addressing Mode Function Prototypes
-void r_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]);
-void i_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]);
-void s_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]);
-void b_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]);
-void u_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]);
-void j_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]);
+void r_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]);
+void i_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]);
+void s_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]);
+void b_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]);
+void u_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]);
+void j_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]);
 
 //Instruction Function Protoytpes
 void load(uint8_t function, uint8_t destination, uint8_t source, int32_t immediate, uint32_t array[], int size, uint32_t reg_array[32]);
@@ -146,13 +146,15 @@ int main(int argc, char *argv[]){
     while(continue_program){
         fetch_and_decode(MainMem, pc, &current_opcode);
 
+        fprintf(stderr, "Current pc: 0x%08X\n", pc);
 
         switch (current_opcode) {
             case REGS_OP:
                 #ifdef DEBUG
                 fprintf(stderr, "0x%02X is a Register Instruction\n", current_opcode);
                 #endif
-                r_type(MainMem, MemWords, pc, x);
+                r_type(MainMem, MemWords, &pc, x);
+                pc += 4;
                 break;
             case IMMS_OP:
             case LOAD_OP:
@@ -160,33 +162,34 @@ int main(int argc, char *argv[]){
                 #ifdef DEBUG
                 fprintf(stderr, "0x%02X is an Immediate Instruction\n", current_opcode);
                 #endif
-                i_type(MainMem, MemWords, pc, x);
+                i_type(MainMem, MemWords, &pc, x);
                 break;
             case STOR_OP:
                 #ifdef DEBUG
                 fprintf(stderr, "0x%02X is a Store Instruction\n", current_opcode);
                 #endif
-                s_type(MainMem, MemWords, pc, x);
+                s_type(MainMem, MemWords, &pc, x);
+                pc += 4;
                 break;
             case BRAN_OP:
                 #ifdef DEBUG
                 fprintf(stderr, "0x%02X is a Branch Instruction\n", current_opcode);
                 #endif
-                b_type(MainMem, MemWords, pc, x);
+                b_type(MainMem, MemWords, &pc, x);
                 break;
             case JAL_OP:
                 #ifdef DEBUG
                 fprintf(stderr, "0x%02X is a Jump Instruction\n", current_opcode);
                 #endif
-                j_type(MainMem,MemWords,pc,x);
+                j_type(MainMem,MemWords, &pc,x);
                 break;
             case LUI_OP:
-                u_type(MainMem, MemWords, pc, x);
             case AUIPC:
                 #ifdef DEBUG
                 fprintf(stderr, "0x%02X is an 'Upper Immediate' Instruction\n", current_opcode);
                 #endif
-                u_type(MainMem, MemWords, pc, x);
+                u_type(MainMem, MemWords, &pc, x);
+                pc += 4;
                 break;
             case ZERO_OP:
                 fprintf(stderr, "End of Program\n");
@@ -202,7 +205,7 @@ int main(int argc, char *argv[]){
                 exit(1);
         }
         // For development purposes only
-        pc += 4;
+        
 
     }
     //printAllReg(x);
@@ -345,10 +348,10 @@ void fetch_and_decode(uint32_t array[], uint32_t pc, uint32_t *opcode){
     return;
 }
 
-void r_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]){
+void r_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]){
 
     uint8_t func7, rs2, rs1, func3, rd, opcode;
-    uint32_t instruction = mem_array[pc / 4];
+    uint32_t instruction = mem_array[*pc / 4];
 
     opcode = instruction & 0x7F;
     rd = (instruction >> 7 ) & 0x1F;
@@ -448,11 +451,11 @@ void r_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
     return;
 }
 
-void i_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]){
+void i_type(uint32_t mem_array[], int size, uint32_t* pc, uint32_t reg_array[32]){
 
     uint8_t rs1, func3, rd, opcode;
     int32_t imm;
-    uint32_t instruction = mem_array[pc / 4];
+    uint32_t instruction = mem_array[*pc / 4];
 
     opcode = instruction & 0x7F;
     rd = (instruction >> 7 ) & 0x1F;
@@ -475,13 +478,15 @@ void i_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
     switch (opcode){
         case LOAD_OP:
             load(func3, rd, rs1, imm, mem_array, size, reg_array);
+            *pc += 4;
             break;
         case IMMS_OP:
             immediateop(func3, rd, rs1, imm, mem_array, size, reg_array);
+            *pc += 4;
             break;
         case JALR_OP:
-            reg_array[rd] = pc + 4;
-            pc = reg_array[rs1] + imm;
+            reg_array[rd] = *pc + 4;
+            *pc = reg_array[rs1] + imm;
             break;
         default:
             fprintf(stderr, "0x%02X is not a valid I-type opcode.\n", opcode);
@@ -524,14 +529,9 @@ void immediateop(uint8_t function, uint8_t destination, uint8_t source, int32_t 
         #ifdef DEBUG
         fprintf(stderr, "Logical Shifting 0x%08X Left (the contents of register x%d) by %d and placing the result in register x%d\n", reg_array[source], source, shamt, destination);
         #endif
-        // This part below feels wrong
-        // TODO Check this
-        reg_array[destination] = reg_array[source] & immediate;
         reg_array[destination] = reg_array[source] << shamt;
         break;
     case 0x5:
-        // TODO check this register thing?
-        reg_array[destination] = reg_array[source] & immediate;
         switch (func7)
         {
         case 0x00: //srli
@@ -621,11 +621,11 @@ void load(uint8_t function, uint8_t destination, uint8_t source, int32_t immedia
     return;
 };
 
-void s_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]){
+void s_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]){
 
     uint8_t imm11_5, rs2, rs1, func3, imm4_0, opcode;
     int32_t imm;
-    uint32_t instruction = mem_array[pc / 4];
+    uint32_t instruction = mem_array[*pc / 4];
 
     opcode = instruction & 0x7F;
     imm4_0 = (instruction >> 7 ) & 0x1F;
@@ -674,11 +674,11 @@ void s_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
     return;
 }
 
-void b_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]){
+void b_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]){
 
     uint8_t imm12, imm10_5, rs2, rs1, func3, imm4_1, imm11, opcode;
     int32_t imm;
-    uint32_t instruction = mem_array[pc / 4];
+    uint32_t instruction = mem_array[*pc / 4];
 
     opcode = instruction & 0x7F;
     imm4_1 = (instruction >> 8 ) & 0xF;
@@ -810,9 +810,9 @@ void b_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
 
     return;
 }
-void u_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]){
+void u_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]){
 
-    uint32_t instruction = mem_array[pc/4];
+    uint32_t instruction = mem_array[*pc/4];
 
     uint8_t opcode = instruction & 0x0000007F;
     uint8_t rd = (instruction >> 7) & 0x0000001F;
@@ -828,7 +828,7 @@ void u_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
         reg_array[rd] =  (imm << 12);
         break;
     case AUIPC:
-        reg_array[rd] = pc + (imm << 12);
+        reg_array[rd] = *pc + (imm << 12);
         break;
     
     default:
@@ -839,9 +839,9 @@ void u_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
     return;
 }
 
-void j_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]){
+void j_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]){
 
-    uint32_t instruction = mem_array[pc/4];
+    uint32_t instruction = mem_array[*pc/4];
 
     uint8_t opcode = instruction & 0x0000007F;
     uint8_t rd = (instruction >> 7) & 0x0000001F;
@@ -860,12 +860,12 @@ void j_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
 
     #ifdef DEBUG
     fprintf(stderr, "J-Type instruction breakdown:\n    Opcode: 0x%02X\n    R_Des: 0x%02X\n    Immediate: 0x%06X\n", opcode, rd, imm);
-    fprintf(stderr, "Storing 0x%08X into register x%d, then adding 0x%05X to PC\n", pc + 4, rd, imm);
+    fprintf(stderr, "Storing 0x%08X into register x%d, then adding 0x%05X to PC\n", *pc + 4, rd, imm);
     #endif
 
 
-    reg_array[rd] = pc + 4;
-    pc += imm;
+    reg_array[rd] = *pc + 4;
+    *pc += imm;
     
     return;
 }
