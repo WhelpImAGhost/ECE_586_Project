@@ -15,7 +15,7 @@
 
 // Debug function to print memory info
 void printAllMem(uint32_t array[], int size);
-void printAllReg(uint32_t regs[32], char regnames[32][5]);
+void printAllReg(uint32_t regs[32], char regnames[32][8]);
 
 // Function Prototypes
 uint32_t readByte(uint32_t array[], int size, int address);
@@ -53,11 +53,11 @@ int main(int argc, char *argv[]){
     uint32_t opcodes[10] = {REGS_OP, IMMS_OP,LOAD_OP, STOR_OP, BRAN_OP, 
                             JAL_OP, JALR_OP, LUI_OP, AUIPC, ENVIRO };
 
-char regnames[32][5] = {
-                "zero", "ra", "sp", "gp", "tp", "t0", "t1", "t2",
-                "s0", "s1", "a0", "a1", "a2", "a3", "a4", "a5",
-                "a6", "a7", "s2", "s3", "s4", "s5", "s6", "s7",
-                "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6"
+char regnames[32][8] = {
+                "(zero)", "(ra)", "(sp)", "(gp)", "(tp)", "(t0)", "(t1)", "(t2)",
+                "(s0)", "(s1)", "(a0)", "(a1)", "(a2)", "(a3)", "(a4)", "(a5)",
+                "(a6)", "(a7)", "(s2)", "(s3)", "(s4)", "(s5)", "(s6)", "(s7)",
+                "(s8)", "(s9)", "(s10)", "(s11)", "(t3)", "(t4)", "(t5)", "(t6)"
 };
 
     // Register declarations
@@ -243,10 +243,10 @@ for (int i = 0; i < size; i++){
 }
 
 // Function to display all register values
-void printAllReg(uint32_t regs[32], char regnames[32][5] ){
+void printAllReg(uint32_t regs[32], char regnames[32][8] ){
 
     for (int i = 0; i < 32; i++){
-        printf("Register: x%02d (%s)  Contents: ", i, regnames[i]);
+        printf("Register: x%02d %-6sContents: ", i, regnames[i]);
         printf("%08X\n", regs[i]);
 
     }
