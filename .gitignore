@@ -3,4 +3,10 @@
 !defines.c
 !Mem_files/
 !Mem_files/*
+!Mem_files/Imm_mem
+!Mem_files/Imm_mem/*
+!Mem_files/Misc_mem
+!Mem_files/Misc_mem/*
+!Mem_files/Reg_mem
+!Mem_files/Reg_mem/*
 !make_instruction.c
