@@ -502,7 +502,7 @@ void i_type(uint32_t mem_array[], int size, uint32_t* pc, uint32_t reg_array[32]
             break;
         case JALR_OP:
             reg_array[rd] = *pc + 4;
-            *pc = reg_array[rs1] + imm;
+            *pc = (reg_array[rs1] + imm) & 0xFFFFFFFE;
             break;
         default:
             fprintf(stderr, "0x%02X is not a valid I-type opcode.\n", opcode);
