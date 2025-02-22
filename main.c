@@ -385,13 +385,19 @@ void r_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
 
     switch(func3){
 
-        case 0x0: // add and sub
+        case 0x0: 
             switch(func7){
                 case 0x00: // add
                     #ifdef DEBUG
                     fprintf(stderr, "Adding 0x%08X (the contents of register x%d) and 0x%08X (the contents of register x%d) and placing the result in register x%d \n",  reg_array[rs1], rs1, reg_array[rs2], rs2, rd);
                     #endif
                     reg_array[rd] = reg_array[rs1] + reg_array[rs2];
+                    break;
+                case 0x10: // mul
+                    #ifdef DEBUG
+                    fprintf(stderr, "Multiplying 0x%08X (the contents of register x%d) and 0x%08X (the contents of register x%d) and placing the result in register x%d \n",  reg_array[rs1], rs1, reg_array[rs2], rs2, rd);
+                    #endif
+                    reg_array[rd]= rs1_signed * rs2_signed;
                     break;
                 case 0x20: // sub
                     #ifdef DEBUG
@@ -400,7 +406,7 @@ void r_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
                     reg_array[rd] = reg_array[rs1] - reg_array[rs2];
                     break;
                 default:
-                    fprintf(stderr, "0x%X is not a valid Add/Sub FUNC7 code\n", func7);
+                    fprintf(stderr, "0x%X is not a valid FUNC7 code for FUNC3 code 0x%X\n", func7, func3);
                     exit(1);
             }
             break;
@@ -422,12 +428,24 @@ void r_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
             #endif
             reg_array[rd] = reg_array[rs1] & reg_array[rs2];
             break;
-        case 0x1: // Shift Left Logical
-            #ifdef DEBUG
-            fprintf(stderr, "Shift Left 0x%08X (the contents of register x%d) by 0x%08X (the contents of register x%d) and placing the result in register x%d \n",  reg_array[rs1], rs1, reg_array[rs2], rs2, rd);
-            #endif
-            reg_array[rd] = reg_array[rs1] << (reg_array[rs2] & 0x1F);
-            break;
+        case 0x1: 
+            switch(func7){
+                case 0x00: // Shift Left Logical 
+                    #ifdef DEBUG
+                    fprintf(stderr, "Shift Left 0x%08X (the contents of register x%d) by 0x%08X (the contents of register x%d) and placing the result in register x%d \n",  reg_array[rs1], rs1, reg_array[rs2], rs2, rd);
+                    #endif
+                    reg_array[rd] = reg_array[rs1] << (reg_array[rs2] & 0x1F);
+                    break;
+                case 0x10: // mul high
+                    #ifdef DEBUG
+                    fprintf(stderr, "Multiplying 0x%08X (the contents of register x%d) and 0x%08X (the contents of register x%d) and placing the higer 32 bits in register x%d \n",  reg_array[rs1], rs1, reg_array[rs2], rs2, rd);
+                    #endif
+                    reg_array[rd] = (rs1_signed * rs2_signed) >> 32;
+                    break;
+                default:
+                    fprintf(stderr, "0x%X is not a valid FUNC7 code for FUNC3 code 0x%X\n", func7, func3);
+                    exit(1);
+                }
         case 0x5: // Shift Right
             switch (func7){
                 case 0x00: // Shift Right Logical
@@ -447,12 +465,26 @@ void r_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
                     exit(1);
             }
             break;
-        case 0x2: // Set Less Than
-            #ifdef DEBUG
-            fprintf(stderr, "Set register x%d to 1 if 0x%08X (the contents of x%d) is less than 0x%08X (the contents of x%d), otherwise set it to 0\n",rd, reg_array[rs1], rs1, reg_array[rs2], rs2);
-            #endif
-            reg_array[rd] = (rs1_signed < rs2_signed) ? 1 : 0;
-            break;
+        case 0x2: 
+
+            switch (func7){
+                case 0x00:
+                    #ifdef DEBUG
+                    fprintf(stderr, "Set register x%d to 1 if 0x%08X (the contents of x%d) is less than 0x%08X (the contents of x%d), otherwise set it to 0\n",rd, reg_array[rs1], rs1, reg_array[rs2], rs2);
+                    #endif
+                    reg_array[rd] = (rs1_signed < rs2_signed) ? 1 : 0;
+                    break;
+                case 0x10:
+                    #ifdef DEBUG
+                    fprintf(stderr, "Multiplying 0x%08X (the contents of register x%d) and 0x%08X (the unsigned contents of register x%d) and placing the higer 32 bits in register x%d \n",  reg_array[rs1], rs1, reg_array[rs2], rs2, rd);
+                    #endif
+                    reg_array[rd] = (rs1_signed * reg_array[rs2]) >> 32;
+                    break;
+                default:
+                    fprintf(stderr, "0x%X is not a valid FUNC7 code for FUNC3 code 0x%X\n", func7, func3);
+                    exit(1);
+                
+            }
         case 0x3: // Set Less Than Unsigned
             #ifdef DEBUG
             fprintf(stderr, "(UNSIGNED) Set register x%d to 1 if 0x%08X (the contents of x%d) is less than 0x%08X (the contents of x%d), otherwise set it to 0\n",rd, reg_array[rs1], rs1, reg_array[rs2], rs2);
