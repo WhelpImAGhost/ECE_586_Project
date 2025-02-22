@@ -376,6 +376,9 @@ void r_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
     rs2 = (instruction >> 20) & 0x1F;
     func7 = (instruction >> 25) & 0x7F;
 
+    int64_t reg_64;
+    uint64_t ureg_64;
+
     int32_t rs1_signed = reg_array[rs1];
     int32_t rs2_signed = reg_array[rs2];
 
@@ -393,7 +396,7 @@ void r_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
                     #endif
                     reg_array[rd] = reg_array[rs1] + reg_array[rs2];
                     break;
-                case 0x10: // mul
+                case 0x01: // mul
                     #ifdef DEBUG
                     fprintf(stderr, "Multiplying 0x%08X (the contents of register x%d) and 0x%08X (the contents of register x%d) and placing the result in register x%d \n",  reg_array[rs1], rs1, reg_array[rs2], rs2, rd);
                     #endif
@@ -410,23 +413,62 @@ void r_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
                     exit(1);
             }
             break;
-        case 0x4: // xor
-            #ifdef DEBUG
-            fprintf(stderr, "XOR 0x%08X (the contents of register x%d) and 0x%08X (the contents of register x%d) and placing the result in register x%d \n",  reg_array[rs1], rs1, reg_array[rs2], rs2, rd);
-            #endif
-            reg_array[rd] = reg_array[rs1] ^ reg_array[rs2];
+        case 0x4: 
+            switch (func7) {
+            case 0x00: // xor
+                #ifdef DEBUG
+                fprintf(stderr, "XOR 0x%08X (the contents of register x%d) and 0x%08X (the contents of register x%d) and placing the result in register x%d \n",  reg_array[rs1], rs1, reg_array[rs2], rs2, rd);
+                #endif
+                reg_array[rd] = reg_array[rs1] ^ reg_array[rs2];
+                break;
+            case 0x01: // div
+                #ifdef DEBUG
+                fprintf(stderr, "Dividing 0x%08X (the contents of register x%d) by 0x%08X (the  contents of register x%d) and placing the result in register x%d \n",  reg_array[rs1], rs1, reg_array[rs2], rs2, rd);
+                #endif
+                reg_array[rd] = rs1_signed / rs2_signed;
+                break;
+            default:
+                fprintf(stderr, "0x%X is not a valid FUNC7 code for FUNC3 code 0x%X\n", func7, func3);
+                exit(1);
+            }
             break;
-        case 0x6: // or
-            #ifdef DEBUG
-            fprintf(stderr, "OR 0x%08X (the contents of register x%d) and 0x%08X (the contents of register x%d) and placing the result in register x%d \n",  reg_array[rs1], rs1, reg_array[rs2], rs2, rd);
-            #endif
-            reg_array[rd] = reg_array[rs1] | reg_array[rs2];
+        case 0x6: 
+            switch(func7){
+                case 0x00: // or
+                    #ifdef DEBUG
+                    fprintf(stderr, "OR 0x%08X (the contents of register x%d) and 0x%08X (the contents of register x%d) and placing the result in register x%d \n",  reg_array[rs1], rs1, reg_array[rs2], rs2, rd);
+                    #endif
+                    reg_array[rd] = reg_array[rs1] | reg_array[rs2];
+                    break;
+                case 0x01: // Remmainder
+                    #ifdef DEBUG
+                    fprintf(stderr, "Dividing 0x%08X (the contents of register x%d) by 0x%08X (the contents of register x%d) and placing the remainder in register x%d \n",  reg_array[rs1], rs1, reg_array[rs2], rs2, rd);
+                    #endif
+                    reg_array[rd] = rs1_signed % rs2_signed;
+                    break;
+                default:
+                    fprintf(stderr, "0x%X is not a valid FUNC7 code for FUNC3 code 0x%X\n", func7, func3);
+                    exit(1);  
+            }
             break;
         case 0x7: // and
-            #ifdef DEBUG
-            fprintf(stderr, "AND 0x%08X (the contents of register x%d) and 0x%08X (the contents of register x%d) and placing the result in register x%d \n",  reg_array[rs1], rs1, reg_array[rs2], rs2, rd);
-            #endif
-            reg_array[rd] = reg_array[rs1] & reg_array[rs2];
+            switch(func7){
+                case 0x00:
+                    #ifdef DEBUG
+                    fprintf(stderr, "AND 0x%08X (the contents of register x%d) and 0x%08X (the contents of register x%d) and placing the result in register x%d \n",  reg_array[rs1], rs1, reg_array[rs2], rs2, rd);
+                    #endif
+                    reg_array[rd] = reg_array[rs1] & reg_array[rs2];
+                    break;
+                case 0x01:
+                    #ifdef DEBUG
+                    fprintf(stderr, "Dividing 0x%08X (the unsigned contents of register x%d) by 0x%08X (the unsigned contents of register x%d) and placing the remainder in register x%d \n",  reg_array[rs1], rs1, reg_array[rs2], rs2, rd);
+                    #endif
+                    reg_array[rd] = reg_array[rs1] % reg_array[rs2];
+                    break;
+                default:
+                    fprintf(stderr, "0x%X is not a valid FUNC7 code for FUNC3 code 0x%X\n", func7, func3);
+                    exit(1);  
+            }
             break;
         case 0x1: 
             switch(func7){
@@ -436,16 +478,18 @@ void r_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
                     #endif
                     reg_array[rd] = reg_array[rs1] << (reg_array[rs2] & 0x1F);
                     break;
-                case 0x10: // mul high
+                case 0x01: // mul high
                     #ifdef DEBUG
                     fprintf(stderr, "Multiplying 0x%08X (the contents of register x%d) and 0x%08X (the contents of register x%d) and placing the higer 32 bits in register x%d \n",  reg_array[rs1], rs1, reg_array[rs2], rs2, rd);
                     #endif
-                    reg_array[rd] = (rs1_signed * rs2_signed) >> 32;
+                    reg_64 = ((int64_t)rs1_signed *(int64_t)rs2_signed);
+                    reg_array[rd] = reg_64 >> 32;
                     break;
                 default:
                     fprintf(stderr, "0x%X is not a valid FUNC7 code for FUNC3 code 0x%X\n", func7, func3);
                     exit(1);
                 }
+            break;
         case 0x5: // Shift Right
             switch (func7){
                 case 0x00: // Shift Right Logical
@@ -454,6 +498,12 @@ void r_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
                     #endif
                     reg_array[rd] = reg_array[rs1] >> (reg_array[rs2] & 0x1F);
                     break;
+                case 0x01: // div U
+                    #ifdef DEBUG
+                    fprintf(stderr, "Dividing 0x%08X (the contents of register x%d) by 0x%08X (the  contents of register x%d) and placing the result in register x%d \n",  reg_array[rs1], rs1, reg_array[rs2], rs2, rd);
+                    #endif
+                    reg_array[rd] = reg_array[rs1] / reg_array[rs2];
+                    break;
                 case 0x20: // Shift Right Arithmetic
                     #ifdef DEBUG
                     fprintf(stderr, "Shift Right (Arithmetic) 0x%08X (the contents of register x%d) by 0x%08X (the contents of register x%d) and placing the result in register x%d \n",  reg_array[rs1], rs1, reg_array[rs2], rs2, rd);
@@ -461,35 +511,52 @@ void r_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
                     reg_array[rd] = rs1_signed >> (reg_array[rs2] & 0x1F);
                     break;
                 default:
-                    fprintf(stderr, "0x%X is not a valid Shift Right FUNC7 code\n", func7);
+                    fprintf(stderr, "0x%X is not a valid FUNC7 code for FUNC3 code 0x%X\n", func7, func3);
                     exit(1);
             }
             break;
         case 0x2: 
 
             switch (func7){
-                case 0x00:
+                case 0x00: // Set Less Than
                     #ifdef DEBUG
                     fprintf(stderr, "Set register x%d to 1 if 0x%08X (the contents of x%d) is less than 0x%08X (the contents of x%d), otherwise set it to 0\n",rd, reg_array[rs1], rs1, reg_array[rs2], rs2);
                     #endif
                     reg_array[rd] = (rs1_signed < rs2_signed) ? 1 : 0;
                     break;
-                case 0x10:
+                case 0x01: // mulh S U
                     #ifdef DEBUG
                     fprintf(stderr, "Multiplying 0x%08X (the contents of register x%d) and 0x%08X (the unsigned contents of register x%d) and placing the higer 32 bits in register x%d \n",  reg_array[rs1], rs1, reg_array[rs2], rs2, rd);
                     #endif
-                    reg_array[rd] = (rs1_signed * reg_array[rs2]) >> 32;
+                    reg_64 = ((int64_t)rs1_signed * (uint64_t)reg_array[rs2]);
+                    reg_array[rd] = reg_64 >> 32;
                     break;
                 default:
                     fprintf(stderr, "0x%X is not a valid FUNC7 code for FUNC3 code 0x%X\n", func7, func3);
                     exit(1);
                 
             }
-        case 0x3: // Set Less Than Unsigned
-            #ifdef DEBUG
-            fprintf(stderr, "(UNSIGNED) Set register x%d to 1 if 0x%08X (the contents of x%d) is less than 0x%08X (the contents of x%d), otherwise set it to 0\n",rd, reg_array[rs1], rs1, reg_array[rs2], rs2);
-            #endif
-            reg_array[rd] = (reg_array[rs1] < reg_array[rs2]) ? 1 : 0;
+            break;
+        case 0x3:
+            switch (func7){
+                case 0x00: // Set Less Than Unsigned
+                    #ifdef DEBUG
+                    fprintf(stderr, "(UNSIGNED) Set register x%d to 1 if 0x%08X (the contents of x%d) is less than 0x%08X (the contents of x%d), otherwise set it to 0\n",rd, reg_array[rs1], rs1, reg_array[rs2], rs2);
+                    #endif
+                    reg_array[rd] = (reg_array[rs1] < reg_array[rs2]) ? 1 : 0;
+                    break;
+                case 0x01: // multu
+                    #ifdef DEBUG
+                    fprintf(stderr, "Multiplying 0x%08X (the unsigned contents of register x%d) and 0x%08X (the unsigned contents of register x%d) and placing the higer 32 bits in register x%d \n",  reg_array[rs1], rs1, reg_array[rs2], rs2, rd);
+                    #endif
+                    ureg_64 = (reg_array[rs1] * reg_array[rs2]);
+                    reg_array[rd] = ureg_64 >> 32;
+                    break;
+                default:
+                    fprintf(stderr, "0x%X is not a valid FUNC7 code for FUNC3 code 0x%X\n", func7, func3);
+                    exit(1);
+
+            }
             break;
         default:
         fprintf(stderr, "0x%X is not a valid Register FUNC3 code\n", func3);
