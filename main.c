@@ -614,8 +614,13 @@ void immediateop(uint8_t function, uint8_t destination, uint8_t source, int32_t 
         fprintf(stderr,"The provided immediate instruction is invalid.\n");
         exit(1);
     }
-    
+
+    if(destination == 0 ){
+        reg_array[0] = 0x00000000;
+    }
+    else{
     return;
+    }
 }
 
 void load(uint8_t function, uint8_t destination, uint8_t source, int32_t immediate, uint32_t array[], int size, uint32_t reg_array[32]){
