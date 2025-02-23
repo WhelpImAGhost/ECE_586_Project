@@ -279,8 +279,10 @@ uint32_t readHalfWord(uint32_t array[], int size, int address){
     
     if (address % 4 == 2) {
         target_hw = 2;
-    } else {
+    } else if (address % 4 == 0){
         target_hw = 0;
+    } else {
+        exit(1);
     }
 
     uint32_t selected_word = array[target_block];
