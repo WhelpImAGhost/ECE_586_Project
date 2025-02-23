@@ -9,4 +9,6 @@
 !Mem_files/Misc_mem/*
 !Mem_files/Reg_mem
 !Mem_files/Reg_mem/*
+!Mem_files/Load_mem
+!Mem_files/Load_mem/*
 !make_instruction.c
