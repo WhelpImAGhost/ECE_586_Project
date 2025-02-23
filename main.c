@@ -207,10 +207,12 @@ char regnames[32][8] = {
                 u_type(MainMem, MemWords, &pc, x);
                 pc += 4;
                 break;
-            case ZERO_OP:
+/*
+           case ZERO_OP:
                 fprintf(stderr, "End of Program\n");
                 continue_program = false;
                 break;
+*/
             case ENVIRO:
                 #ifdef DEBUG
                 fprintf(stderr, "0x%02X is an Environment Instruction\n", current_opcode);
@@ -521,6 +523,7 @@ void i_type(uint32_t mem_array[], int size, uint32_t* pc, uint32_t reg_array[32]
             fprintf(stderr, "pc before jump: 0x%08x \n", *pc);
         #endif
             reg_array[rd] = *pc + 4;
+            reg_array[0] = 0x00000000;
             *pc = (reg_array[rs1] + imm) & 0xFFFFFFFE;
         #ifdef DEBUG
             fprintf(stderr, "pc after jump: 0x%08x \n", *pc);
