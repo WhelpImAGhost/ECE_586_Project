@@ -270,7 +270,7 @@ uint32_t readByte(uint32_t array[], int size, int address) {
 uint32_t readHalfWord(uint32_t array[], int size, int address){
 
     if (address % 2 != 0) {
-        fprintf(stderr, "Misaligned reference at 0x%08d\n", address);
+        fprintf(stderr, "Misaligned reference at 0x%08x\n", address);
         exit(1);
     }
     else{
@@ -282,6 +282,7 @@ uint32_t readHalfWord(uint32_t array[], int size, int address){
     } else if (address % 4 == 0){
         target_hw = 0;
     } else {
+        fprintf(stderr, "Misaligned reference at 0x%08x\n", address);
         exit(1);
     }
 
