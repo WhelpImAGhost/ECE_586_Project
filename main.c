@@ -520,12 +520,7 @@ void i_type(uint32_t mem_array[], int size, uint32_t* pc, uint32_t reg_array[32]
         #ifdef DEBUG
             fprintf(stderr, "pc before jump: 0x%08x \n", *pc);
         #endif
-        if(rd == 0 ){
-            reg_array[0] = 0x00000000;
-        }
-        else{
             reg_array[rd] = *pc + 4;
-        }
             *pc = (reg_array[rs1] + imm) & 0xFFFFFFFE;
         #ifdef DEBUG
             fprintf(stderr, "pc after jump: 0x%08x \n", *pc);
@@ -776,12 +771,13 @@ void b_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
                 #ifdef DEBUG
                 fprintf(stderr, "Branch taken, adding 0x%03X to PC\n", imm);
                 #endif
-                pc += imm;
+                *pc += imm;
             }
             else{
                 #ifdef DEBUG
                 fprintf(stderr, "Branch not take\n");
                 #endif
+                *pc += 4;
             }
             break;
         case 0x1: // !=
@@ -792,12 +788,13 @@ void b_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
                 #ifdef DEBUG
                 fprintf(stderr, "Branch taken, adding 0x%03X to PC\n", imm);
                 #endif
-                pc += imm;
+                *pc += imm;
             }
             else{
                 #ifdef DEBUG
                 fprintf(stderr, "Branch not take\n");
                 #endif
+                *pc += 4;
             }
             break;
         case 0x4: // <
@@ -808,12 +805,13 @@ void b_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
                 #ifdef DEBUG
                 fprintf(stderr, "Branch taken, adding 0x%03X to PC\n", imm);
                 #endif
-                pc += imm;
+                *pc += imm;
             }
             else{
                 #ifdef DEBUG
                 fprintf(stderr, "Branch not take\n");
                 #endif
+                *pc += 4;
             }
             break;
         case 0x5: // >=
@@ -824,12 +822,13 @@ void b_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
                 #ifdef DEBUG
                 fprintf(stderr, "Branch taken, adding 0x%03X to PC\n", imm);
                 #endif
-                pc += imm;
+                *pc += imm;
             }
             else{
                 #ifdef DEBUG
                 fprintf(stderr, "Branch not take\n");
                 #endif
+                *pc += 4;
             }
             break;
         case 0x6: // < unsigned
@@ -840,12 +839,13 @@ void b_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
                 #ifdef DEBUG
                 fprintf(stderr, "Branch taken, adding 0x%03X to PC\n", imm);
                 #endif
-                pc += imm;
+                *pc += imm;
             }
             else{
                 #ifdef DEBUG
                 fprintf(stderr, "Branch not take\n");
                 #endif
+                *pc += 4;
             }
             break;
         case 0x7: // >= unsigned
@@ -856,12 +856,13 @@ void b_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
                 #ifdef DEBUG
                 fprintf(stderr, "Branch taken, adding 0x%03X to PC\n", imm);
                 #endif
-                pc += imm;
+                *pc += imm;
             }
             else{
                 #ifdef DEBUG
                 fprintf(stderr, "Branch not take\n");
                 #endif
+                *pc += 4;
             }
             break;
         default:

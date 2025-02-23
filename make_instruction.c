@@ -89,12 +89,12 @@ int main(int argc, char *argv[]){
         }
         else if (strcmp(argv[0], "-j" ) == 0 ) {
             printf("Jump Mode\n");
-            printf("20:0 IMM val: "); scanf("%x", &imm_21);
+            printf("21:0 IMM val: "); scanf("%x", &imm_21);
             printf("Rd val: "); scanf("%x", &rd);
             printf("Opcode val: "); scanf("%x", &opcode);
 
 
-            instruction = ((imm_21 & 0x80000) << 11) // Bit 20 -> bit 31
+            instruction = ((imm_21 & 0x100000) << 11) // Bit 20 -> bit 31
                         | ((imm_21 & 0x7FE) << 20)    // Bits 10:1 -> bits 30:21
                         | ((imm_21 & 0x800) << 9)     // Bit 11 -> bit 20
                         | ((imm_21 & 0xFF000) << 0)   // Bits 19:12 -> bits 19:12
