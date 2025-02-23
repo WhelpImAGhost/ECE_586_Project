@@ -9,6 +9,8 @@
 !Mem_files/Misc_mem/*
 !Mem_files/Reg_mem
 !Mem_files/Reg_mem/*
+!Mem_files/Mul_mem
+!Mem_files/Mul_mem/*
 !Mem_files/Load_mem
 !Mem_files/Load_mem/*
 !Mem_files/Branch_mem/
