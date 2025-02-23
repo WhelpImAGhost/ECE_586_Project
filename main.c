@@ -509,8 +509,14 @@ void i_type(uint32_t mem_array[], int size, uint32_t* pc, uint32_t reg_array[32]
             *pc += 4;
             break;
         case JALR_OP:
+        #ifdef DEBUG
+            fprintf(stderr, "pc before jump: 0x%08x \n", pc)
+        #endif
             reg_array[rd] = *pc + 4;
             *pc = (reg_array[rs1] + imm) & 0xFFFFFFFE;
+        #ifdef DEBUG
+            fprintf(stderr, "pc after jump: 0x%08x \n", pc)
+        #endif
             break;
         default:
             fprintf(stderr, "0x%02X is not a valid I-type opcode.\n", opcode);
