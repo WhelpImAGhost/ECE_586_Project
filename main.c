@@ -316,6 +316,7 @@ int writeByte(uint32_t array[], int size, int address, uint32_t value) {
     int target_block = address / 4;
     int target_byte = address % 4;
 
+    value = value & 0xFF;
     array[target_block] = (array[target_block] & ~(0xFF << (8 * target_byte)));
     array[target_block] = array[target_block] | (value << (8 * target_byte));
 
@@ -510,12 +511,12 @@ void i_type(uint32_t mem_array[], int size, uint32_t* pc, uint32_t reg_array[32]
             break;
         case JALR_OP:
         #ifdef DEBUG
-            fprintf(stderr, "pc before jump: 0x%08x \n", pc);
+            fprintf(stderr, "pc before jump: 0x%08x \n", *pc);
         #endif
             reg_array[rd] = *pc + 4;
             *pc = (reg_array[rs1] + imm) & 0xFFFFFFFE;
         #ifdef DEBUG
-            fprintf(stderr, "pc after jump: 0x%08x \n", pc);
+            fprintf(stderr, "pc after jump: 0x%08x \n", *pc);
         #endif
             break;
         default:
