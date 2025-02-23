@@ -318,7 +318,7 @@ int writeByte(uint32_t array[], int size, int address, uint32_t value) {
 
     value = value & 0xFF;
     array[target_block] = (array[target_block] & ~(0xFF << (8 * target_byte)));
-    array[target_block] = array[target_block] | (value << (8 * target_byte));
+    array[target_block] = array[target_block] | ((value & 0xFF) << (8 * target_byte));
 
     return 0;
 
