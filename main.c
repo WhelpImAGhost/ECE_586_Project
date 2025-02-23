@@ -153,8 +153,6 @@ char regnames[32][8] = {
     while(continue_program){
         fetch_and_decode(MainMem, pc, &current_opcode);
 
-        
-
         switch (current_opcode) {
             case REGS_OP:
                 #ifdef DEBUG
@@ -224,7 +222,6 @@ char regnames[32][8] = {
         }
         // For development purposes only
         
-
     }
     //printAllReg(x);
     printAllMem(MainMem, MemWords);
@@ -265,7 +262,6 @@ uint32_t readByte(uint32_t array[], int size, int address) {
     uint32_t selected_byte = selected_word & 0x000000FF;
 
     return selected_byte;
-
 }
 
 // Function to read a specific half-word (alligned) from memory
@@ -533,7 +529,7 @@ void i_type(uint32_t mem_array[], int size, uint32_t* pc, uint32_t reg_array[32]
             fprintf(stderr, "0x%02X is not a valid I-type opcode.\n", opcode);
             exit(1);
     }
-    
+
     if(rd == 0 ){
         reg_array[0] = 0x00000000;
     }
