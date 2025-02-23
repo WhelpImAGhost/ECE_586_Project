@@ -89,7 +89,7 @@ int main(int argc, char *argv[]){
         }
         else if (strcmp(argv[0], "-j" ) == 0 ) {
             printf("Jump Mode\n");
-            printf("20:0 IMM val: "); scanf("%x", &imm_21);
+            printf("21:0 IMM val: "); scanf("%x", &imm_21);
             printf("Rd val: "); scanf("%x", &rd);
             printf("Opcode val: "); scanf("%x", &opcode);
 

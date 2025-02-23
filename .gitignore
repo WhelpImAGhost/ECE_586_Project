@@ -11,4 +11,8 @@
 !Mem_files/Reg_mem/*
 !Mem_files/Mul_mem
 !Mem_files/Mul_mem/*
+!Mem_files/Load_mem
+!Mem_files/Load_mem/*
+!Mem_files/Branch_mem/
+!Mem_files/Branch_mem/*
 !make_instruction.c
