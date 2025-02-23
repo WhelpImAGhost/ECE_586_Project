@@ -298,6 +298,11 @@ uint32_t readHalfWord(uint32_t array[], int size, int address){
 // Function to read a specific word from memory
 uint32_t readWord(uint32_t array[], int size, int address){
 
+    if (address % 4 != 0) {
+        fprintf(stderr, "Misaligned reference at 0x%08x\n", address);
+        exit(1);
+    }
+
     int target_block = address / 4;
     uint32_t selected_word = array[target_block];
 
