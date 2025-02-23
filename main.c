@@ -328,7 +328,7 @@ int writeByte(uint32_t array[], int size, int address, uint32_t value) {
 int writeHalfWord(uint32_t array[], int size, int address, uint32_t value) {
 
     if (address % 2 != 0) {
-        fprintf(stderr, "Misaligned reference at 0x%08d\n", address);
+        fprintf(stderr, "Misaligned reference at 0x%08x\n", address);
         exit(1);
     }
     else{
@@ -357,6 +357,10 @@ int writeHalfWord(uint32_t array[], int size, int address, uint32_t value) {
 // Function to write to a specific word in memory
 int writeWord(uint32_t array[], int size, int address, uint32_t value) {
 
+    if (address % 4 != 0) {
+        fprintf(stderr, "Misaligned reference at 0x%08x\n", address);
+        exit(1);
+    }
     int target_block = address / 4;
     array[target_block] = value;
 
@@ -687,13 +691,13 @@ void s_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
     switch(func3){
         case 0x0:
             #ifdef DEBUG
-            fprintf(stderr, "Storing 0x%02X @ 0x%08X\n", reg_array[rs2], reg_array[rs1] + imm);
+            fprintf(stderr, "Storing 0x%02X @ 0x%08X\n", reg_array[rs2] & 0xFF, reg_array[rs1] + imm);
             #endif
             writeByte(mem_array, size, reg_array[rs1] + imm, reg_array[rs2]);
             break;
         case 0x1:
             #ifdef DEBUG
-            fprintf(stderr, "Storing 0x%04X @ 0x%08X\n", reg_array[rs2], reg_array[rs1] + imm);
+            fprintf(stderr, "Storing 0x%04X @ 0x%08X\n", reg_array[rs2] & 0xFFFF, reg_array[rs1] + imm);
             #endif
             writeHalfWord(mem_array, size, reg_array[rs1] + imm, reg_array[rs2]);
             break;
