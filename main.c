@@ -25,7 +25,7 @@ int writeByte(uint32_t array[], int size, int address, uint32_t value);
 int writeHalfWord(uint32_t array[], int size, int address, uint32_t value);
 int writeWord(uint32_t array[], int size, int address, uint32_t value);
 
-void fetch_and_decode(uint32_t array[], uint32_t pc, uint32_t* opcode);
+void fetch_and_decode(uint32_t array[], uint32_t pc, uint32_t* opcode, int mode);
 
 //Addressing Mode Function Prototypes
 void r_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]);
@@ -52,13 +52,14 @@ int main(int argc, char *argv[]){
     // Opcode array
     uint32_t opcodes[10] = {REGS_OP, IMMS_OP,LOAD_OP, STOR_OP, BRAN_OP, 
                             JAL_OP, JALR_OP, LUI_OP, AUIPC, ENVIRO };
+    
 
-char regnames[32][8] = {
-                "(zero)", "(ra)", "(sp)", "(gp)", "(tp)", "(t0)", "(t1)", "(t2)",
-                "(s0)", "(s1)", "(a0)", "(a1)", "(a2)", "(a3)", "(a4)", "(a5)",
-                "(a6)", "(a7)", "(s2)", "(s3)", "(s4)", "(s5)", "(s6)", "(s7)",
-                "(s8)", "(s9)", "(s10)", "(s11)", "(t3)", "(t4)", "(t5)", "(t6)"
-};
+    char regnames[32][8] = {
+                    "(zero)", "(ra)", "(sp)", "(gp)", "(tp)", "(t0)", "(t1)", "(t2)",
+                    "(s0)", "(s1)", "(a0)", "(a1)", "(a2)", "(a3)", "(a4)", "(a5)",
+                    "(a6)", "(a7)", "(s2)", "(s3)", "(s4)", "(s5)", "(s6)", "(s7)",
+                    "(s8)", "(s9)", "(s10)", "(s11)", "(t3)", "(t4)", "(t5)", "(t6)"
+    };
 
     // Register declarations
     uint32_t x[32];
@@ -66,8 +67,10 @@ char regnames[32][8] = {
     x[1] = 0; //ra
     x[2] = 0; //sp
 
+    uint32_t old_pc = 0;
     // Set default mode
-    int mode = 0;
+    int mode = 0;  // 0 is silent
+                   // 1 is verbose
 
     // Memory & Stack Starting Addresses
     uint32_t stack_address = STACK_ADDRESS, prog_start = START_ADDRESS;
@@ -151,8 +154,10 @@ char regnames[32][8] = {
 
     // Begin fetching and decoding instructions
     while(continue_program){
-        fetch_and_decode(MainMem, pc, &current_opcode);
 
+        fetch_and_decode(MainMem, pc, &current_opcode, mode);
+
+        old_pc = pc;
         switch (current_opcode) {
             case REGS_OP:
                 #ifdef DEBUG
@@ -169,7 +174,9 @@ char regnames[32][8] = {
                 #endif
                 i_type(MainMem, MemWords, &pc, x);
                 if (pc == 0x0) {
+                    #ifdef DEBUG
                     fprintf(stderr, "End of Program\n");
+                    #endif
                     continue_program = false;
                 }
                 break;
@@ -193,7 +200,9 @@ char regnames[32][8] = {
                 
                 j_type(MainMem,MemWords, &pc, x);
                 if (pc == 0x0) {
+                    #ifdef DEBUG
                     fprintf(stderr, "End of Program\n");
+                    #endif
                     continue_program = false;
                 }
                 break;
@@ -220,12 +229,18 @@ char regnames[32][8] = {
                 fprintf(stderr, "0x%02X is an invalid op code.\n", current_opcode);
                 exit(1);
         }
-        // For development purposes only
+
+        if (mode == 1) printAllReg(x, regnames);
+
         
     }
-    //printAllReg(x);
-    printAllMem(MainMem, MemWords);
-    printAllReg(x, regnames);
+
+
+    // Silent mode prints
+    if (mode == 0) printAllReg(x, regnames);
+    if (mode == 0) fprintf(stderr, "PC at final instruction: 0x%08X\n", old_pc);
+
+
     return 0;
 
 }
@@ -249,6 +264,7 @@ void printAllReg(uint32_t regs[32], char regnames[32][8] ){
         printf("%08X\n", regs[i]);
 
     }
+    printf("\n\n");
 }
 
 // Function to read a specific byte from memory
@@ -365,12 +381,14 @@ int writeWord(uint32_t array[], int size, int address, uint32_t value) {
 
 }
 
-void fetch_and_decode(uint32_t array[], uint32_t pc, uint32_t *opcode){
+void fetch_and_decode(uint32_t array[], uint32_t pc, uint32_t *opcode, int mode){
 
     uint32_t selected_instruction = array[pc / 4];
 
     *opcode = selected_instruction & 0x0000007F;
 
+    if (mode == 1)fprintf(stderr, "Current PC:          0x%08X\n", pc);
+    if (mode == 1)fprintf(stderr, "Current Instruction: 0x%08X\n\n", selected_instruction);
     return;
 }
 
