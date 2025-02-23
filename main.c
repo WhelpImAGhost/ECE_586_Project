@@ -15,7 +15,7 @@
 
 // Debug function to print memory info
 void printAllMem(uint32_t array[], int size);
-void printAllReg(uint32_t regs[32]);
+void printAllReg(uint32_t regs[32], char regnames[32][8]);
 
 // Function Prototypes
 uint32_t readByte(uint32_t array[], int size, int address);
@@ -25,15 +25,15 @@ int writeByte(uint32_t array[], int size, int address, uint32_t value);
 int writeHalfWord(uint32_t array[], int size, int address, uint32_t value);
 int writeWord(uint32_t array[], int size, int address, uint32_t value);
 
-void fetch_and_decode(uint32_t array[], uint32_t pc, uint32_t* opcode);
+void fetch_and_decode(uint32_t array[], uint32_t pc, uint32_t* opcode, int mode);
 
 //Addressing Mode Function Prototypes
-void r_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]);
-void i_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]);
-void s_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]);
-void b_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]);
-void u_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]);
-void j_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]);
+void r_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]);
+void i_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]);
+void s_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]);
+void b_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]);
+void u_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]);
+void j_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]);
 
 //Instruction Function Protoytpes
 void load(uint8_t function, uint8_t destination, uint8_t source, int32_t immediate, uint32_t array[], int size, uint32_t reg_array[32]);
@@ -52,6 +52,14 @@ int main(int argc, char *argv[]){
     // Opcode array
     uint32_t opcodes[10] = {REGS_OP, IMMS_OP,LOAD_OP, STOR_OP, BRAN_OP, 
                             JAL_OP, JALR_OP, LUI_OP, AUIPC, ENVIRO };
+    
+
+    char regnames[32][8] = {
+                    "(zero)", "(ra)", "(sp)", "(gp)", "(tp)", "(t0)", "(t1)", "(t2)",
+                    "(s0)", "(s1)", "(a0)", "(a1)", "(a2)", "(a3)", "(a4)", "(a5)",
+                    "(a6)", "(a7)", "(s2)", "(s3)", "(s4)", "(s5)", "(s6)", "(s7)",
+                    "(s8)", "(s9)", "(s10)", "(s11)", "(t3)", "(t4)", "(t5)", "(t6)"
+    };
 
     // Register declarations
     uint32_t x[32];
@@ -59,8 +67,10 @@ int main(int argc, char *argv[]){
     x[1] = 0; //ra
     x[2] = 0; //sp
 
+    uint32_t old_pc = 0;
     // Set default mode
-    int mode = 0;
+    int mode = 0;  // 0 is silent
+                   // 1 is verbose
 
     // Memory & Stack Starting Addresses
     uint32_t stack_address = STACK_ADDRESS, prog_start = START_ADDRESS;
@@ -140,19 +150,21 @@ int main(int argc, char *argv[]){
 
     }
 
-    x[2] = stack_address - 1;
+    x[2] = stack_address;
 
     // Begin fetching and decoding instructions
     while(continue_program){
-        fetch_and_decode(MainMem, pc, &current_opcode);
 
+        fetch_and_decode(MainMem, pc, &current_opcode, mode);
 
+        old_pc = pc;
         switch (current_opcode) {
             case REGS_OP:
                 #ifdef DEBUG
                 fprintf(stderr, "0x%02X is a Register Instruction\n", current_opcode);
                 #endif
-                r_type(MainMem, MemWords, pc, x);
+                r_type(MainMem, MemWords, &pc, x);
+                pc += 4;
                 break;
             case IMMS_OP:
             case LOAD_OP:
@@ -160,38 +172,54 @@ int main(int argc, char *argv[]){
                 #ifdef DEBUG
                 fprintf(stderr, "0x%02X is an Immediate Instruction\n", current_opcode);
                 #endif
-                i_type(MainMem, MemWords, pc, x);
+                i_type(MainMem, MemWords, &pc, x);
+                if (pc == 0x0) {
+                    #ifdef DEBUG
+                    fprintf(stderr, "End of Program\n");
+                    #endif
+                    continue_program = false;
+                }
                 break;
             case STOR_OP:
                 #ifdef DEBUG
                 fprintf(stderr, "0x%02X is a Store Instruction\n", current_opcode);
                 #endif
-                s_type(MainMem, MemWords, pc, x);
+                s_type(MainMem, MemWords, &pc, x);
+                pc += 4;
                 break;
             case BRAN_OP:
                 #ifdef DEBUG
                 fprintf(stderr, "0x%02X is a Branch Instruction\n", current_opcode);
                 #endif
-                b_type(MainMem, MemWords, pc, x);
+                b_type(MainMem, MemWords, &pc, x);
                 break;
             case JAL_OP:
                 #ifdef DEBUG
                 fprintf(stderr, "0x%02X is a Jump Instruction\n", current_opcode);
                 #endif
-                j_type(MainMem,MemWords,pc,x);
+                
+                j_type(MainMem,MemWords, &pc, x);
+                if (pc == 0x0) {
+                    #ifdef DEBUG
+                    fprintf(stderr, "End of Program\n");
+                    #endif
+                    continue_program = false;
+                }
                 break;
             case LUI_OP:
-                u_type(MainMem, MemWords, pc, x);
             case AUIPC:
                 #ifdef DEBUG
                 fprintf(stderr, "0x%02X is an 'Upper Immediate' Instruction\n", current_opcode);
                 #endif
-                u_type(MainMem, MemWords, pc, x);
+                u_type(MainMem, MemWords, &pc, x);
+                pc += 4;
                 break;
-            case ZERO_OP:
+/*
+           case ZERO_OP:
                 fprintf(stderr, "End of Program\n");
-                continue_program = false;//WTF
+                continue_program = false;
                 break;
+*/
             case ENVIRO:
                 #ifdef DEBUG
                 fprintf(stderr, "0x%02X is an Environment Instruction\n", current_opcode);
@@ -201,13 +229,18 @@ int main(int argc, char *argv[]){
                 fprintf(stderr, "0x%02X is an invalid op code.\n", current_opcode);
                 exit(1);
         }
-        // For development purposes only
-        pc += 4;
 
+        if (mode == 1) printAllReg(x, regnames);
+
+        
     }
-    //printAllReg(x);
-    printAllMem(MainMem, MemWords);
-    printAllReg(x);
+
+
+    // Silent mode prints
+    if (mode == 0) printAllReg(x, regnames);
+    if (mode == 0) fprintf(stderr, "PC at final instruction: 0x%08X\n", old_pc);
+
+
     return 0;
 
 }
@@ -224,13 +257,14 @@ for (int i = 0; i < size; i++){
 }
 
 // Function to display all register values
-void printAllReg(uint32_t regs[32] ){
+void printAllReg(uint32_t regs[32], char regnames[32][8] ){
 
     for (int i = 0; i < 32; i++){
-        printf("Register: x%02d   Contents: ", i);
+        printf("Register: x%02d %-6sContents: ", i, regnames[i]);
         printf("%08X\n", regs[i]);
 
     }
+    printf("\n\n");
 }
 
 // Function to read a specific byte from memory
@@ -244,14 +278,13 @@ uint32_t readByte(uint32_t array[], int size, int address) {
     uint32_t selected_byte = selected_word & 0x000000FF;
 
     return selected_byte;
-
 }
 
 // Function to read a specific half-word (alligned) from memory
 uint32_t readHalfWord(uint32_t array[], int size, int address){
 
     if (address % 2 != 0) {
-        fprintf(stderr, "Misaligned reference at 0x%08d\n", address);
+        fprintf(stderr, "Misaligned reference at 0x%08x\n", address);
         exit(1);
     }
     else{
@@ -260,8 +293,11 @@ uint32_t readHalfWord(uint32_t array[], int size, int address){
     
     if (address % 4 == 2) {
         target_hw = 2;
-    } else {
+    } else if (address % 4 == 0){
         target_hw = 0;
+    } else {
+        fprintf(stderr, "Misaligned reference at 0x%08x\n", address);
+        exit(1);
     }
 
     uint32_t selected_word = array[target_block];
@@ -275,6 +311,11 @@ uint32_t readHalfWord(uint32_t array[], int size, int address){
 
 // Function to read a specific word from memory
 uint32_t readWord(uint32_t array[], int size, int address){
+
+    if (address % 4 != 0) {
+        fprintf(stderr, "Misaligned reference at 0x%08x\n", address);
+        exit(1);
+    }
 
     int target_block = address / 4;
     uint32_t selected_word = array[target_block];
@@ -290,7 +331,7 @@ int writeByte(uint32_t array[], int size, int address, uint32_t value) {
     int target_byte = address % 4;
 
     array[target_block] = (array[target_block] & ~(0xFF << (8 * target_byte)));
-    array[target_block] = array[target_block] | (value << (8 * target_byte));
+    array[target_block] = array[target_block] | ((value & 0xFF) << (8 * target_byte));
 
     return 0;
 
@@ -300,7 +341,7 @@ int writeByte(uint32_t array[], int size, int address, uint32_t value) {
 int writeHalfWord(uint32_t array[], int size, int address, uint32_t value) {
 
     if (address % 2 != 0) {
-        fprintf(stderr, "Misaligned reference at 0x%08d\n", address);
+        fprintf(stderr, "Misaligned reference at 0x%08x\n", address);
         exit(1);
     }
     else{
@@ -329,6 +370,10 @@ int writeHalfWord(uint32_t array[], int size, int address, uint32_t value) {
 // Function to write to a specific word in memory
 int writeWord(uint32_t array[], int size, int address, uint32_t value) {
 
+    if (address % 4 != 0) {
+        fprintf(stderr, "Misaligned reference at 0x%08x\n", address);
+        exit(1);
+    }
     int target_block = address / 4;
     array[target_block] = value;
 
@@ -336,19 +381,21 @@ int writeWord(uint32_t array[], int size, int address, uint32_t value) {
 
 }
 
-void fetch_and_decode(uint32_t array[], uint32_t pc, uint32_t *opcode){
+void fetch_and_decode(uint32_t array[], uint32_t pc, uint32_t *opcode, int mode){
 
     uint32_t selected_instruction = array[pc / 4];
 
     *opcode = selected_instruction & 0x0000007F;
 
+    if (mode == 1)fprintf(stderr, "Current PC:          0x%08X\n", pc);
+    if (mode == 1)fprintf(stderr, "Current Instruction: 0x%08X\n\n", selected_instruction);
     return;
 }
 
-void r_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]){
+void r_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]){
 
     uint8_t func7, rs2, rs1, func3, rd, opcode;
-    uint32_t instruction = mem_array[pc / 4];
+    uint32_t instruction = mem_array[*pc / 4];
 
     opcode = instruction & 0x7F;
     rd = (instruction >> 7 ) & 0x1F;
@@ -357,18 +404,106 @@ void r_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
     rs2 = (instruction >> 20) & 0x1F;
     func7 = (instruction >> 25) & 0x7F;
 
+    int32_t rs1_signed = reg_array[rs1];
+    int32_t rs2_signed = reg_array[rs2];
+
     #ifdef DEBUG
     fprintf(stderr, "R-Type instruction breakdown:\n    Opcode: 0x%02X\n    R_Des: 0x%02X\n    Func3: 0x%02X\n    R_S1: 0x%02X\n    R_S2: 0x%02X\n    Func7: 0x%02X\n", opcode, rd, func3, rs1, rs2, func7);
     #endif
 
+    switch(func3){
+
+        case 0x0: // add and sub
+            switch(func7){
+                case 0x00: // add
+                    #ifdef DEBUG
+                    fprintf(stderr, "Adding 0x%08X (the contents of register x%d) and 0x%08X (the contents of register x%d) and placing the result in register x%d \n",  reg_array[rs1], rs1, reg_array[rs2], rs2, rd);
+                    #endif
+                    reg_array[rd] = reg_array[rs1] + reg_array[rs2];
+                    break;
+                case 0x20: // sub
+                    #ifdef DEBUG
+                    fprintf(stderr, "Subtracting 0x%08X (the contents of register x%d) from 0x%08X (the contents of register x%d) and placing the result in register x%d \n",   reg_array[rs2], rs2, reg_array[rs1], rs1, rd);
+                    #endif
+                    reg_array[rd] = reg_array[rs1] - reg_array[rs2];
+                    break;
+                default:
+                    fprintf(stderr, "0x%X is not a valid Add/Sub FUNC7 code\n", func7);
+                    exit(1);
+            }
+            break;
+        case 0x4: // xor
+            #ifdef DEBUG
+            fprintf(stderr, "XOR 0x%08X (the contents of register x%d) and 0x%08X (the contents of register x%d) and placing the result in register x%d \n",  reg_array[rs1], rs1, reg_array[rs2], rs2, rd);
+            #endif
+            reg_array[rd] = reg_array[rs1] ^ reg_array[rs2];
+            break;
+        case 0x6: // or
+            #ifdef DEBUG
+            fprintf(stderr, "OR 0x%08X (the contents of register x%d) and 0x%08X (the contents of register x%d) and placing the result in register x%d \n",  reg_array[rs1], rs1, reg_array[rs2], rs2, rd);
+            #endif
+            reg_array[rd] = reg_array[rs1] | reg_array[rs2];
+            break;
+        case 0x7: // and
+            #ifdef DEBUG
+            fprintf(stderr, "AND 0x%08X (the contents of register x%d) and 0x%08X (the contents of register x%d) and placing the result in register x%d \n",  reg_array[rs1], rs1, reg_array[rs2], rs2, rd);
+            #endif
+            reg_array[rd] = reg_array[rs1] & reg_array[rs2];
+            break;
+        case 0x1: // Shift Left Logical
+            #ifdef DEBUG
+            fprintf(stderr, "Shift Left 0x%08X (the contents of register x%d) by 0x%08X (the contents of register x%d) and placing the result in register x%d \n",  reg_array[rs1], rs1, reg_array[rs2], rs2, rd);
+            #endif
+            reg_array[rd] = reg_array[rs1] << (reg_array[rs2] & 0x1F);
+            break;
+        case 0x5: // Shift Right
+            switch (func7){
+                case 0x00: // Shift Right Logical
+                    #ifdef DEBUG
+                    fprintf(stderr, "Shift Right (Logical) 0x%08X (the contents of register x%d) by 0x%08X (the contents of register x%d) and placing the result in register x%d \n",  reg_array[rs1], rs1, reg_array[rs2], rs2, rd);
+                    #endif
+                    reg_array[rd] = reg_array[rs1] >> (reg_array[rs2] & 0x1F);
+                    break;
+                case 0x20: // Shift Right Arithmetic
+                    #ifdef DEBUG
+                    fprintf(stderr, "Shift Right (Arithmetic) 0x%08X (the contents of register x%d) by 0x%08X (the contents of register x%d) and placing the result in register x%d \n",  reg_array[rs1], rs1, reg_array[rs2], rs2, rd);
+                    #endif
+                    reg_array[rd] = rs1_signed >> (reg_array[rs2] & 0x1F);
+                    break;
+                default:
+                    fprintf(stderr, "0x%X is not a valid Shift Right FUNC7 code\n", func7);
+                    exit(1);
+            }
+            break;
+        case 0x2: // Set Less Than
+            #ifdef DEBUG
+            fprintf(stderr, "Set register x%d to 1 if 0x%08X (the contents of x%d) is less than 0x%08X (the contents of x%d), otherwise set it to 0\n",rd, reg_array[rs1], rs1, reg_array[rs2], rs2);
+            #endif
+            reg_array[rd] = (rs1_signed < rs2_signed) ? 1 : 0;
+            break;
+        case 0x3: // Set Less Than Unsigned
+            #ifdef DEBUG
+            fprintf(stderr, "(UNSIGNED) Set register x%d to 1 if 0x%08X (the contents of x%d) is less than 0x%08X (the contents of x%d), otherwise set it to 0\n",rd, reg_array[rs1], rs1, reg_array[rs2], rs2);
+            #endif
+            reg_array[rd] = (reg_array[rs1] < reg_array[rs2]) ? 1 : 0;
+            break;
+        default:
+        fprintf(stderr, "0x%X is not a valid Register FUNC3 code\n", func3);
+        exit(1);
+    }
+    if(rd == 0 ){
+        reg_array[0] = 0x00000000;
+    }
+    else{
     return;
+    }
 }
 
-void i_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]){
+void i_type(uint32_t mem_array[], int size, uint32_t* pc, uint32_t reg_array[32]){
 
     uint8_t rs1, func3, rd, opcode;
     int32_t imm;
-    uint32_t instruction = mem_array[pc / 4];
+    uint32_t instruction = mem_array[*pc / 4];
 
     opcode = instruction & 0x7F;
     rd = (instruction >> 7 ) & 0x1F;
@@ -391,89 +526,114 @@ void i_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
     switch (opcode){
         case LOAD_OP:
             load(func3, rd, rs1, imm, mem_array, size, reg_array);
+            *pc += 4;
             break;
         case IMMS_OP:
             immediateop(func3, rd, rs1, imm, mem_array, size, reg_array);
+            *pc += 4;
             break;
         case JALR_OP:
+        #ifdef DEBUG
+            fprintf(stderr, "pc before jump: 0x%08x \n", *pc);
+        #endif
+            reg_array[rd] = *pc + 4;
+            reg_array[0] = 0x00000000;
+            *pc = (reg_array[rs1] + imm) & 0xFFFFFFFE;
+        #ifdef DEBUG
+            fprintf(stderr, "pc after jump: 0x%08x \n", *pc);
+        #endif
             break;
         default:
             fprintf(stderr, "0x%02X is not a valid I-type opcode.\n", opcode);
             exit(1);
     }
 
+    if(rd == 0 ){
+        reg_array[0] = 0x00000000;
+    }
+    else{
     return;
+    }
 }
 void immediateop(uint8_t function, uint8_t destination, uint8_t source, int32_t immediate, uint32_t array[], int size, uint32_t reg_array[32]){
     uint8_t func7 = (immediate >> 5) & 0x7F; 
     uint8_t shamt = immediate & 0x1F;
-    int32_t signedsource;
+    int32_t signedsource = reg_array[source];
     switch (function)
     {
     case 0x0: //addi
         #ifdef DEBUG
         fprintf(stderr, "Adding 0x%08X (the contents of register x%d) and 0x%08X and placing the result in register x%d \n", reg_array[source], source, immediate, destination);
         #endif
-        reg_array[destination] = reg_array[source] + immediate;
+        reg_array[destination] = signedsource + immediate;
         break;
-    case 0x4:
+    case 0x4: //xori
         #ifdef DEBUG
         fprintf(stderr, "Bitwise XORing 0x%08X (the contents of register x%d) and 0x%08X and placing the result in register x%d\n", reg_array[source], source, immediate, destination);
         #endif
-        reg_array[destination] = reg_array[source] ^ immediate;
+        reg_array[destination] = signedsource ^ immediate;
         break;
-    case 0x6:
+    case 0x6: //ori
         #ifdef DEBUG
         fprintf(stderr, "Bitwise ORing 0x%08X (the contents of register x%d) and 0x%08X and placing the result in register x%d\n", reg_array[source], source, immediate, destination);
         #endif  
-        reg_array[destination] = reg_array[source] | immediate;      
+        reg_array[destination] = signedsource | immediate;      
         break;
-    case 0x7:
+    case 0x7: //andi
         #ifdef DEBUG
         fprintf(stderr, "Bitwise ANDing 0x%08X (the contents of register x%d) and 0x%08X and placing the result in register x%d\n", reg_array[source], source, immediate, destination);
         #endif
-        reg_array[destination] = reg_array[source] & immediate;
+        reg_array[destination] = signedsource & immediate;
         break;
-    case 0x1:
+    case 0x1: //slli
         #ifdef DEBUG
         fprintf(stderr, "Logical Shifting 0x%08X Left (the contents of register x%d) by %d and placing the result in register x%d\n", reg_array[source], source, shamt, destination);
         #endif
-        reg_array[destination] = reg_array[source] & immediate;
         reg_array[destination] = reg_array[source] << shamt;
         break;
     case 0x5:
-        reg_array[destination] = reg_array[source] & immediate;
         switch (func7)
         {
-        case 0x00:
+        case 0x00: //srli
             #ifdef DEBUG
             fprintf(stderr, "Logical Shifting 0x%08X Right (the contents of register x%d) by %d and placing the result at 0x%08X (register x%d)\n", reg_array[source], source, shamt, reg_array[destination], destination);
             #endif
             reg_array[destination] = reg_array[source] >> shamt;
             break;
-        case 0x20:
+        case 0x20: //srai
             #ifdef DEBUG
             fprintf(stderr, "Arithmetic Shifting 0x%08X Right (the contents of register x%d) by %d and placing the result at 0x%08X (register x%d)\n", reg_array[source], source, shamt, reg_array[destination], destination);
             #endif 
-            signedsource = reg_array[source];
-            
-            
             reg_array[destination] = signedsource >> shamt;
             break;
         default:
-            printf("The provided shift instruction is invalid.\n");
-            break;
+            fprintf(stderr, "The provided shift instruction is invalid.\n");
+            exit(1);
         }
         break;  
-    case 0x2:
-        
+    case 0x2: // Set Less Than
+        #ifdef DEBUG
+        fprintf(stderr, "Set register x%d to 1 if 0x%08X (the contents of x%d) is less than 0x%08X, otherwise set it to 0\n",destination, reg_array[destination], destination, immediate);
+        #endif
+        reg_array[destination] = (signedsource < immediate) ? 1 : 0;
         break; 
-    case 0x3:
-        
+    case 0x3: // Set Less Than Unsigned
+        #ifdef DEBUG
+        fprintf(stderr, "Set register x%d to 1 if 0x%08X (the contents of x%d) is less than 0x%08X, otherwise set it to 0\n",destination, reg_array[destination], destination, immediate);
+        #endif    
+        uint32_t unsignedimmediate = immediate;
+        reg_array[destination] = (reg_array[source] < unsignedimmediate) ? 1 : 0;
         break;   
     default:
-        printf("The provided immediate instruction is invalid.\n");
-        break;
+        fprintf(stderr,"The provided immediate instruction is invalid.\n");
+        exit(1);
+    }
+
+    if(destination == 0 ){
+        reg_array[0] = 0x00000000;
+    }
+    else{
+    return;
     }
 }
 
@@ -531,14 +691,19 @@ void load(uint8_t function, uint8_t destination, uint8_t source, int32_t immedia
             printf("The provided load instruction is invalid.\n");
            return exit(1);
     }
+    if(destination == 0 ){
+        reg_array[0] = 0x00000000;
+    }
+    else{
     return;
+    }
 };
 
-void s_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]){
+void s_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]){
 
     uint8_t imm11_5, rs2, rs1, func3, imm4_0, opcode;
     int32_t imm;
-    uint32_t instruction = mem_array[pc / 4];
+    uint32_t instruction = mem_array[*pc / 4];
 
     opcode = instruction & 0x7F;
     imm4_0 = (instruction >> 7 ) & 0x1F;
@@ -563,13 +728,13 @@ void s_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
     switch(func3){
         case 0x0:
             #ifdef DEBUG
-            fprintf(stderr, "Storing 0x%02X @ 0x%08X\n", reg_array[rs2], reg_array[rs1] + imm);
+            fprintf(stderr, "Storing 0x%02X @ 0x%08X\n", reg_array[rs2] & 0xFF, reg_array[rs1] + imm);
             #endif
             writeByte(mem_array, size, reg_array[rs1] + imm, reg_array[rs2]);
             break;
         case 0x1:
             #ifdef DEBUG
-            fprintf(stderr, "Storing 0x%04X @ 0x%08X\n", reg_array[rs2], reg_array[rs1] + imm);
+            fprintf(stderr, "Storing 0x%04X @ 0x%08X\n", reg_array[rs2] & 0xFFFF, reg_array[rs1] + imm);
             #endif
             writeHalfWord(mem_array, size, reg_array[rs1] + imm, reg_array[rs2]);
             break;
@@ -581,17 +746,17 @@ void s_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
             break;
         default:
             fprintf(stderr, "0x%02X is not a valid S-type Function3 value.\n", func3);
-            //exit(1);
+            exit(1);
     }
 
     return;
 }
 
-void b_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]){
+void b_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]){
 
     uint8_t imm12, imm10_5, rs2, rs1, func3, imm4_1, imm11, opcode;
     int32_t imm;
-    uint32_t instruction = mem_array[pc / 4];
+    uint32_t instruction = mem_array[*pc / 4];
 
     opcode = instruction & 0x7F;
     imm4_1 = (instruction >> 8 ) & 0xF;
@@ -610,19 +775,136 @@ void b_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
         imm = imm & ~(0xFFFFE000);
     }
 
+    int32_t rs1_signed = reg_array[rs1];
+    int32_t rs2_signed = reg_array[rs2];
+
     #ifdef DEBUG
     fprintf(stderr, "B-Type instruction breakdown:\n    Opcode: 0x%02X\n    Func3: 0x%02X\n    R_S1: 0x%02X\n    R_S2: 0x%02X\n    Immediate: 0x%04X\n", opcode, func3, rs1, rs2, imm);
     #endif
 
+
+    switch (func3){
+
+        case 0x0: // ==
+            #ifdef DEBUG
+            fprintf(stderr, "Comparing 0x%08X (contents of register x%d) == 0x%08X (contents of register x%d)\n", reg_array[rs1], rs1, reg_array[rs2], rs2);
+            #endif
+            if (rs1_signed == rs2_signed){ 
+                #ifdef DEBUG
+                fprintf(stderr, "Branch taken, adding 0x%03X to PC\n", imm);
+                #endif
+                *pc += imm;
+            }
+            else{
+                #ifdef DEBUG
+                fprintf(stderr, "Branch not take\n");
+                #endif
+                *pc += 4;
+            }
+            break;
+        case 0x1: // !=
+            #ifdef DEBUG
+            fprintf(stderr, "Comparing 0x%08X (contents of register x%d) != 0x%08X (contents of register x%d)\n", reg_array[rs1], rs1, reg_array[rs2], rs2);
+            #endif
+            if (rs1_signed != rs2_signed) {
+                #ifdef DEBUG
+                fprintf(stderr, "Branch taken, adding 0x%03X to PC\n", imm);
+                #endif
+                *pc += imm;
+            }
+            else{
+                #ifdef DEBUG
+                fprintf(stderr, "Branch not take\n");
+                #endif
+                *pc += 4;
+            }
+            break;
+        case 0x4: // <
+            #ifdef DEBUG
+            fprintf(stderr, "Comparing (signed) 0x%08X (contents of register x%d) < (signed) 0x%08X (contents of register x%d)\n", rs1_signed, rs1, rs2_signed, rs2);
+            #endif
+            if (rs1_signed < rs2_signed) {
+                #ifdef DEBUG
+                fprintf(stderr, "Branch taken, adding 0x%03X to PC\n", imm);
+                #endif
+                *pc += imm;
+            }
+            else{
+                #ifdef DEBUG
+                fprintf(stderr, "Branch not take\n");
+                #endif
+                *pc += 4;
+            }
+            break;
+        case 0x5: // >=
+            #ifdef DEBUG
+            fprintf(stderr, "Comparing (signed) 0x%08X (contents of register x%d) >= (signed) 0x%08X (contents of register x%d)\n", rs1_signed, rs1, rs2_signed, rs2);
+            #endif
+            if (rs1_signed >= rs2_signed) {
+                #ifdef DEBUG
+                fprintf(stderr, "Branch taken, adding 0x%03X to PC\n", imm);
+                #endif
+                *pc += imm;
+            }
+            else{
+                #ifdef DEBUG
+                fprintf(stderr, "Branch not take\n");
+                #endif
+                *pc += 4;
+            }
+            break;
+        case 0x6: // < unsigned
+            #ifdef DEBUG
+            fprintf(stderr, "Comparing 0x%08X (contents of register x%d) < 0x%08X (contents of register x%d)\n", reg_array[rs1], rs1, reg_array[rs2], rs2);
+            #endif
+            if (reg_array[rs1] < reg_array[rs2]) {
+                #ifdef DEBUG
+                fprintf(stderr, "Branch taken, adding 0x%03X to PC\n", imm);
+                #endif
+                *pc += imm;
+            }
+            else{
+                #ifdef DEBUG
+                fprintf(stderr, "Branch not take\n");
+                #endif
+                *pc += 4;
+            }
+            break;
+        case 0x7: // >= unsigned
+            #ifdef DEBUG
+            fprintf(stderr, "Comparing 0x%08X (contents of register x%d) >= 0x%08X (contents of register x%d)\n", reg_array[rs1], rs1, reg_array[rs2], rs2);
+            #endif
+            if (reg_array[rs1] >= reg_array[rs2]) {
+                #ifdef DEBUG
+                fprintf(stderr, "Branch taken, adding 0x%03X to PC\n", imm);
+                #endif
+                *pc += imm;
+            }
+            else{
+                #ifdef DEBUG
+                fprintf(stderr, "Branch not take\n");
+                #endif
+                *pc += 4;
+            }
+            break;
+        default:
+            fprintf(stderr, "0x%X is not a valid Branch FUNC3 code\n", func3);
+            exit(1);
+    }
+
     return;
 }
-void u_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]){
+void u_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]){
 
-    uint32_t instruction = mem_array[pc/4];
+    uint32_t instruction = mem_array[*pc/4];
 
     uint8_t opcode = instruction & 0x0000007F;
     uint8_t rd = (instruction >> 7) & 0x0000001F;
-    int32_t imm = (instruction & 0xFFFFF000);
+    int32_t imm = (instruction & 0xFFFFF000) >> 12;
+
+    #ifdef DEBUG
+    fprintf(stderr, "U-Type instruction breakdown:\n    Opcode: 0x%02X\n    R_Des: 0x%02X\n    Immediate: 0x%08X\n", opcode, rd, imm);
+    #endif
 
     switch (opcode)
     {
@@ -630,7 +912,7 @@ void u_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
         reg_array[rd] =  (imm << 12);
         break;
     case AUIPC:
-        reg_array[rd] = pc + (imm << 12);
+        reg_array[rd] = *pc + (imm << 12);
         break;
     
     default:
@@ -638,15 +920,17 @@ void u_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
         break;
     }
 
-    #ifdef DEBUG
-    fprintf(stderr, "U-Type instruction breakdown:\n    Opcode: 0x%02X\n    R_Des: 0x%02X\n    Immediate: 0x%08X\n", opcode, rd, imm);
-    #endif
-
+    if(rd == 0 ){
+        reg_array[0] = 0x00000000;
+    }
+    else{
     return;
+    }
 }
-void j_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32]){
 
-    uint32_t instruction = mem_array[pc/4];
+void j_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]){
+
+    uint32_t instruction = mem_array[*pc/4];
 
     uint8_t opcode = instruction & 0x0000007F;
     uint8_t rd = (instruction >> 7) & 0x0000001F;
@@ -665,7 +949,17 @@ void j_type(uint32_t mem_array[], int size, uint32_t pc, uint32_t reg_array[32])
 
     #ifdef DEBUG
     fprintf(stderr, "J-Type instruction breakdown:\n    Opcode: 0x%02X\n    R_Des: 0x%02X\n    Immediate: 0x%06X\n", opcode, rd, imm);
+    fprintf(stderr, "Storing 0x%08X into register x%d, then adding 0x%05X to PC\n", *pc + 4, rd, imm);
     #endif
 
+    reg_array[rd] = *pc + 4;
+    *pc += imm;
+
+    if(rd == 0 ){
+        reg_array[0] = 0x00000000;
+    }
+    else{
     return;
+    }
+
 }
