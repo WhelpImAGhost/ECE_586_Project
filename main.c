@@ -772,7 +772,7 @@ void b_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
             #ifdef DEBUG
             fprintf(stderr, "Comparing 0x%08X (contents of register x%d) == 0x%08X (contents of register x%d)\n", reg_array[rs1], rs1, reg_array[rs2], rs2);
             #endif
-            if (reg_array[rs1] == reg_array[rs2]){ 
+            if (rs1_signed == rs2_signed){ 
                 #ifdef DEBUG
                 fprintf(stderr, "Branch taken, adding 0x%03X to PC\n", imm);
                 #endif
@@ -788,7 +788,7 @@ void b_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
             #ifdef DEBUG
             fprintf(stderr, "Comparing 0x%08X (contents of register x%d) != 0x%08X (contents of register x%d)\n", reg_array[rs1], rs1, reg_array[rs2], rs2);
             #endif
-            if (reg_array[rs1] != reg_array[rs2]) {
+            if (rs1_signed != rs2_signed) {
                 #ifdef DEBUG
                 fprintf(stderr, "Branch taken, adding 0x%03X to PC\n", imm);
                 #endif
