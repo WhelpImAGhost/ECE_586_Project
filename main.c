@@ -475,8 +475,12 @@ void r_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
         fprintf(stderr, "0x%X is not a valid Register FUNC3 code\n", func3);
         exit(1);
     }
-
+    if(rd == 0 ){
+        reg_array[0] = 0x00000000;
+    }
+    else{
     return;
+    }
 }
 
 void i_type(uint32_t mem_array[], int size, uint32_t* pc, uint32_t reg_array[32]){
@@ -527,7 +531,12 @@ void i_type(uint32_t mem_array[], int size, uint32_t* pc, uint32_t reg_array[32]
             exit(1);
     }
 
+    if(rd == 0 ){
+        reg_array[0] = 0x00000000;
+    }
+    else{
     return;
+    }
 }
 void immediateop(uint8_t function, uint8_t destination, uint8_t source, int32_t immediate, uint32_t array[], int size, uint32_t reg_array[32]){
     uint8_t func7 = (immediate >> 5) & 0x7F; 
@@ -658,7 +667,12 @@ void load(uint8_t function, uint8_t destination, uint8_t source, int32_t immedia
             printf("The provided load instruction is invalid.\n");
            return exit(1);
     }
+    if(destination == 0 ){
+        reg_array[0] = 0x00000000;
+    }
+    else{
     return;
+    }
 };
 
 void s_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]){
@@ -876,7 +890,12 @@ void u_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
         break;
     }
 
+    if(rd == 0 ){
+        reg_array[0] = 0x00000000;
+    }
+    else{
     return;
+    }
 }
 
 void j_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]){
@@ -905,6 +924,12 @@ void j_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
 
     reg_array[rd] = *pc + 4;
     *pc += imm;
-    
+
+    if(rd == 0 ){
+        reg_array[0] = 0x00000000;
+    }
+    else{
     return;
+    }
+
 }
