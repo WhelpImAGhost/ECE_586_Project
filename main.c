@@ -316,7 +316,6 @@ int writeByte(uint32_t array[], int size, int address, uint32_t value) {
     int target_block = address / 4;
     int target_byte = address % 4;
 
-    value = value & 0xFF;
     array[target_block] = (array[target_block] & ~(0xFF << (8 * target_byte)));
     array[target_block] = array[target_block] | ((value & 0xFF) << (8 * target_byte));
 
@@ -903,7 +902,6 @@ void j_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
     fprintf(stderr, "J-Type instruction breakdown:\n    Opcode: 0x%02X\n    R_Des: 0x%02X\n    Immediate: 0x%06X\n", opcode, rd, imm);
     fprintf(stderr, "Storing 0x%08X into register x%d, then adding 0x%05X to PC\n", *pc + 4, rd, imm);
     #endif
-
 
     reg_array[rd] = *pc + 4;
     *pc += imm;
