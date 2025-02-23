@@ -468,7 +468,7 @@ void r_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
                     #endif
                     reg_array[rd] = reg_array[rs1] | reg_array[rs2];
                     break;
-                case 0x01: // Remmainder
+                case 0x01: // Remainder
                     #ifdef DEBUG
                     fprintf(stderr, "Dividing 0x%08X (the contents of register x%d) by 0x%08X (the contents of register x%d) and placing the remainder in register x%d \n",  reg_array[rs1], rs1, reg_array[rs2], rs2, rd);
                     #endif
