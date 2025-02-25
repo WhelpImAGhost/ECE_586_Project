@@ -559,6 +559,7 @@ void immediateop(uint8_t function, uint8_t destination, uint8_t source, int32_t 
     uint8_t func7 = (immediate >> 5) & 0x7F; 
     uint8_t shamt = immediate & 0x1F;
     int32_t signedsource = reg_array[source];
+    uint32_t unsignedimm = immediate;
     switch (function)
     {
     case 0x0: //addi
@@ -621,8 +622,8 @@ void immediateop(uint8_t function, uint8_t destination, uint8_t source, int32_t 
         #ifdef DEBUG
         fprintf(stderr, "Set register x%d to 1 if 0x%08X (the contents of x%d) is less than 0x%08X, otherwise set it to 0\n",destination, reg_array[destination], destination, immediate);
         #endif    
-        uint32_t unsignedimmediate = immediate;
-        reg_array[destination] = (reg_array[source] < unsignedimmediate) ? 1 : 0;
+        
+        reg_array[destination] = (reg_array[source] < unsignedimm) ? 1 : 0;
         break;   
     default:
         fprintf(stderr,"The provided immediate instruction is invalid.\n");
