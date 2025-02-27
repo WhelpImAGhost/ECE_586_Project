@@ -34,6 +34,10 @@ void s_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
 void b_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]);
 void u_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]);
 void j_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]);
+void f1_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32], float flt_array[32]);
+float flt_round(float value, int rm);
+void f2_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32], float flt_array[32]);
+void f3_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32], float flt_array[32]);
 
 //Instruction Function Protoytpes
 void load(uint8_t function, uint8_t destination, uint8_t source, int32_t immediate, uint32_t array[], int size, uint32_t reg_array[32]);
@@ -672,6 +676,7 @@ void immediateop(uint8_t function, uint8_t destination, uint8_t source, int32_t 
     uint8_t func7 = (immediate >> 5) & 0x7F; 
     uint8_t shamt = immediate & 0x1F;
     int32_t signedsource = reg_array[source];
+    uint32_t unsignedimmediate = immediate;
     switch (function)
     {
     case 0x0: //addi
@@ -734,7 +739,7 @@ void immediateop(uint8_t function, uint8_t destination, uint8_t source, int32_t 
         #ifdef DEBUG
         fprintf(stderr, "Set register x%d to 1 if 0x%08X (the contents of x%d) is less than 0x%08X, otherwise set it to 0\n",destination, reg_array[destination], destination, immediate);
         #endif    
-        uint32_t unsignedimmediate = immediate;
+        
         reg_array[destination] = (reg_array[source] < unsignedimmediate) ? 1 : 0;
         break;   
     default:
@@ -1078,7 +1083,7 @@ void j_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
 }
 
 
-void fl_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32], float flt_array[32]){
+void f1_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32], float flt_array[32]){
 
     uint8_t func7, rs2, rs1, func3, rd, opcode;
     uint32_t instruction = mem_array[*pc / 4];
@@ -1093,31 +1098,35 @@ void fl_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32
     int32_t rs1_signed = reg_array[rs1];
     int32_t rs2_signed = reg_array[rs2];
 
+    int rm;
+    if ((func3 != 5) && (func3 != 6) ) rm = func3;
+    else rm = -1;
+
     switch (func7){
 
         case 0x00:  //  FADD.S
-            flt_array[rd] = flt_array[rs1] + flt_array[rs2];
+            flt_array[rd] = flt_round((flt_array[rs1] + flt_array[rs2]), rm);
             break;
 
         case 0x04:  //  FSUB.S
-            flt_array[rd] = flt_array[rs1] - flt_array[rs2];
+            flt_array[rd] = flt_round((flt_array[rs1] - flt_array[rs2]), rm);
             break;
         case 0x08:  //  FMUL.S
-            flt_array[rd] = flt_array[rs1] * flt_array[rs2];
+            flt_array[rd] = flt_round((flt_array[rs1] * flt_array[rs2]), rm);
             break;
         case 0x0C:  //  FDIV.S
-            flt_array[rd] = flt_array[rs1] / flt_array[rs2];
+            flt_array[rd] = flt_round((flt_array[rs1] / flt_array[rs2]), rm);
             break;
         case 0x10:  //  FSGNJ.S, FSGNJN.S, FSGNJX.S
             switch(func3){
                 case 0x0:   //  FSGNJ.S
-                    flt_array[rd] = abs(flt_array[rs1]) * (flt_array[rs1] < 0) ? -1 : 1;
+                    flt_array[rd] = fabsf(flt_array[rs1]) * ((flt_array[rs1] < 0) ? -1 : 1);
                     break;
                 case 0x1:   //  FSGNJN.S
-                    flt_array[rd] = abs(flt_array[rs1]) * -1 * (flt_array[rs1] < 0) ? -1 : 1;
+                    flt_array[rd] = fabsf(flt_array[rs1]) * -1 * ((flt_array[rs1] < 0) ? -1 : 1);
                     break;
                 case 0x2:   //  FSGNJX.S
-                    flt_array[rd] = flt_array[rs1] * (flt_array[rs1] < 0) ? -1 : 1;
+                    flt_array[rd] = flt_array[rs1] * ((flt_array[rs1] < 0) ? -1 : 1);
                     break;
                 default:
                     fprintf(stderr, "0x%X is not a valid FUNC3 code for FUNC7 code 0x%X\n", func3, func7);
@@ -1139,7 +1148,7 @@ void fl_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32
             }
             break;
         case 0x2C:  //  FSQRT.S
-            flt_array[rd] = sqrt(flt_array[rs1]);
+            flt_array[rd] = flt_round(sqrt(flt_array[rs1]), rm);
             break;
         case 0x50:  //  FEQ.S, FLT.S, FLE.S
             switch (func3){
@@ -1160,10 +1169,10 @@ void fl_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32
         case 0x60:  //  FCVT.W.S, FCVT.WU.S
             switch (rs2){
                 case 0x0:   //  FCVT.W.S
-                    reg_array[rd] = (int32_t) flt_array[rs1];
+                    reg_array[rd] = (int32_t) flt_round(flt_array[rs1], rm);
                     break;
                 case 0x1:   //  FCVT.WU.S
-                reg_array[rd] = (uint32_t) flt_array[rs1];
+                reg_array[rd] = (uint32_t) flt_round(flt_array[rs1], rm);
                     break;
                 default:
                     fprintf(stderr, "0x%X is not a valid RS2 code for FUNC7 code 0x%X\n", rs2, func7);
@@ -1172,26 +1181,129 @@ void fl_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32
         case 0x68:  //  FCVT.S.W, FCVT.S.WU
             switch (rs2){
                 case 0x0:   //  FCVT.S.W
-                    flt_array[rd] = (float) rs1_signed;
+                    flt_array[rd] = flt_round((float) rs1_signed, rm);
                     break;
                 case 0x1:   //  FCVT.S.WU
-                    flt_array[rd] = (float) reg_array[rs1];
+                    flt_array[rd] = flt_round((float) reg_array[rs1], rm);
                     break;
                 default:
                     fprintf(stderr, "0x%X is not a valid RS2 code for FUNC7 code 0x%X\n", rs2, func7);
                     exit(1);
             }
+            break;
         case 0x70:  //  FMV.X.W, FCLASS.S
+            switch (func3){
+                case 0x0:   //  FMV.X.W
+                    reg_array[rd] = *((int*) &flt_array[rs1]);
+                    break;
+                case 0x1:   //  FCLASS.S
+                    reg_array[rd] = fpclassify(flt_array[rs1]);
+                    break;
+                default:
+                    fprintf(stderr, "0x%X is not a valid FUNC3 code for FUNC7 code 0x%X\n", func3, func7);
+                    exit(1);
+            }
+            break;
         case 0x78:  //  FMV.W.X
+            reg_array[rd] = *((float*) &flt_array[rs1]);
 
         default:
+            fprintf(stderr, "Invalid FP-type instruction.\n");
+            exit(1);
 
 
-
-
+        
 
     }
 
     reg_array[0] = 0x00000000;
+    return;
+}
+
+float flt_round(float value, int rm){
+
+    switch (rm) {
+        case 0b000: // RNE: Round to Nearest, ties to Even
+            return round(value);
+        case 0b001: // RTZ: Round towards Zero
+            return trunc(value);
+        case 0b010: // RDN: Round Down (towards -∞)
+            return floor(value);
+        case 0b011: // RUP: Round Up (towards +∞)
+            return ceil(value);
+        case 0b100: // RMM: Round to Nearest, ties to Max Magnitude
+            return (value > 0) ? ceil(value) : floor(value);
+        case 0b111: // DYN: Dynamic mode (not implemented, placeholder)
+            // Handle dynamically if needed
+            return value;
+        default: // Reserved values (101, 110) or invalid input
+            fprintf(stderr, "Error: Unsupported rounding mode: %d\n", rm);
+            return value;
+    }
+}
+
+void f2_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32], float flt_array[32]){
+
+    uint8_t func7, rs2, rs1, func3, rd, opcode;
+    uint32_t instruction = mem_array[*pc / 4];
+
+    opcode = instruction & 0x7F;
+    rd = (instruction >> 7 ) & 0x1F;
+    func3 = (instruction >> 12) & 0x7;
+    rs1 = (instruction >> 15) & 0x1F;
+    rs2 = (instruction >> 20) & 0x1F;
+    func7 = (instruction >> 25) & 0x7F;
+
+    switch (opcode){
+        case FLW:
+            flt_array[rd] = readWord(mem_array, size, (reg_array[rs1] + ((func7 << 5 | rs2) )));
+            break;
+        case FSW:
+            writeWord(mem_array, size, (reg_array[rs1] + (func7 << 5 | rd) ), flt_array[rs2] );
+            break;
+        default:
+            fprintf(stderr, "Invalid FP2-type instruction.\n");
+            exit(1);
+
+    }
+
+
+    reg_array[0] = 0x00000000;
+    return;
+}
+
+void f3_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32], float flt_array[32]){
+
+
+    uint8_t rs3, rs2, rs1, rm, rd, opcode;
+    uint32_t instruction = mem_array[*pc / 4];
+
+    opcode = instruction & 0x7F;
+    rd = (instruction >> 7 ) & 0x1F;
+    rm = (instruction >> 12) & 0x7;
+    rs1 = (instruction >> 15) & 0x1F;
+    rs2 = (instruction >> 20) & 0x1F;
+    rs3 = (instruction >> 27) & 0x1F;
+
+
+    switch (opcode){
+        case FMADDS:
+            flt_array[rd] = flt_round( flt_array[rs1] * flt_array[rs2] + flt_array[rs3], rm );
+            break;
+        case FMSUBS:
+            flt_array[rd] = flt_round( flt_array[rs1] * flt_array[rs2] - flt_array[rs3], rm );
+            break;
+        case FNMSUBS:
+            flt_array[rd] = flt_round( -1 * flt_array[rs1] * flt_array[rs2] - flt_array[rs3], rm );
+            break;
+        case FNMADDS:
+            flt_array[rd] = flt_round( -1 * flt_array[rs1] * flt_array[rs2] + flt_array[rs3], rm );
+            break;
+        default:
+            fprintf(stderr, "Invalid FP2-type instruction.\n");
+            exit(1);
+
+    }
+
     return;
 }
