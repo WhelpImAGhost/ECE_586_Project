@@ -1126,12 +1126,61 @@ void fl_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32
             }
             break;
         case 0x14:  //  FMIN.S, FMAX.S
+            switch (func3){
+                case 0x0:   //  FMIN.S
+                    flt_array[rd] = (flt_array[rs1] < flt_array[rs2]) ? flt_array[rs1] : flt_array[rs2];
+                    break;
+                case 0x1:   //  FMAX.S
+                    flt_array[rd] = (flt_array[rs1] > flt_array[rs2]) ? flt_array[rs1] : flt_array[rs2];
+                    break;
+                default:
+                    fprintf(stderr, "0x%X is not a valid FUNC3 code for FUNC7 code 0x%X\n", func3, func7);
+                    exit(1);
+            }
+            break;
         case 0x2C:  //  FSQRT.S
             flt_array[rd] = sqrt(flt_array[rs1]);
             break;
         case 0x50:  //  FEQ.S, FLT.S, FLE.S
+            switch (func3){
+                case 0x0:   //  FLE.S
+                    flt_array[rd] = (flt_array[rs1] <= flt_array[rs2]) ? 1 : 0;
+                    break;
+                case 0x1:   //  FLT.S
+                    flt_array[rd] = (flt_array[rs1] < flt_array[rs2]) ? 1 : 0;
+                    break;
+                case 0x2:   //  FEQ.S
+                    flt_array[rd] = (flt_array[rs1] == flt_array[rs2]) ? 1 : 0;
+                    break;
+                default:
+                    fprintf(stderr, "0x%X is not a valid FUNC3 code for FUNC7 code 0x%X\n", func3, func7);
+                    exit(1);
+            }
+            break;
         case 0x60:  //  FCVT.W.S, FCVT.WU.S
+            switch (rs2){
+                case 0x0:   //  FCVT.W.S
+                    reg_array[rd] = (int32_t) flt_array[rs1];
+                    break;
+                case 0x1:   //  FCVT.WU.S
+                reg_array[rd] = (uint32_t) flt_array[rs1];
+                    break;
+                default:
+                    fprintf(stderr, "0x%X is not a valid RS2 code for FUNC7 code 0x%X\n", rs2, func7);
+                    exit(1);
+            }
         case 0x68:  //  FCVT.S.W, FCVT.S.WU
+            switch (rs2){
+                case 0x0:   //  FCVT.S.W
+                    flt_array[rd] = (float) rs1_signed;
+                    break;
+                case 0x1:   //  FCVT.S.WU
+                    flt_array[rd] = (float) reg_array[rs1];
+                    break;
+                default:
+                    fprintf(stderr, "0x%X is not a valid RS2 code for FUNC7 code 0x%X\n", rs2, func7);
+                    exit(1);
+            }
         case 0x70:  //  FMV.X.W, FCLASS.S
         case 0x78:  //  FMV.W.X
 
