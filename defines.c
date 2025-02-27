@@ -14,3 +14,11 @@
 #define AUIPC   0b0010111
 #define ENVIRO  0b1110011
 #define ZERO_OP 0b0000000
+
+#define FLW     0b0000111
+#define FSW     0b0100111
+#define FMADDS  0b1000011
+#define FMSUBS  0b1000111
+#define FNMSUBS 0b1001011
+#define FNMADDS 0b1001111
+#define FL_OP   0b1010011

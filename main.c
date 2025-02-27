@@ -67,6 +67,9 @@ int main(int argc, char *argv[]){
     x[1] = 0; //ra
     x[2] = 0; //sp
 
+    // Floating point Register Declarations
+    float f[32];
+
     uint32_t old_pc = 0;
     // Set default mode
     int mode = 0;  // 0 is silent
@@ -220,11 +223,22 @@ int main(int argc, char *argv[]){
                 continue_program = false;
                 break;
 */
+            case FLW:
+            case FSW:
+            case FMADDS:
+            case FMSUBS:
+            case FNMSUBS:
+            case FNMADDS:
+                break;
+            
+            case FL_OP:
+                break;
+
             case ENVIRO:
                 #ifdef DEBUG
                 fprintf(stderr, "0x%02X is an Environment Instruction\n", current_opcode);
                 fprintf(stderr, "Not implemented yet\n");
-                #endif
+                #endif 
             default:
                 fprintf(stderr, "0x%02X is an invalid op code.\n", current_opcode);
                 exit(1);
@@ -593,9 +607,9 @@ void r_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
     if(rd == 0 ){
         reg_array[0] = 0x00000000;
     }
-    else{
+
     return;
-    }
+
 }
 
 void i_type(uint32_t mem_array[], int size, uint32_t* pc, uint32_t reg_array[32]){
@@ -650,9 +664,9 @@ void i_type(uint32_t mem_array[], int size, uint32_t* pc, uint32_t reg_array[32]
     if(rd == 0 ){
         reg_array[0] = 0x00000000;
     }
-    else{
+
     return;
-    }
+
 }
 void immediateop(uint8_t function, uint8_t destination, uint8_t source, int32_t immediate, uint32_t array[], int size, uint32_t reg_array[32]){
     uint8_t func7 = (immediate >> 5) & 0x7F; 
@@ -731,9 +745,9 @@ void immediateop(uint8_t function, uint8_t destination, uint8_t source, int32_t 
     if(destination == 0 ){
         reg_array[0] = 0x00000000;
     }
-    else{
+
     return;
-    }
+
 }
 
 void load(uint8_t function, uint8_t destination, uint8_t source, int32_t immediate, uint32_t array[], int size, uint32_t reg_array[32]){
@@ -793,9 +807,9 @@ void load(uint8_t function, uint8_t destination, uint8_t source, int32_t immedia
     if(destination == 0 ){
         reg_array[0] = 0x00000000;
     }
-    else{
+
     return;
-    }
+
 };
 
 void s_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]){
@@ -1022,9 +1036,9 @@ void u_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
     if(rd == 0 ){
         reg_array[0] = 0x00000000;
     }
-    else{
+
     return;
-    }
+
 }
 
 void j_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]){
@@ -1057,8 +1071,78 @@ void j_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
     if(rd == 0 ){
         reg_array[0] = 0x00000000;
     }
-    else{
+
     return;
+
+
+}
+
+
+void fl_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32], float flt_array[32]){
+
+    uint8_t func7, rs2, rs1, func3, rd, opcode;
+    uint32_t instruction = mem_array[*pc / 4];
+
+    opcode = instruction & 0x7F;
+    rd = (instruction >> 7 ) & 0x1F;
+    func3 = (instruction >> 12) & 0x7;
+    rs1 = (instruction >> 15) & 0x1F;
+    rs2 = (instruction >> 20) & 0x1F;
+    func7 = (instruction >> 25) & 0x7F;
+
+    int32_t rs1_signed = reg_array[rs1];
+    int32_t rs2_signed = reg_array[rs2];
+
+    switch (func7){
+
+        case 0x00:  //  FADD.S
+            flt_array[rd] = flt_array[rs1] + flt_array[rs2];
+            break;
+
+        case 0x04:  //  FSUB.S
+            flt_array[rd] = flt_array[rs1] - flt_array[rs2];
+            break;
+        case 0x08:  //  FMUL.S
+            flt_array[rd] = flt_array[rs1] * flt_array[rs2];
+            break;
+        case 0x0C:  //  FDIV.S
+            flt_array[rd] = flt_array[rs1] / flt_array[rs2];
+            break;
+        case 0x10:  //  FSGNJ.S, FSGNJN.S, FSGNJX.S
+            switch(func3){
+                case 0x0:   //  FSGNJ.S
+                    flt_array[rd] = abs(flt_array[rs1]) * (flt_array[rs1] < 0) ? -1 : 1;
+                    break;
+                case 0x1:   //  FSGNJN.S
+                    flt_array[rd] = abs(flt_array[rs1]) * -1 * (flt_array[rs1] < 0) ? -1 : 1;
+                    break;
+                case 0x2:   //  FSGNJX.S
+                    flt_array[rd] = flt_array[rs1] * (flt_array[rs1] < 0) ? -1 : 1;
+                    break;
+                default:
+                    fprintf(stderr, "0x%X is not a valid FUNC3 code for FUNC7 code 0x%X\n", func3, func7);
+                    exit(1);
+
+            }
+            break;
+        case 0x14:  //  FMIN.S, FMAX.S
+        case 0x2C:  //  FSQRT.S
+            flt_array[rd] = sqrt(flt_array[rs1]);
+            break;
+        case 0x50:  //  FEQ.S, FLT.S, FLE.S
+        case 0x60:  //  FCVT.W.S, FCVT.WU.S
+        case 0x68:  //  FCVT.S.W, FCVT.S.WU
+        case 0x70:  //  FMV.X.W, FCLASS.S
+        case 0x78:  //  FMV.W.X
+
+        default:
+
+
+
+
+
     }
 
+    reg_array[0] = 0x00000000;
+    return;
 }
