@@ -229,13 +229,16 @@ int main(int argc, char *argv[]){
 */
             case FLW:
             case FSW:
+                f2_type(MainMem, MemWords, &pc, x, f);
             case FMADDS:
             case FMSUBS:
             case FNMSUBS:
             case FNMADDS:
+                f3_type(MainMem, MemWords, &pc, x, f);
                 break;
             
             case FL_OP:
+                f1_type(MainMem, MemWords, &pc, x, f);
                 break;
 
             case ENVIRO:
