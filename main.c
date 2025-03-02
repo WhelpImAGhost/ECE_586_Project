@@ -16,6 +16,7 @@
 // Debug function to print memory info
 void printAllMem(uint32_t array[], int size);
 void printAllReg(uint32_t regs[32], char regnames[32][8]);
+void printAllFPReg(float regs[32]);
 
 // Function Prototypes
 uint32_t readByte(uint32_t array[], int size, int address);
@@ -252,13 +253,14 @@ int main(int argc, char *argv[]){
         }
 
         if (mode == 1) printAllReg(x, regnames);
-
+        if (mode == 1) printAllFPReg(f);
         
     }
 
 
     // Silent mode prints
     if (mode == 0) printAllReg(x, regnames);
+    if (mode == 0) printAllFPReg(f);
     if (mode == 0) fprintf(stderr, "PC at final instruction: 0x%08X\n", old_pc);
 
 
@@ -1230,9 +1232,6 @@ void f1_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32
             fprintf(stderr, "Invalid FP-type instruction.\n");
             exit(1);
 
-
-        
-
     }
 
     reg_array[0] = 0x00000000;
@@ -1324,5 +1323,16 @@ void f3_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32
 
     }
 
+    return;
+}
+
+void printAllFPReg(float regs[32]){
+
+    for (int i = 0; i < 32; i++){
+        printf("Register: f%02d  Contents: ", i);
+        printf("%08X\n", regs[i]);
+
+    }
+    printf("\n\n");
     return;
 }
