@@ -84,7 +84,7 @@ int main(int argc, char *argv[]){
     uint32_t stack_address = STACK_ADDRESS, prog_start = START_ADDRESS;
 
     // Set default filename
-    char *default_filename = "Mem_files/prog.mem";
+    char *default_filename = "Mem_files/Float_mem/flw.mem";
     char *filename = default_filename;
 
     // Flags for setting non-default variable values
@@ -231,6 +231,7 @@ int main(int argc, char *argv[]){
             case FLW:
             case FSW:
                 f2_type(MainMem, MemWords, &pc, x, f);
+                break;
             case FMADDS:
             case FMSUBS:
             case FNMSUBS:
@@ -1234,6 +1235,7 @@ void f1_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32
 
     }
 
+    *pc += 4;
     reg_array[0] = 0x00000000;
     return;
 }
@@ -1272,7 +1274,13 @@ void f2_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32
     rs2 = (instruction >> 20) & 0x1F;
     func7 = (instruction >> 25) & 0x7F;
 
+    #ifdef DEBUG
+    fprintf(stderr, "F-Type 2 instruction breakdown:\n    Opcode: 0x%02X\n    R_Des: 0x%02X\n    Func3: 0x%02X\n    R_S1: 0x%02X\n    R_S2: 0x%02X\n    Func7: 0x%02X\n", opcode, rd, func3, rs1, rs2, func7);
+    #endif
+
+    
     switch (opcode){
+    
         case FLW:
             flt_array[rd] = readWord(mem_array, size, (reg_array[rs1] + ((func7 << 5 | rs2) )));
             break;
@@ -1285,7 +1293,7 @@ void f2_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32
 
     }
 
-
+    *pc += 4;
     reg_array[0] = 0x00000000;
     return;
 }
@@ -1318,19 +1326,23 @@ void f3_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32
             flt_array[rd] = flt_round( -1 * flt_array[rs1] * flt_array[rs2] + flt_array[rs3], rm );
             break;
         default:
-            fprintf(stderr, "Invalid FP2-type instruction.\n");
+            fprintf(stderr, "Invalid FP3-type instruction.\n");
             exit(1);
 
     }
+    *pc += 4;
 
     return;
 }
 
 void printAllFPReg(float regs[32]){
 
+    uint32_t ui;
+
     for (int i = 0; i < 32; i++){
+        memcpy(&ui, &regs[i], sizeof(ui));
         printf("Register: f%02d  Contents: ", i);
-        printf("%08X\n", regs[i]);
+        printf("%08X\n", ui);
 
     }
     printf("\n\n");

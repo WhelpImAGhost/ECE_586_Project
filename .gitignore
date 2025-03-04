@@ -15,4 +15,6 @@
 !Mem_files/Load_mem/*
 !Mem_files/Branch_mem/
 !Mem_files/Branch_mem/*
+!Mem_files/Float_mem/
+!Mem_files/Float_mem/*
 !make_instruction.c
