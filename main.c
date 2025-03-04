@@ -1288,6 +1288,7 @@ void f2_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32
             writeWord(mem_array, size, (reg_array[rs1] + (func7 << 5 | rd) ), flt_array[rs2] );
             break;
         default:
+
             fprintf(stderr, "Invalid FP2-type instruction.\n");
             exit(1);
 
