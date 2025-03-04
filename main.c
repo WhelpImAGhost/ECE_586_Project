@@ -1266,6 +1266,8 @@ void f2_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32
 
     uint8_t func7, rs2, rs1, func3, rd, opcode;
     uint32_t instruction = mem_array[*pc / 4];
+    uint32_t *uint_val;
+    float *flt_val;
 
     opcode = instruction & 0x7F;
     rd = (instruction >> 7 ) & 0x1F;
@@ -1282,10 +1284,14 @@ void f2_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32
     switch (opcode){
     
         case FLW:
-            flt_array[rd] = readWord(mem_array, size, (reg_array[rs1] + ((func7 << 5 | rs2) )));
+            *uint_val = readWord(mem_array, size, (reg_array[rs1] + ((func7 << 5 | rs2) )));
+            flt_val = (float*)uint_val;
+            flt_array[rd] = *flt_val;
             break;
         case FSW:
-            writeWord(mem_array, size, (reg_array[rs1] + (func7 << 5 | rd) ), flt_array[rs2] );
+            *flt_val = flt_array[rs2];
+            uint_val = (int*)flt_val;
+            writeWord(mem_array, size, (reg_array[rs1] + (func7 << 5 | rd) ), *uint_val );
             break;
         default:
 
