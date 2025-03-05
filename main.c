@@ -255,7 +255,9 @@ int main(int argc, char *argv[]){
 
         if (mode == 1) printAllReg(x, regnames);
         if (mode == 1) printAllFPReg(f);
-        
+        #ifdef DEBUG
+        printAllMem(MainMem, MemWords);
+        #endif
     }
 
 
