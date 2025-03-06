@@ -255,9 +255,7 @@ int main(int argc, char *argv[]){
 
         if (mode == 1) printAllReg(x, regnames);
         if (mode == 1) printAllFPReg(f);
-        #ifdef DEBUG
-        printAllMem(MainMem, MemWords);
-        #endif
+
     }
 
 
@@ -287,7 +285,11 @@ void printAllReg(uint32_t regs[32], char regnames[32][8] ){
 
     for (int i = 0; i < 32; i++){
         printf("Register: x%02d %-6sContents: ", i, regnames[i]);
-        printf("%08X\n", regs[i]);
+        printf("%08X", regs[i]);
+        #ifdef DEBUG
+        printf(" (%d)", regs[i]);
+        #endif
+        printf("\n");
 
     }
     printf("\n\n");
@@ -1144,13 +1146,13 @@ void f1_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32
         case 0x10:  //  FSGNJ.S, FSGNJN.S, FSGNJX.S
             switch(func3){
                 case 0x0:   //  FSGNJ.S
-                    flt_array[rd] = fabsf(flt_array[rs1]) * ((flt_array[rs1] < 0) ? -1 : 1);
+                    flt_array[rd] = fabsf(flt_array[rs1]) * ((rs2_signed < 0) ? -1 : 1);
                     break;
                 case 0x1:   //  FSGNJN.S
-                    flt_array[rd] = fabsf(flt_array[rs1]) * -1 * ((flt_array[rs1] < 0) ? -1 : 1);
+                    flt_array[rd] = fabsf(flt_array[rs1]) * -1 * ((rs2_signed < 0) ? -1 : 1);
                     break;
                 case 0x2:   //  FSGNJX.S
-                    flt_array[rd] = flt_array[rs1] * ((flt_array[rs1] < 0) ? -1 : 1);
+                    flt_array[rd] = flt_array[rs1] * ((rs2_signed < 0) ? -1 : 1);
                     break;
                 default:
                     fprintf(stderr, "0x%X is not a valid FUNC3 code for FUNC7 code 0x%X\n", func3, func7);
@@ -1302,6 +1304,10 @@ void f2_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32
 
     }
 
+    #ifdef DEBUG
+    printAllMem(mem_array, size);
+    #endif
+
     *pc += 4;
     reg_array[0] = 0x00000000;
     return;
@@ -1351,7 +1357,11 @@ void printAllFPReg(float regs[32]){
     for (int i = 0; i < 32; i++){
         memcpy(&ui, &regs[i], sizeof(ui));
         printf("Register: f%02d  Contents: ", i);
-        printf("%08X\n", ui);
+        printf("%08X", ui);
+        #ifdef DEBUG
+        printf(" (%f)", regs[i]);
+        #endif
+        printf("\n");
 
     }
     printf("\n\n");
