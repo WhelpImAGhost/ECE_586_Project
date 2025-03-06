@@ -1128,6 +1128,10 @@ void f1_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32
     if ((func3 != 5) && (func3 != 6) ) rm = func3;
     else rm = -1;
 
+    #ifdef DEBUG
+    fprintf(stderr, "F1-Type instruction breakdown:\n    Opcode: 0x%02X\n    R_Des: 0x%02X\n    Func3: 0x%02X\n    R_S1: 0x%02X\n    R_S2: 0x%02X\n    Func7: 0x%02X\n", opcode, rd, func3, rs1, rs2, func7);
+    #endif
+
     switch (func7){
 
         case 0x00:  //  FADD.S
@@ -1146,13 +1150,13 @@ void f1_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32
         case 0x10:  //  FSGNJ.S, FSGNJN.S, FSGNJX.S
             switch(func3){
                 case 0x0:   //  FSGNJ.S
-                    flt_array[rd] = fabsf(flt_array[rs1]) * ((rs2_signed < 0) ? -1 : 1);
+                    flt_array[rd] = fabsf(flt_array[rs1]) * ((flt_array[rs2] < 0) ? -1 : 1);
                     break;
                 case 0x1:   //  FSGNJN.S
-                    flt_array[rd] = fabsf(flt_array[rs1]) * -1 * ((rs2_signed < 0) ? -1 : 1);
+                    flt_array[rd] = fabsf(flt_array[rs1]) * -1 * ((flt_array[rs2] < 0) ? -1 : 1);
                     break;
                 case 0x2:   //  FSGNJX.S
-                    flt_array[rd] = flt_array[rs1] * ((rs2_signed < 0) ? -1 : 1);
+                    flt_array[rd] = flt_array[rs1] * ((flt_array[rs2] < 0) ? -1 : 1);
                     break;
                 default:
                     fprintf(stderr, "0x%X is not a valid FUNC3 code for FUNC7 code 0x%X\n", func3, func7);
@@ -1294,7 +1298,7 @@ void f2_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32
             break;
         case FSW:
             *flt_val = flt_array[rs2];
-            uint_val = (int*)flt_val;
+            uint_val = (unsigned int*)flt_val;
             writeWord(mem_array, size, (reg_array[rs1] + (func7 << 5 | rd) ), *uint_val );
             break;
         default:
