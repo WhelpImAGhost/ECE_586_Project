@@ -1393,14 +1393,14 @@ void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[
     scanf("%c", &input);
 
         if(input == 'R' || input == 'r'){
-            char regCommand[2];
-            printf("To display all integer registers enter: [I]\nTo display all floating point registers enter: [FP]\nTo display a specific integer register enter: [X]\nTo display a specific floating point register enter: [F]\n");
-            scanf("%s", &regCommand);
-            if(regCommand == "I" || regCommand == "i"){
+            char regCommand;
+            printf("To display all integer registers enter: [R]\nTo display all floating point registers enter: [F]\nTo display a specific integer register enter: [X]\nTo display a specific floating point register enter: [P]\n");
+            scanf("%c", &regCommand);
+            if(regCommand == 'R' || regCommand == 'r'){
             printAllReg(regs, regnames);
-            } else if(regCommand == "FP" || regCommand == "fp" || regCommand == "Fp" || regCommand == "fP"){
+            } else if(regCommand == 'F' || regCommand == 'f'){
             printAllFPReg(fregs);
-            } else if(regCommand == "X" || regCommand == "x"){
+            } else if(regCommand == 'X' || regCommand == 'x'){
             char regNum[2];
             printf("To display a desired integer register, enter the number corresponding to the register: \n");
             scanf("%s", &regNum);
@@ -1408,9 +1408,9 @@ void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[
             if (regNumInt > 31 || regNumInt < 0){
                 printf("Invalid integer register number\n");
                 } else{
-                printf("F%c:   0x%08x\n", regNumInt, regs[regNumInt]);
+                printf("X%c:   0x%08x\n", regNumInt, regs[regNumInt]);
                 }
-            } else if(regCommand == "F" || regCommand == "f"){
+            } else if(regCommand == 'P' || regCommand == 'p'){
             char fregNum[2];
             printf("To display a desired floating point register, enter the number corresponding to the register: \n");
             scanf("%s", &fregNum);
@@ -1421,7 +1421,7 @@ void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[
             printf("F%c:   0x%08x\n", fregNumInt, fregs[fregNumInt]);
             }
             }else{
-                printf("Invalid command, please try again\n"); 
+                printf("Invalid register command, please try again\n"); 
             }
         }
         else if(input == 'M' || input == 'm'){
