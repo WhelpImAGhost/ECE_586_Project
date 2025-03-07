@@ -1367,7 +1367,7 @@ void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[
 
         if(input == "R" || input == "r"){
             char regCommand[2];
-            printf("To display all integer registers enter: [I]\n To display all floating point registers enter: [FP]\n To display a specific integer register enter: [X]\n To display a specific integer register enter: [F]\n");
+            printf("To display all integer registers enter: [I]\n To display all floating point registers enter: [FP]\n To display a specific integer register enter: [X]\n To display a specific floating point register enter: [F]\n");
             scanf("%s", regCommand);
             if(regCommand == "I" || regCommand == "i"){
             printAllReg(regs, regnames);
@@ -1375,6 +1375,7 @@ void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[
             printAllFPReg(fregs);
             } else if(regCommand == "X" || regCommand == "x"){
             char regNum[2];
+            printf("To display the desired register its value after the X");
             } else if(regCommand == "F" || regCommand == "f"){
             char fregNum[2];
             }else{
