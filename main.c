@@ -1386,7 +1386,7 @@ void printAllFPReg(float regs[32]){
 
 void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float fregs[32]) {
 
-    char input;
+    char input = '\0';
 
     while(input != 'C'){
     printf("To display current instruction enter: [I]\nTo print register contents enter: [R]\nTo print memory contents enter: [M]\nTo continue enter: [C]\n\n");
@@ -1412,7 +1412,7 @@ void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[
                 char regNum[2];
                 printf("To display a desired integer register, enter the number corresponding to the register: \n\n");
                 while ( getchar() != '\n' );
-                scanf("%s", &regNum);
+                scanf("%2d", &regNum);
                 printf("\n");
                 int regNumInt = atoi(regNum);
                 if (regNumInt > 31 || regNumInt < 0){
@@ -1421,12 +1421,13 @@ void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[
                     else{
                     printf("x%d %s:   0x%08x\n\n", regNumInt, regnames[regNumInt], regs[regNumInt]);
                 }
+                while ( getchar() != '\n' );
             } 
             else if(regCommand == 'P' || regCommand == 'p'){
                 char fregNum[2];
                 printf("To display a desired floating point register, enter the number corresponding to the register: \n\n");
                 while ( getchar() != '\n' );
-                scanf("%s", &fregNum);
+                scanf("%2d", &fregNum);
                 printf("\n");
                 int fregNumInt = atoi(fregNum);
                 if (fregNumInt > 31 || fregNumInt < 0){
@@ -1435,6 +1436,7 @@ void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[
                 else{
                     printf("f%d:   0x%08x\n\n", fregNumInt, fregs[fregNumInt]);
                 }
+                while ( getchar() != '\n' );
             }
             else{
                 while ( getchar() != '\n' );
@@ -1446,8 +1448,12 @@ void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[
 
         }
         else if(input == 'I' || input == 'i'){
-            while ( getchar() != '\n' );
             printf("Current Instruction: 0x%08x\n\n", instruction);
+            while ( getchar() != '\n' );
+        }
+        else if(input == 'C' || input == 'c'){
+            while ( getchar() != '\n' );
+            break;
         }
         else{
             printf("Invalid command, please try again\n");
@@ -1459,7 +1465,6 @@ void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[
 
     //Breakpoint Code Should be in here too, idk how to implement yet
     }
-    while ( getchar() != '\n' );
 }
 
 void fclass_s(float value, uint32_t *out) {
