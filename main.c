@@ -1389,13 +1389,13 @@ void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[
     char input[1];
 
     while(input != "C"){
-    printf("To display current instruction enter: [I]\n To print register contents enter: [R]\n To print memory contents enter: [M]\n To continue enter: [C]\n");
-    scanf("%s", input);
+    printf("To display current instruction enter: [I]\nTo print register contents enter: [R]\nTo print memory contents enter: [M]\nTo continue enter: [C]\n");
+    scanf("%s", &input);
 
         if(input == "R" || input == "r"){
             char regCommand[2];
-            printf("To display all integer registers enter: [I]\n To display all floating point registers enter: [FP]\n To display a specific integer register enter: [X]\n To display a specific floating point register enter: [F]\n");
-            scanf("%s", regCommand);
+            printf("To display all integer registers enter: [I]\nTo display all floating point registers enter: [FP]\nTo display a specific integer register enter: [X]\nTo display a specific floating point register enter: [F]\n");
+            scanf("%s", &regCommand);
             if(regCommand == "I" || regCommand == "i"){
             printAllReg(regs, regnames);
             } else if(regCommand == "FP" || regCommand == "fp" || regCommand == "Fp" || regCommand == "fP"){
@@ -1403,7 +1403,7 @@ void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[
             } else if(regCommand == "X" || regCommand == "x"){
             char regNum[2];
             printf("To display a desired integer register, enter the number corresponding to the register: \n");
-            scanf("%s", regNum);
+            scanf("%s", &regNum);
             int regNumInt = atoi(regNum);
             if (regNumInt > 31 || regNumInt < 0){
                 printf("Invalid integer register number\n");
@@ -1413,7 +1413,7 @@ void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[
             } else if(regCommand == "F" || regCommand == "f"){
             char fregNum[2];
             printf("To display a desired floating point register, enter the number corresponding to the register: \n");
-            scanf("%s", fregNum);
+            scanf("%s", &fregNum);
             int fregNumInt = atoi(fregNum);
             if (fregNumInt > 31 || fregNumInt < 0){
             printf("Invalid floating point register number\n");
