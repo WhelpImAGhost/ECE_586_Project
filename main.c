@@ -772,6 +772,7 @@ void immediateop(uint8_t function, uint8_t destination, uint8_t source, int32_t 
         #endif    
         
         reg_array[destination] = (reg_array[source] < unsignedimmediate) ? 1 : 0;
+
         break;   
     default:
         fprintf(stderr,"The provided immediate instruction is invalid.\n");
