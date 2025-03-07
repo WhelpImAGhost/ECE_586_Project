@@ -40,7 +40,7 @@ float flt_round(float value, int rm);
 void f2_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32], float flt_array[32]);
 void f3_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32], float flt_array[32]);
 void fclass_s(float value, uint32_t *out);
-void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float fregs[32]);
+void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float fregs[32], int MemWords);
 
 //Instruction Function Protoytpes
 void load(uint8_t function, uint8_t destination, uint8_t source, int32_t immediate, uint32_t array[], int size, uint32_t reg_array[32]);
@@ -256,7 +256,7 @@ int main(int argc, char *argv[]){
 
         if (mode == 1) printAllReg(x, regnames);
         if (mode == 1) printAllFPReg(f);
-        if (mode == 2) singleStep(old_pc, MainMem, MemWords, x, regnames, f);
+        if (mode == 2) singleStep(old_pc, MainMem, MemWords, x, regnames, f, MemWords);
     }
 
 
@@ -276,12 +276,10 @@ int main(int argc, char *argv[]){
 
 // Memory dump function for debugging (using a log file)
 void printAllMem(uint32_t array[], int size){
-#ifdef DEBUG
 fprintf(stderr,"\n");
 for (int i = 0; i < size; i++){
-    if (array[i] != 0x0) printf( /*Array Member: %4d*/ "Memory Address: 0x%08X     Contents: 0x%08X\n", /*i*/, 4*i, array[i]);
+    if (array[i] != 0x0) printf( /*Array Member: %4d*/ "Memory Address: 0x%08X     Contents: 0x%08X\n", /*i,*/ 4*i, array[i]);
 }
-#endif
     return;
 }
 
@@ -1383,7 +1381,7 @@ void printAllFPReg(float regs[32]){
     return;
 }
 
-void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float fregs[32]) {
+void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float fregs[32], int MemWords) {
 
         char input = '\0';  // Initialize input variable
     
@@ -1428,6 +1426,26 @@ void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[
     
                 case 'M':
                 case 'm': {
+                    char memCommand;
+                    printf("To display all nonzero memory locations enter: [M]\nTo display a specific memory address enter: [A]\n\n");
+                    scanf(" %c", &memCommand);
+                    if (memCommand == 'M' || memCommand == 'm') {
+                        printf("\n");
+                        printAllMem(array, MemWords);
+                        printf("\n");
+                    } else if (memCommand == 'A' || memCommand == 'a') {
+                        printf("\n");
+                        int memAddress;
+                        printf("Enter the desired memory address (Hexadecimal): 0x");
+                        if (scanf("%x", &memAddress) != 1 || memAddress < 0 || memAddress > 0xFFFF) {
+                            printf("\nInvalid register number\n\n");
+                        } else {
+                            printf("\nAddress 0x%05x: 0x%08x\n\n", memAddress, array[memAddress / 4]);
+                        }
+                    } else {
+                        printf("Invalid memory command, please try again\n");
+                    }
+                    break;
                 }
     
                 case 'I':
