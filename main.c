@@ -166,7 +166,6 @@ int main(int argc, char *argv[]){
     while(continue_program){
 
         fetch_and_decode(MainMem, pc, &current_opcode, mode);
-
         old_pc = pc;
         switch (current_opcode) {
             case REGS_OP:
@@ -257,7 +256,7 @@ int main(int argc, char *argv[]){
 
         if (mode == 1) printAllReg(x, regnames);
         if (mode == 1) printAllFPReg(f);
-        if (mode == 2) singleStep(instruction, MainMem, MemWords, x, regnames, f);
+        if (mode == 2) singleStep(old_pc, MainMem, MemWords, x, regnames, f);
     }
 
 
@@ -1433,7 +1432,7 @@ void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[
     
                 case 'I':
                 case 'i':
-                    printf("Current Instruction: 0x%08x\n\n", instruction);
+                    printf("Current Instruction: 0x%08x\n\n", array[instruction/4]);
                     break;
     
                 case 'C':
