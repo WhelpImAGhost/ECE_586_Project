@@ -1409,7 +1409,8 @@ void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[
                 int regNumInt = atoi(regNum);
                 if (regNumInt > 31 || regNumInt < 0){
                     printf("Invalid integer register number\n");
-                    } else{
+                    } 
+                    else{
                     printf("X%c:   0x%08x\n", regNumInt, regs[regNumInt]);
                 }
             } 
@@ -1419,9 +1420,10 @@ void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[
                 scanf("%s", &fregNum);
                 int fregNumInt = atoi(fregNum);
                 if (fregNumInt > 31 || fregNumInt < 0){
-                printf("Invalid floating point register number\n");
-                } else{
-                printf("F%c:   0x%08x\n", fregNumInt, fregs[fregNumInt]);
+                    printf("Invalid floating point register number\n");
+                } 
+                else{
+                    printf("F%c:   0x%08x\n", fregNumInt, fregs[fregNumInt]);
                 }
             }
             else{
