@@ -255,6 +255,7 @@ int main(int argc, char *argv[]){
 
         if (mode == 1) printAllReg(x, regnames);
         if (mode == 1) printAllFPReg(f);
+        //if (mode == 2) singleStep(instruction, );
         
     }
 
@@ -274,7 +275,7 @@ void printAllMem(uint32_t array[], int size){
 #ifdef DEBUG
 fprintf(stderr,"\n");
 for (int i = 0; i < size; i++){
-    if (array[i] != 0x0) printf( "Array Member: %4d     Memory Address: 0x%08X     Contents: 0x%08X\n", i, 4*i, array[i]);
+    if (array[i] != 0x0) printf( /*Array Member: %4d*/ "Memory Address: 0x%08X     Contents: 0x%08X\n", /*i*/, 4*i, array[i]);
 }
 #endif
     return;
@@ -1354,4 +1355,54 @@ void printAllFPReg(float regs[32]){
     }
     printf("\n\n");
     return;
+}
+
+void singleStep(instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float regs[32]) {
+
+    char input[1];
+
+    while(input != "C"){
+    printf("To display current instruction enter: [I]\n To print register contents enter: [R]\n To print memory contents enter: [M]\n To continue enter: [C]\n");
+    scanf("%s", input);
+
+        if(input == "R" || input == "r"){
+            char regCommand[2];
+            printf("To display all integer registers enter: [I]\n To display all floating point registers enter: [FP]\n To print memory contents enter: [M]\n To continue enter: [C]\n");
+            scanf("%s", regCommand);
+            if(){
+            printAllReg();
+            } else if(){
+            printAllFPReg();
+            } else if(){
+
+            } else if(){
+
+            }
+        }
+        else if(input == "M" || input == "m"){
+
+        }
+        else if(input == "I" || input == "i"){
+
+        }
+        else if(input == "C" || input == "c"){
+
+        }
+        else{
+        printf("Invalid command, please try again\n");
+        }
+        while (getchar() != '\n');
+    //Display that they can type "R" to display a register
+        //If R is typed, display register names w/ 0-31 next to them
+        //depending on what the user types, print that each time they step
+        //check to make sure user value is 
+
+    //If M is typed, the user will be prompted to enter the memory address their interested in in hex, by an allignment of 4
+        //check to ensure what they entered matches the necessary format
+    //If I is entered, print the current instruction
+
+    //Prompt user to enter "C" when they are ready to continue
+
+    //Breakpoint Code Should be in here too, idk how to implement yet
+    }
 }
