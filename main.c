@@ -39,6 +39,7 @@ void f1_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32
 float flt_round(float value, int rm);
 void f2_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32], float flt_array[32]);
 void f3_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32], float flt_array[32]);
+void fclass_s(float value, uint32_t *out);
 
 //Instruction Function Protoytpes
 void load(uint8_t function, uint8_t destination, uint8_t source, int32_t immediate, uint32_t array[], int size, uint32_t reg_array[32]);
@@ -1183,13 +1184,22 @@ void f1_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32
         case 0x50:  //  FEQ.S, FLT.S, FLE.S
             switch (func3){
                 case 0x0:   //  FLE.S
-                    flt_array[rd] = (flt_array[rs1] <= flt_array[rs2]) ? 1 : 0;
+                    #ifdef DEBUG
+                    fprintf(stderr, "If f-reg %d contents (%f) is less than or equal to f-reg %d contents (%f), set i-reg %d to 1, else 0\n", rs1, flt_array[rs1], rs2, flt_array[rs2], rd);
+                    #endif
+                    reg_array[rd] = (flt_array[rs1] <= flt_array[rs2]) ? 1 : 0;
                     break;
                 case 0x1:   //  FLT.S
-                    flt_array[rd] = (flt_array[rs1] < flt_array[rs2]) ? 1 : 0;
+                    #ifdef DEBUG
+                    fprintf(stderr, "If f-reg %d contents (%f) is less than to f-reg %d contents (%f), set i-reg %d to 1, else 0\n", rs1, flt_array[rs1], rs2, flt_array[rs2], rd);
+                    #endif
+                    reg_array[rd] = (flt_array[rs1] < flt_array[rs2]) ? 1 : 0;
                     break;
                 case 0x2:   //  FEQ.S
-                    flt_array[rd] = (flt_array[rs1] == flt_array[rs2]) ? 1 : 0;
+                    #ifdef DEBUG
+                    fprintf(stderr, "If f-reg %d contents (%f) is equal to f-reg %d contents (%f), set i-reg %d to 1, else 0\n", rs1, flt_array[rs1], rs2, flt_array[rs2], rd);
+                    #endif
+                    reg_array[rd] = (flt_array[rs1] == flt_array[rs2]) ? 1 : 0;
                     break;
                 default:
                     fprintf(stderr, "0x%X is not a valid FUNC3 code for FUNC7 code 0x%X\n", func3, func7);
@@ -1227,7 +1237,7 @@ void f1_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32
                     reg_array[rd] = *((int*) &flt_array[rs1]);
                     break;
                 case 0x1:   //  FCLASS.S
-                    reg_array[rd] = fpclassify(flt_array[rs1]);
+                    fclass_s(flt_array[rs1], &reg_array[rd]);
                     break;
                 default:
                     fprintf(stderr, "0x%X is not a valid FUNC3 code for FUNC7 code 0x%X\n", func3, func7);
@@ -1236,6 +1246,7 @@ void f1_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32
             break;
         case 0x78:  //  FMV.W.X
             reg_array[rd] = *((float*) &flt_array[rs1]);
+            break;
 
         default:
             fprintf(stderr, "Invalid FP-type instruction.\n");
@@ -1370,4 +1381,36 @@ void printAllFPReg(float regs[32]){
     }
     printf("\n\n");
     return;
+}
+
+
+void fclass_s(float value, uint32_t *out) {
+    uint32_t bits;
+    uint32_t result = 0;
+
+    // Interpret the float as raw bits
+    bits = *(uint32_t *)&value;
+
+    // Extract sign, exponent, and fraction
+    uint32_t sign = (bits >> 31) & 1;
+    uint32_t exponent = (bits >> 23) & 0xFF;
+    uint32_t fraction = bits & 0x7FFFFF;
+
+    if (exponent == 0xFF) { // NaN or Infinity
+        if (fraction == 0) { // Infinity
+            result = (sign == 1) ? (1 << 0) : (1 << 7); // -Inf or +Inf
+        } else { // NaN
+            result = (fraction & (1 << 22)) ? (1 << 9) : (1 << 8); // Signaling or Quiet NaN
+        }
+    } else if (exponent == 0) { // Zero or Subnormal
+        if (fraction == 0) {
+            result = (sign == 1) ? (1 << 3) : (1 << 4); // -Zero or +Zero
+        } else {
+            result = (sign == 1) ? (1 << 2) : (1 << 5); // -Subnormal or +Subnormal
+        }
+    } else { // Normal numbers
+        result = (sign == 1) ? (1 << 1) : (1 << 6); // -Normal or +Normal
+    }
+
+    *out = result;
 }
