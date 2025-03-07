@@ -265,6 +265,10 @@ int main(int argc, char *argv[]){
     if (mode == 0) printAllFPReg(f);
     if (mode == 0) fprintf(stderr, "PC at final instruction: 0x%08X\n", old_pc);
 
+    
+    #ifdef DEBUG
+    printAllMem(MainMem, MemWords);
+    #endif
 
     return 0;
 
@@ -1245,7 +1249,7 @@ void f1_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32
             }
             break;
         case 0x78:  //  FMV.W.X
-            reg_array[rd] = *((float*) &flt_array[rs1]);
+            flt_array[rd] = *((float*) &reg_array[rs1]);
             break;
 
         default:
@@ -1285,8 +1289,8 @@ void f2_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32
 
     uint8_t func7, rs2, rs1, func3, rd, opcode;
     uint32_t instruction = mem_array[*pc / 4];
-    uint32_t *uint_val;
-    float *flt_val;
+    uint32_t uint_val;
+    float flt_val;
 
     opcode = instruction & 0x7F;
     rd = (instruction >> 7 ) & 0x1F;
@@ -1303,14 +1307,12 @@ void f2_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32
     switch (opcode){
     
         case FLW:
-            *uint_val = readWord(mem_array, size, (reg_array[rs1] + ((func7 << 5 | rs2) )));
-            flt_val = (float*)uint_val;
-            flt_array[rd] = *flt_val;
+            uint_val = readWord(mem_array, size, (reg_array[rs1] + ((func7 << 5 | rs2) )));
+            flt_array[rd] = *((float*) &uint_val);
             break;
         case FSW:
-            *flt_val = flt_array[rs2];
-            uint_val = (unsigned int*)flt_val;
-            writeWord(mem_array, size, (reg_array[rs1] + (func7 << 5 | rd) ), *uint_val );
+            uint_val = *((int*) &flt_array[rs2]);
+            writeWord(mem_array, size, (reg_array[rs1] + (func7 << 5 | rd) ), uint_val );
             break;
         default:
 
@@ -1319,9 +1321,6 @@ void f2_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32
 
     }
 
-    #ifdef DEBUG
-    printAllMem(mem_array, size);
-    #endif
 
     *pc += 4;
     reg_array[0] = 0x00000000;
