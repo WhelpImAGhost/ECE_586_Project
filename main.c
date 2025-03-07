@@ -40,6 +40,7 @@ float flt_round(float value, int rm);
 void f2_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32], float flt_array[32]);
 void f3_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32], float flt_array[32]);
 void fclass_s(float value, uint32_t *out);
+void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float fregs[32]);
 
 //Instruction Function Protoytpes
 void load(uint8_t function, uint8_t destination, uint8_t source, int32_t immediate, uint32_t array[], int size, uint32_t reg_array[32]);
@@ -256,7 +257,7 @@ int main(int argc, char *argv[]){
 
         if (mode == 1) printAllReg(x, regnames);
         if (mode == 1) printAllFPReg(f);
-        //if (mode == 2) singleStep(instruction, x, regnames);
+        if (mode == 2) singleStep(instruction, MainMem, MemWords, x, regnames, f);
     }
 
 
@@ -1401,9 +1402,24 @@ void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[
             printAllFPReg(fregs);
             } else if(regCommand == "X" || regCommand == "x"){
             char regNum[2];
-            printf("To display the desired register its value after the X");
+            printf("To display a desired integer register, enter the number corresponding to the register: \n");
+            scanf("%s", regNum);
+            int regNumInt = atoi(regNum);
+            if (regNumInt > 31 || regNumInt < 0){
+                printf("Invalid integer register number\n");
+                } else{
+                printf("F%c:   0x%08x\n", regNumInt, regs[regNumInt]);
+                }
             } else if(regCommand == "F" || regCommand == "f"){
             char fregNum[2];
+            printf("To display a desired floating point register, enter the number corresponding to the register: \n");
+            scanf("%s", fregNum);
+            int fregNumInt = atoi(fregNum);
+            if (fregNumInt > 31 || fregNumInt < 0){
+            printf("Invalid floating point register number\n");
+            } else{
+            printf("F%c:   0x%08x\n", fregNumInt, fregs[fregNumInt]);
+            }
             }else{
                 printf("Invalid command, please try again\n"); 
             }
@@ -1415,7 +1431,7 @@ void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[
 
         }
         else if(input == "C" || input == "c"){
-
+        return;
         }
         else{
         printf("Invalid command, please try again\n");
@@ -1434,6 +1450,7 @@ void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[
 
     //Breakpoint Code Should be in here too, idk how to implement yet
     }
+}
 
 void fclass_s(float value, uint32_t *out) {
     uint32_t bits;
