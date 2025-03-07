@@ -1388,74 +1388,78 @@ void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[
 
     char input;
 
-    while(input != 'C' ){
-    printf("To display current instruction enter: [I]\nTo print register contents enter: [R]\nTo print memory contents enter: [M]\nTo continue enter: [C]\n");
-    scanf("%c", &input);
-
+    while(input != 'C'){
+    printf("To display current instruction enter: [I]\nTo print register contents enter: [R]\nTo print memory contents enter: [M]\nTo continue enter: [C]\n\n");
+    input = getchar();
+    printf("\n");
+    while ( getchar() != '\n' );
         if(input == 'R' || input == 'r'){
             char regCommand;
-            printf("To display all integer registers enter: [R]\nTo display all floating point registers enter: [F]\nTo display a specific integer register enter: [X]\nTo display a specific floating point register enter: [P]\n");
-            scanf("%c", &regCommand);
+            printf("To display all integer registers enter: [R]\nTo display all floating point registers enter: [F]\nTo display a specific integer register enter: [X]\nTo display a specific floating point register enter: [P]\n\n");
+            regCommand = getchar();
+            printf("\n");
             if(regCommand == 'R' || regCommand == 'r'){
+                while ( getchar() != '\n' );
+                printf("\n");
                 printAllReg(regs, regnames);
             } 
             else if(regCommand == 'F' || regCommand == 'f'){
+                while ( getchar() != '\n' );
+                printf("\n");
                 printAllFPReg(fregs);
             } 
             else if(regCommand == 'X' || regCommand == 'x'){
                 char regNum[2];
-                printf("To display a desired integer register, enter the number corresponding to the register: \n");
+                printf("To display a desired integer register, enter the number corresponding to the register: \n\n");
+                while ( getchar() != '\n' );
                 scanf("%s", &regNum);
+                printf("\n");
                 int regNumInt = atoi(regNum);
                 if (regNumInt > 31 || regNumInt < 0){
                     printf("Invalid integer register number\n");
                     } 
                     else{
-                    printf("X%c:   0x%08x\n", regNumInt, regs[regNumInt]);
+                    printf("x%d %s:   0x%08x\n\n", regNumInt, regnames[regNumInt], regs[regNumInt]);
                 }
             } 
             else if(regCommand == 'P' || regCommand == 'p'){
                 char fregNum[2];
-                printf("To display a desired floating point register, enter the number corresponding to the register: \n");
+                printf("To display a desired floating point register, enter the number corresponding to the register: \n\n");
+                while ( getchar() != '\n' );
                 scanf("%s", &fregNum);
+                printf("\n");
                 int fregNumInt = atoi(fregNum);
                 if (fregNumInt > 31 || fregNumInt < 0){
                     printf("Invalid floating point register number\n");
                 } 
                 else{
-                    printf("F%c:   0x%08x\n", fregNumInt, fregs[fregNumInt]);
+                    printf("f%d:   0x%08x\n\n", fregNumInt, fregs[fregNumInt]);
                 }
             }
             else{
+                while ( getchar() != '\n' );
                 printf("Invalid register command, please try again\n"); 
             }
         }
         else if(input == 'M' || input == 'm'){
+            while ( getchar() != '\n' );
 
         }
         else if(input == 'I' || input == 'i'){
-
-        }
-        else if(input == 'C' || input == 'c'){
-            return;
+            while ( getchar() != '\n' );
+            printf("Current Instruction: 0x%08x\n\n", instruction);
         }
         else{
             printf("Invalid command, please try again\n");
         }
-    //Display that they can type "R" to display a register
-        //If R is typed, display register names w/ 0-31 next to them
-        //depending on what the user types, print that each time they step
-        //check to make sure user value is 
 
     //If M is typed, the user will be prompted to enter the memory address their interested in in hex, by an allignment of 4
         //check to ensure what they entered matches the necessary format
     //If I is entered, print the current instruction
 
-    //Prompt user to enter "C" when they are ready to continue
-
     //Breakpoint Code Should be in here too, idk how to implement yet
     }
-    while (getchar() != '\n');
+    while ( getchar() != '\n' );
 }
 
 void fclass_s(float value, uint32_t *out) {
