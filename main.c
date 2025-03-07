@@ -1386,13 +1386,13 @@ void printAllFPReg(float regs[32]){
 
 void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float fregs[32]) {
 
-    char input[1];
+    char input;
 
-    while(input != "C"){
+    while(input != 'C' ){
     printf("To display current instruction enter: [I]\nTo print register contents enter: [R]\nTo print memory contents enter: [M]\nTo continue enter: [C]\n");
-    scanf("%s", &input);
+    scanf("%c", &input);
 
-        if(input == "R" || input == "r"){
+        if(input == 'R' || input == 'r'){
             char regCommand[2];
             printf("To display all integer registers enter: [I]\nTo display all floating point registers enter: [FP]\nTo display a specific integer register enter: [X]\nTo display a specific floating point register enter: [F]\n");
             scanf("%s", &regCommand);
@@ -1424,13 +1424,13 @@ void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[
                 printf("Invalid command, please try again\n"); 
             }
         }
-        else if(input == "M" || input == "m"){
+        else if(input == 'M' || input == 'm'){
 
         }
-        else if(input == "I" || input == "i"){
+        else if(input == 'I' || input == 'i'){
 
         }
-        else if(input == "C" || input == "c"){
+        else if(input == 'C' || input == 'c'){
         return;
         }
         else{
