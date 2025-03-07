@@ -39,6 +39,7 @@ void f1_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32
 float flt_round(float value, int rm);
 void f2_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32], float flt_array[32]);
 void f3_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32], float flt_array[32]);
+void fclass_s(float value, uint32_t *out);
 
 //Instruction Function Protoytpes
 void load(uint8_t function, uint8_t destination, uint8_t source, int32_t immediate, uint32_t array[], int size, uint32_t reg_array[32]);
@@ -256,7 +257,6 @@ int main(int argc, char *argv[]){
         if (mode == 1) printAllReg(x, regnames);
         if (mode == 1) printAllFPReg(f);
         //if (mode == 2) singleStep(instruction, x, regnames);
-        
     }
 
 
@@ -265,6 +265,10 @@ int main(int argc, char *argv[]){
     if (mode == 0) printAllFPReg(f);
     if (mode == 0) fprintf(stderr, "PC at final instruction: 0x%08X\n", old_pc);
 
+    
+    #ifdef DEBUG
+    printAllMem(MainMem, MemWords);
+    #endif
 
     return 0;
 
@@ -286,7 +290,11 @@ void printAllReg(uint32_t regs[32], char regnames[32][8] ){
 
     for (int i = 0; i < 32; i++){
         printf("Register: x%02d %-6sContents: ", i, regnames[i]);
-        printf("%08X\n", regs[i]);
+        printf("%08X", regs[i]);
+        #ifdef DEBUG
+        printf(" (%d)", regs[i]);
+        #endif
+        printf("\n");
 
     }
     printf("\n\n");
@@ -764,6 +772,7 @@ void immediateop(uint8_t function, uint8_t destination, uint8_t source, int32_t 
         #endif    
         
         reg_array[destination] = (reg_array[source] < unsignedimmediate) ? 1 : 0;
+
         break;   
     default:
         fprintf(stderr,"The provided immediate instruction is invalid.\n");
@@ -1125,6 +1134,10 @@ void f1_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32
     if ((func3 != 5) && (func3 != 6) ) rm = func3;
     else rm = -1;
 
+    #ifdef DEBUG
+    fprintf(stderr, "F1-Type instruction breakdown:\n    Opcode: 0x%02X\n    R_Des: 0x%02X\n    Func3: 0x%02X\n    R_S1: 0x%02X\n    R_S2: 0x%02X\n    Func7: 0x%02X\n", opcode, rd, func3, rs1, rs2, func7);
+    #endif
+
     switch (func7){
 
         case 0x00:  //  FADD.S
@@ -1143,13 +1156,13 @@ void f1_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32
         case 0x10:  //  FSGNJ.S, FSGNJN.S, FSGNJX.S
             switch(func3){
                 case 0x0:   //  FSGNJ.S
-                    flt_array[rd] = fabsf(flt_array[rs1]) * ((flt_array[rs1] < 0) ? -1 : 1);
+                    flt_array[rd] = fabsf(flt_array[rs1]) * ((flt_array[rs2] < 0) ? -1 : 1);
                     break;
                 case 0x1:   //  FSGNJN.S
-                    flt_array[rd] = fabsf(flt_array[rs1]) * -1 * ((flt_array[rs1] < 0) ? -1 : 1);
+                    flt_array[rd] = fabsf(flt_array[rs1]) * -1 * ((flt_array[rs2] < 0) ? -1 : 1);
                     break;
                 case 0x2:   //  FSGNJX.S
-                    flt_array[rd] = flt_array[rs1] * ((flt_array[rs1] < 0) ? -1 : 1);
+                    flt_array[rd] = flt_array[rs1] * ((flt_array[rs2] < 0) ? -1 : 1);
                     break;
                 default:
                     fprintf(stderr, "0x%X is not a valid FUNC3 code for FUNC7 code 0x%X\n", func3, func7);
@@ -1176,13 +1189,22 @@ void f1_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32
         case 0x50:  //  FEQ.S, FLT.S, FLE.S
             switch (func3){
                 case 0x0:   //  FLE.S
-                    flt_array[rd] = (flt_array[rs1] <= flt_array[rs2]) ? 1 : 0;
+                    #ifdef DEBUG
+                    fprintf(stderr, "If f-reg %d contents (%f) is less than or equal to f-reg %d contents (%f), set i-reg %d to 1, else 0\n", rs1, flt_array[rs1], rs2, flt_array[rs2], rd);
+                    #endif
+                    reg_array[rd] = (flt_array[rs1] <= flt_array[rs2]) ? 1 : 0;
                     break;
                 case 0x1:   //  FLT.S
-                    flt_array[rd] = (flt_array[rs1] < flt_array[rs2]) ? 1 : 0;
+                    #ifdef DEBUG
+                    fprintf(stderr, "If f-reg %d contents (%f) is less than to f-reg %d contents (%f), set i-reg %d to 1, else 0\n", rs1, flt_array[rs1], rs2, flt_array[rs2], rd);
+                    #endif
+                    reg_array[rd] = (flt_array[rs1] < flt_array[rs2]) ? 1 : 0;
                     break;
                 case 0x2:   //  FEQ.S
-                    flt_array[rd] = (flt_array[rs1] == flt_array[rs2]) ? 1 : 0;
+                    #ifdef DEBUG
+                    fprintf(stderr, "If f-reg %d contents (%f) is equal to f-reg %d contents (%f), set i-reg %d to 1, else 0\n", rs1, flt_array[rs1], rs2, flt_array[rs2], rd);
+                    #endif
+                    reg_array[rd] = (flt_array[rs1] == flt_array[rs2]) ? 1 : 0;
                     break;
                 default:
                     fprintf(stderr, "0x%X is not a valid FUNC3 code for FUNC7 code 0x%X\n", func3, func7);
@@ -1220,7 +1242,7 @@ void f1_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32
                     reg_array[rd] = *((int*) &flt_array[rs1]);
                     break;
                 case 0x1:   //  FCLASS.S
-                    reg_array[rd] = fpclassify(flt_array[rs1]);
+                    fclass_s(flt_array[rs1], &reg_array[rd]);
                     break;
                 default:
                     fprintf(stderr, "0x%X is not a valid FUNC3 code for FUNC7 code 0x%X\n", func3, func7);
@@ -1228,7 +1250,8 @@ void f1_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32
             }
             break;
         case 0x78:  //  FMV.W.X
-            reg_array[rd] = *((float*) &flt_array[rs1]);
+            flt_array[rd] = *((float*) &reg_array[rs1]);
+            break;
 
         default:
             fprintf(stderr, "Invalid FP-type instruction.\n");
@@ -1267,8 +1290,8 @@ void f2_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32
 
     uint8_t func7, rs2, rs1, func3, rd, opcode;
     uint32_t instruction = mem_array[*pc / 4];
-    uint32_t *uint_val;
-    float *flt_val;
+    uint32_t uint_val;
+    float flt_val;
 
     opcode = instruction & 0x7F;
     rd = (instruction >> 7 ) & 0x1F;
@@ -1285,14 +1308,12 @@ void f2_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32
     switch (opcode){
     
         case FLW:
-            *uint_val = readWord(mem_array, size, (reg_array[rs1] + ((func7 << 5 | rs2) )));
-            flt_val = (float*)uint_val;
-            flt_array[rd] = *flt_val;
+            uint_val = readWord(mem_array, size, (reg_array[rs1] + ((func7 << 5 | rs2) )));
+            flt_array[rd] = *((float*) &uint_val);
             break;
         case FSW:
-            *flt_val = flt_array[rs2];
-            uint_val = (int*)flt_val;
-            writeWord(mem_array, size, (reg_array[rs1] + (func7 << 5 | rd) ), *uint_val );
+            uint_val = *((int*) &flt_array[rs2]);
+            writeWord(mem_array, size, (reg_array[rs1] + (func7 << 5 | rd) ), uint_val );
             break;
         default:
 
@@ -1300,6 +1321,7 @@ void f2_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32
             exit(1);
 
     }
+
 
     *pc += 4;
     reg_array[0] = 0x00000000;
@@ -1350,7 +1372,11 @@ void printAllFPReg(float regs[32]){
     for (int i = 0; i < 32; i++){
         memcpy(&ui, &regs[i], sizeof(ui));
         printf("Register: f%02d  Contents: ", i);
-        printf("%08X\n", ui);
+        printf("%08X", ui);
+        #ifdef DEBUG
+        printf(" (%f)", regs[i]);
+        #endif
+        printf("\n");
 
     }
     printf("\n\n");
@@ -1408,4 +1434,34 @@ void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[
 
     //Breakpoint Code Should be in here too, idk how to implement yet
     }
+
+void fclass_s(float value, uint32_t *out) {
+    uint32_t bits;
+    uint32_t result = 0;
+
+    // Interpret the float as raw bits
+    bits = *(uint32_t *)&value;
+
+    // Extract sign, exponent, and fraction
+    uint32_t sign = (bits >> 31) & 1;
+    uint32_t exponent = (bits >> 23) & 0xFF;
+    uint32_t fraction = bits & 0x7FFFFF;
+
+    if (exponent == 0xFF) { // NaN or Infinity
+        if (fraction == 0) { // Infinity
+            result = (sign == 1) ? (1 << 0) : (1 << 7); // -Inf or +Inf
+        } else { // NaN
+            result = (fraction & (1 << 22)) ? (1 << 9) : (1 << 8); // Signaling or Quiet NaN
+        }
+    } else if (exponent == 0) { // Zero or Subnormal
+        if (fraction == 0) {
+            result = (sign == 1) ? (1 << 3) : (1 << 4); // -Zero or +Zero
+        } else {
+            result = (sign == 1) ? (1 << 2) : (1 << 5); // -Subnormal or +Subnormal
+        }
+    } else { // Normal numbers
+        result = (sign == 1) ? (1 << 1) : (1 << 6); // -Normal or +Normal
+    }
+
+    *out = result;
 }
