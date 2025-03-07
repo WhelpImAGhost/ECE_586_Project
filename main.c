@@ -1397,30 +1397,34 @@ void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[
             printf("To display all integer registers enter: [R]\nTo display all floating point registers enter: [F]\nTo display a specific integer register enter: [X]\nTo display a specific floating point register enter: [P]\n");
             scanf("%c", &regCommand);
             if(regCommand == 'R' || regCommand == 'r'){
-            printAllReg(regs, regnames);
-            } else if(regCommand == 'F' || regCommand == 'f'){
-            printAllFPReg(fregs);
-            } else if(regCommand == 'X' || regCommand == 'x'){
-            char regNum[2];
-            printf("To display a desired integer register, enter the number corresponding to the register: \n");
-            scanf("%s", &regNum);
-            int regNumInt = atoi(regNum);
-            if (regNumInt > 31 || regNumInt < 0){
-                printf("Invalid integer register number\n");
-                } else{
-                printf("X%c:   0x%08x\n", regNumInt, regs[regNumInt]);
+                printAllReg(regs, regnames);
+            } 
+            else if(regCommand == 'F' || regCommand == 'f'){
+                printAllFPReg(fregs);
+            } 
+            else if(regCommand == 'X' || regCommand == 'x'){
+                char regNum[2];
+                printf("To display a desired integer register, enter the number corresponding to the register: \n");
+                scanf("%s", &regNum);
+                int regNumInt = atoi(regNum);
+                if (regNumInt > 31 || regNumInt < 0){
+                    printf("Invalid integer register number\n");
+                    } else{
+                    printf("X%c:   0x%08x\n", regNumInt, regs[regNumInt]);
                 }
-            } else if(regCommand == 'P' || regCommand == 'p'){
-            char fregNum[2];
-            printf("To display a desired floating point register, enter the number corresponding to the register: \n");
-            scanf("%s", &fregNum);
-            int fregNumInt = atoi(fregNum);
-            if (fregNumInt > 31 || fregNumInt < 0){
-            printf("Invalid floating point register number\n");
-            } else{
-            printf("F%c:   0x%08x\n", fregNumInt, fregs[fregNumInt]);
+            } 
+            else if(regCommand == 'P' || regCommand == 'p'){
+                char fregNum[2];
+                printf("To display a desired floating point register, enter the number corresponding to the register: \n");
+                scanf("%s", &fregNum);
+                int fregNumInt = atoi(fregNum);
+                if (fregNumInt > 31 || fregNumInt < 0){
+                printf("Invalid floating point register number\n");
+                } else{
+                printf("F%c:   0x%08x\n", fregNumInt, fregs[fregNumInt]);
+                }
             }
-            }else{
+            else{
                 printf("Invalid register command, please try again\n"); 
             }
         }
