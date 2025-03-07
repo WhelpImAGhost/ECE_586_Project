@@ -1435,12 +1435,11 @@ void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[
 
         }
         else if(input == 'C' || input == 'c'){
-        return;
+            return;
         }
         else{
-        printf("Invalid command, please try again\n");
+            printf("Invalid command, please try again\n");
         }
-        while (getchar() != '\n');
     //Display that they can type "R" to display a register
         //If R is typed, display register names w/ 0-31 next to them
         //depending on what the user types, print that each time they step
@@ -1454,6 +1453,7 @@ void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[
 
     //Breakpoint Code Should be in here too, idk how to implement yet
     }
+    while (getchar() != '\n');
 }
 
 void fclass_s(float value, uint32_t *out) {
