@@ -255,7 +255,7 @@ int main(int argc, char *argv[]){
 
         if (mode == 1) printAllReg(x, regnames);
         if (mode == 1) printAllFPReg(f);
-        //if (mode == 2) singleStep(instruction, );
+        //if (mode == 2) singleStep(instruction, x, regnames);
         
     }
 
@@ -1357,7 +1357,7 @@ void printAllFPReg(float regs[32]){
     return;
 }
 
-void singleStep(instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float regs[32]) {
+void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float fregs[32]) {
 
     char input[1];
 
@@ -1367,16 +1367,18 @@ void singleStep(instruction, uint32_t array[], int size, uint32_t regs[32], char
 
         if(input == "R" || input == "r"){
             char regCommand[2];
-            printf("To display all integer registers enter: [I]\n To display all floating point registers enter: [FP]\n To print memory contents enter: [M]\n To continue enter: [C]\n");
+            printf("To display all integer registers enter: [I]\n To display all floating point registers enter: [FP]\n To display a specific integer register enter: [X]\n To display a specific integer register enter: [F]\n");
             scanf("%s", regCommand);
-            if(){
-            printAllReg();
-            } else if(){
-            printAllFPReg();
-            } else if(){
-
-            } else if(){
-
+            if(regCommand == "I" || regCommand == "i"){
+            printAllReg(regs, regnames);
+            } else if(regCommand == "FP" || regCommand == "fp" || regCommand == "Fp" || regCommand == "fP"){
+            printAllFPReg(fregs);
+            } else if(regCommand == "X" || regCommand == "x"){
+            char regNum[2];
+            } else if(regCommand == "F" || regCommand == "f"){
+            char fregNum[2];
+            }else{
+                printf("Invalid command, please try again\n"); 
             }
         }
         else if(input == "M" || input == "m"){
