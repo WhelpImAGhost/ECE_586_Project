@@ -41,7 +41,7 @@ void f2_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32
 void f3_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32], float flt_array[32]);
 void fclass_s(float value, uint32_t *out);
 int breakpointInput(int array[]);
-void breakpointCheck(int *bppc, uint32_t instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float fregs[32], int MemWords);
+void breakpointCheck(int bppc[], int numBPs, uint32_t instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float fregs[32], int MemWords);
 void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float fregs[32], int MemWords);
 
 //Instruction Function Protoytpes
@@ -172,8 +172,8 @@ int main(int argc, char *argv[]){
     x[2] = stack_address;
 
     int BreakPC[20];
-    int numbp = 0;
-    if(breakpoints == 1) breakpointInput(BreakPC);
+    int numBreakpoints;
+    if(breakpoints == 1) numBreakpoints = breakpointInput(BreakPC);
 
     // Begin fetching and decoding instructions
     while(continue_program){        
@@ -268,7 +268,7 @@ int main(int argc, char *argv[]){
 
         if (mode == 1) printAllReg(x, regnames);
         if (mode == 1) printAllFPReg(f);
-        if (breakpoints = 1) breakpointCheck(BreakPC, old_pc, MainMem, MemWords, x, regnames, f, MemWords);
+        if (breakpoints = 1) breakpointCheck(BreakPC, numBreakpoints, old_pc, MainMem, MemWords, x, regnames, f, MemWords);
         if (mode == 2) singleStep(old_pc, MainMem, MemWords, x, regnames, f, MemWords);
     }
 
@@ -1399,26 +1399,30 @@ void printAllFPReg(float regs[32]){
     printf("\nEnter the amount of breakpoints you wish to add in the code (1-20): ");
     if (scanf("%d", &numBreaks) != 1 || numBreaks < 0 || numBreaks > 20) {
         printf("\nUnsupported number of breakpoints\n");
-    } else {
-        array[numBreaks];
+        while(getchar() != '\n');
+        return 0;
+    } 
+    else {
         for(int i = 0; i < numBreaks; i++){
             printf("\nEnter the value of the PC where you wish to break (%d): 0x", i+1);
             if (scanf("%x", &array[i]) != 1 || array[i] < 0 || (array[i] % 4) != 0) {
-            printf("Invalid pc value\n");
+                printf("Invalid PC value (must be aligned to 4 bytes)\n");
+                i--;
+                while(getchar() != '\n');
             }   
-            else {
-                printf("\n");
-            }
         }
+    printf("\n");
     while(getchar() != '\n');
-    return *array;
+    return numBreaks;
     }
 }
 
 
-void breakpointCheck(int *bppc, uint32_t instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float fregs[32], int MemWords){
-    if (instruction == bppc[0]){
-        singleStep(instruction, array, size, regs, regnames, fregs, MemWords);
+void breakpointCheck(int bppc[], int numBPs, uint32_t instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float fregs[32], int MemWords){
+    for(int i = 0; i < numBPs; i++){
+        if (instruction == bppc[i]){
+            singleStep(instruction, array, size, regs, regnames, fregs, MemWords);
+        }
     }
     return;
 }
