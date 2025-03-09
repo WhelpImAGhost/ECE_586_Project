@@ -45,7 +45,7 @@ void fclass_s(float value, uint32_t *out);
 int breakpointInput(int array[]);
 void breakpointCheck(int bppc[], int numBPs, uint32_t instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float fregs[32], int MemWords);
 void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float fregs[32], int MemWords);
-int watchingUserInput(uint32_t regindex[], uint32_t fregindex[], uint32_t memindex[]);
+void watchingUserInput(uint32_t regindex[], uint32_t fregindex[], uint32_t memindex[], uint32_t *numRegs, uint32_t *numFregs, uint32_t *numMems);
 void watchingOutput(int numIntRegs, int numFloatRegs, int numMemLocals, uint32_t watchedRegs[], uint32_t watchedFregs[], uint32_t watchedMem[], uint32_t reg[32], char names[32][8], float freg[32], uint32_t mem[32]);
 
 //Instruction Function Protoytpes
@@ -201,7 +201,8 @@ int main(int argc, char *argv[]){
     for(int i = 0; i < 100; i++){
         watchMem[i] = -1;
     }
-    numRegs, numFregs, numMemoryLocals = watchingUserInput(watchReg, watchFreg, watchMem);
+    
+    watchingUserInput(watchReg, watchFreg, watchMem, &numRegs, &numFregs, &numMemoryLocals);
     }
 
     // Begin fetching and decoding instructions
@@ -1477,7 +1478,7 @@ void breakpointCheck(int bppc[], int numBPs, uint32_t instruction, uint32_t arra
     return;
 }
 
-int watchingUserInput(uint32_t regindex[], uint32_t fregindex[], uint32_t memindex[]){
+void watchingUserInput(uint32_t regindex[], uint32_t fregindex[], uint32_t memindex[], uint32_t *numRegs, uint32_t *numFregs, uint32_t *numMems){
     char input = '\0';  // Initialize input variable
     int numIntRegs;
     int numFloatRegs;
@@ -1560,7 +1561,10 @@ int watchingUserInput(uint32_t regindex[], uint32_t fregindex[], uint32_t memind
                     printf("numMemLocals %d: %d\n", i , memindex[i]);
                 }
                 printf("numInt: %d\nnumFloat: %d\nnumMem: %d\n", numIntRegs ,numFloatRegs, numMemLocals);
-                return numIntRegs, numFloatRegs, numMemLocals;
+                *numRegs = numIntRegs;
+                *numFregs = numFloatRegs;
+                *numMems = numMemLocals;
+                return;
             break;
             default:
                 printf("Invalid command, please try again\n");
