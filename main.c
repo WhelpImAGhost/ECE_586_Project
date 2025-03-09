@@ -287,9 +287,10 @@ int main(int argc, char *argv[]){
 
             case ENVIRO:
                 #ifdef DEBUG
-                fprintf(stderr, "0x%02X is an Environment Instruction\n", current_opcode);
-                fprintf(stderr, "Not implemented yet\n");
+                fprintf(stderr, "E-type Instruction");
                 #endif 
+                e_type(MainMem, MemWords, &pc, x);
+                break;
             default:
                 fprintf(stderr, "0x%02X is an invalid op code.\n", current_opcode);
                 exit(1);
