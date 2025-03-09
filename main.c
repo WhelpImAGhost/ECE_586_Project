@@ -1484,7 +1484,6 @@ int watchingUserInput(uint32_t regindex[], float fregindex[], uint32_t memindex[
     while(input != 'C') {
         printf("\nTo watch a memory location enter: [M]\nTo watch a register enter: [R]\nTo continue enter: [C]\n\n");
         scanf(" %c", &input);
-
         switch(input) {
             case 'R':
             case 'r': 
@@ -1496,6 +1495,8 @@ int watchingUserInput(uint32_t regindex[], float fregindex[], uint32_t memindex[
                     printf("\nEnter the amount of integer registers you wish to watch: ");
                     if (scanf("%d", &numIntRegs) != 1 || numIntRegs < 0 || numIntRegs > 31) {
                         printf("\nInvalid register amount\n");
+                    }
+                    else{
                         for(int i = 0; i < numIntRegs; i++){
                             printf("\nEnter the integer register you wish to watch: x");
                             if (scanf("%d", &regindex[i]) != 1 || regindex[i] < 0 || regindex[i] > 31) {
@@ -1505,13 +1506,16 @@ int watchingUserInput(uint32_t regindex[], float fregindex[], uint32_t memindex[
                             }  
                         }
                     } 
-                    else if (regCommand == 'F' || regCommand == 'f') {
+                }
+                else if (regCommand == 'F' || regCommand == 'f') {
                         int fregNumInt;
                         printf("\nEnter the amount of floating point registers you wish to watch: ");
                         if (scanf("%d", &numFloatRegs) != 1 || numFloatRegs < 0 || numFloatRegs > 31) {
                             printf("\nInvalid register amount\n");
+                        }
+                        else{
                             for(int i = 0; i < numFloatRegs; i++){
-                                printf("\nEnter the floating point register you wish to watch: x");
+                                printf("\nEnter the floating point register you wish to watch: f");
                                 if (scanf("%d", &fregindex[i]) != 1 || fregindex[i] < 0 || fregindex[i] > 31) {
                                     printf("Invalid Register Number\n");
                                     i--;
@@ -1519,11 +1523,11 @@ int watchingUserInput(uint32_t regindex[], float fregindex[], uint32_t memindex[
                                 }     
                             }
                         } 
-                        else {
-                            printf("Invalid register command, please try again\n");
-                        }
-                    }
+                        
                 }
+                else{
+                    printf("Invalid register command, please try again\n");
+                    }
                 break;
             case 'M':
             case 'm': 
@@ -1673,4 +1677,3 @@ void fclass_s(float value, uint32_t *out) {
 
     *out = result;
 }
-
