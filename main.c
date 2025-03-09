@@ -1494,7 +1494,6 @@ void watchingUserInput(uint32_t regindex[], uint32_t fregindex[], uint32_t memin
                 printf("To watch an integer register enter: [X]\nTo watch a floating point register enter: [F]\n\n");
                 scanf(" %c", &regCommand);
                 if (regCommand == 'X' || regCommand == 'x') {
-                    int regNumInt;
                     printf("\nEnter the amount of integer registers you wish to watch: ");
                     if (scanf("%d", &numIntRegs) != 1 || numIntRegs < 0 || numIntRegs > 31) {
                         printf("\nInvalid register amount\n");
@@ -1511,7 +1510,6 @@ void watchingUserInput(uint32_t regindex[], uint32_t fregindex[], uint32_t memin
                     } 
                 }
                 else if (regCommand == 'F' || regCommand == 'f') {
-                        int fregNumInt;
                         printf("\nEnter the amount of floating point registers you wish to watch: ");
                         if (scanf("%d", &numFloatRegs) != 1 || numFloatRegs < 0 || numFloatRegs > 31) {
                             printf("\nInvalid register amount\n");
@@ -1534,7 +1532,6 @@ void watchingUserInput(uint32_t regindex[], uint32_t fregindex[], uint32_t memin
                 break;
             case 'M':
             case 'm': 
-                int memAddress;
                 printf("\nEnter the amount of memory locations you wish to watch (1-100): ");
                     if (scanf("%d", &numMemLocals) != 1 || numMemLocals < 0 || numMemLocals > 100) {
                         printf("\nInvalid amount\n");
