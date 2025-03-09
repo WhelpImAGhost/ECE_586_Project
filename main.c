@@ -1421,6 +1421,7 @@ void printAllFPReg(float regs[32]){
 void breakpointCheck(int bppc[], int numBPs, uint32_t instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float fregs[32], int MemWords){
     for(int i = 0; i < numBPs; i++){
         if (instruction == bppc[i]){
+            printf("Breakpoint at PC: 0x%05x\n\n", bppc[i]);
             singleStep(instruction, array, size, regs, regnames, fregs, MemWords);
         }
     }
