@@ -51,7 +51,7 @@ int main(int argc, char *argv[]){
     char test_str[10];
 
     // Local variables for function use
-    uint32_t address, instruction, pc = 0;
+    uint32_t address, instruction, pc = START_ADDRESS;
     uint32_t current_opcode;
     bool continue_program = true;
 
@@ -82,7 +82,7 @@ int main(int argc, char *argv[]){
                    // 1 is verbose
 
     // Memory & Stack Starting Addresses
-    uint32_t stack_address = STACK_ADDRESS, prog_start = START_ADDRESS;
+    uint32_t stack_address = STACK_ADDRESS;
 
     // Set default filename
     char *default_filename = "Mem_files/Float_mem/flw.mem";
@@ -97,12 +97,12 @@ int main(int argc, char *argv[]){
             mode = atoi(argv[1]); // Set operation mode
         }
         else if (strcmp(argv[0], "-sp")) {
-            if ( (atoi(argv[1]) % 4) != 0) fprintf(stderr, "Invalid stack pointer delcaration. Defaulting to 0\n");
+            if ( (atoi(argv[1]) % 4) != 0) fprintf(stderr, "Invalid stack pointer delcaration. Defaulting to 65536\n");
             else stack_address = (uint32_t)atoi(argv[1]);  // Set stack pointer
         }
         else if (strcmp(argv[0], "-s")){
             if ( (atoi(argv[1]) % 4) != 0) fprintf(stderr, "Invalid starting PC delcaration. Defaulting to 0\n");
-            else prog_start = (uint32_t) atoi(argv[1]); // Set starting address
+            else pc = (uint32_t) atoi(argv[1]); // Set starting address
         }
         else { 
             printf("\nInvalid Arguments\n"); exit(-1); 
@@ -141,6 +141,8 @@ int main(int argc, char *argv[]){
 
     // Allocating Memory Size (64KB by default)
     const int MemAlloc = pow(2, MEMORY_SIZE);
+
+
 
     // Load instructions into memory array
     while (fscanf(file, "%x: %x", &address, &instruction ) == 2){
