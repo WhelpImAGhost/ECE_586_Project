@@ -201,7 +201,7 @@ int main(int argc, char *argv[]){
     for(int i = 0; i < 100; i++){
         watchMem[i] = -1;
     }
-    numRegs, numFregs, numMemoryLocals = watchingUserInput(watchReg, watchFreg, MainMem);
+    numRegs, numFregs, numMemoryLocals = watchingUserInput(watchReg, watchFreg, watchMem);
     }
 
     // Begin fetching and decoding instructions
@@ -1541,7 +1541,7 @@ int watchingUserInput(uint32_t regindex[], uint32_t fregindex[], uint32_t memind
                     else{
                         for(int i = 0; i < numMemLocals; i++){
                             printf("Enter the desired memory address (Hexadecimal): 0x");
-                            if (scanf("%x", &memindex[memAddress]) != 1 || memindex[memAddress] < 0 || memindex[memAddress] > 0xFFFF) {
+                            if (scanf("%x", &memindex[i]) != 1 || memindex[i] < 0 || memindex[i] > 0xFFFF) {
                                 printf("\nInvalid memory address\n\n");
                                 i--;
                                 while(getchar() != '\n');
@@ -1552,6 +1552,14 @@ int watchingUserInput(uint32_t regindex[], uint32_t fregindex[], uint32_t memind
             case 'C':
             case 'c':
                 while(getchar() != '\n');
+                for (int i = 0; i < 32; i++){
+                    printf("numIntReg %d:   %d\n", i , regindex[i]);
+                    printf("numFloatReg %d: %d\n", i , fregindex[i]);
+                }
+                for (int i = 0; i < 100; i++){
+                    printf("numMemLocals %d: %d\n", i , memindex[i]);
+                }
+                printf("numInt: %d\nnumFloat: %d\nnumMem: %d\n", numIntRegs ,numFloatRegs, numMemLocals);
                 return numIntRegs, numFloatRegs, numMemLocals;
             break;
             default:
@@ -1562,6 +1570,7 @@ int watchingUserInput(uint32_t regindex[], uint32_t fregindex[], uint32_t memind
 }
 
 void watchingOutput(int numIntRegs, int numFloatRegs, int numMemLocals, uint32_t watchedRegs[], uint32_t watchedFregs[], uint32_t watchedMem[], uint32_t reg[32], char names[32][8], float freg[32], uint32_t mem[32]){
+    
     for(int i = 0; i < numIntRegs; i++){
         printf("\n\nWatched Integer Registers:\n");
         if(watchedRegs[i] != -1){
@@ -1573,16 +1582,19 @@ void watchingOutput(int numIntRegs, int numFloatRegs, int numMemLocals, uint32_t
         printf("\n\nWatched Floating point Registers:\n");
         if(watchedFregs[i] != -1){
             int fregisternumber = watchedFregs[i];
-            printf("Floating Point Register x%d: 0x%08x\n", fregisternumber, freg[fregisternumber]);
+            printf("Floating Point Register f%d: 0x%08x\n", fregisternumber, freg[fregisternumber]);
         }
     }
-    for(int i = 0; i < numMemLocals; i++){
-        printf("\n\nWatched Memory Locations:\n");
-        if(watchedMem[i] != -1){
-            int memoryaddress = watchedMem[i];
-            printf("Memory Location 0x%05x: 0x%08x\n", memoryaddress, mem[memoryaddress/4]);
+    if (numMemLocals > 0){
+        printf("\nWatched Memory Locations:\n");
+        for(int i = 0; i < numMemLocals; i++){
+            if(watchedMem[i] != -1){
+                int memoryaddress = watchedMem[i];
+                printf("Memory Location 0x%05x: 0x%08x\n", memoryaddress, mem[memoryaddress/4]);
+            }
         }
     }
+
     return;
 }
 
