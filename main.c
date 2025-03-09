@@ -1571,20 +1571,28 @@ int watchingUserInput(uint32_t regindex[], uint32_t fregindex[], uint32_t memind
 
 void watchingOutput(int numIntRegs, int numFloatRegs, int numMemLocals, uint32_t watchedRegs[], uint32_t watchedFregs[], uint32_t watchedMem[], uint32_t reg[32], char names[32][8], float freg[32], uint32_t mem[32]){
     
-    for(int i = 0; i < numIntRegs; i++){
+    if(numIntRegs > 0 ){
         printf("\n\nWatched Integer Registers:\n");
-        if(watchedRegs[i] != -1){
-            int registernumber = watchedRegs[i];
-            printf("Register x%d %s: 0x%08x\n", registernumber, names[registernumber], reg[registernumber]);
+        for(int i = 0; i < numIntRegs; i++){
+            if(watchedRegs[i] != -1){
+                int registernumber = watchedRegs[i];
+                printf("Register x%d %s: 0x%08x\n", registernumber, names[registernumber], reg[registernumber]);
+            }
         }
     }
-    for(int i = 0; i < numFloatRegs; i++){
+    else printf("No integer registers watched\n");
+
+    if (numFloatRegs > 0){
         printf("\n\nWatched Floating point Registers:\n");
-        if(watchedFregs[i] != -1){
-            int fregisternumber = watchedFregs[i];
-            printf("Floating Point Register f%d: 0x%08x\n", fregisternumber, freg[fregisternumber]);
+        for(int i = 0; i < numFloatRegs; i++){
+            if(watchedFregs[i] != -1){
+                int fregisternumber = watchedFregs[i];
+                printf("Floating Point Register f%d: 0x%08x\n", fregisternumber, freg[fregisternumber]);
+            }
         }
     }
+    else printf("No floating registers watched\n");
+
     if (numMemLocals > 0){
         printf("\nWatched Memory Locations:\n");
         for(int i = 0; i < numMemLocals; i++){
@@ -1594,6 +1602,7 @@ void watchingOutput(int numIntRegs, int numFloatRegs, int numMemLocals, uint32_t
             }
         }
     }
+    else printf("No memory locations watched\n");
 
     return;
 }
