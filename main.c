@@ -11,6 +11,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <math.h>
+#include <io.h>
 #include "defines.c"
 
 // Debug function to print memory info
@@ -35,6 +36,7 @@ void s_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
 void b_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]);
 void u_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]);
 void j_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]);
+void e_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]);
 void f1_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32], float flt_array[32]);
 float flt_round(float value, int rm);
 void f2_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32], float flt_array[32]);
@@ -1125,6 +1127,24 @@ void j_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
 
 }
 
+void e_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]){
+    
+
+    switch(reg_array[17]){
+        case 63: // Read
+            reg_array[10] = _read(reg_array[10], (void*)(uintptr_t)reg_array[11], reg_array[12]);
+            break;
+        case 64: // Write
+            reg_array[10] = _write(reg_array[10], (void*)(uintptr_t)reg_array[11], reg_array[12]);
+        case 94: // Exit
+            exit(reg_array[10]);
+        default:
+            fprintf(stderr, "Invalid or Unknown syscall val %d\n", reg_array[17]);
+            exit(-1);
+    }
+    
+    return;
+}
 
 void f1_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32], float flt_array[32]){
 
@@ -1551,3 +1571,4 @@ void fclass_s(float value, uint32_t *out) {
 
     *out = result;
 }
+
