@@ -11,6 +11,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <math.h>
+#include <io.h>
 #include "defines.c"
 
 // Debug function to print memory info
@@ -35,11 +36,17 @@ void s_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
 void b_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]);
 void u_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]);
 void j_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]);
+void e_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]);
 void f1_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32], float flt_array[32]);
 float flt_round(float value, int rm);
 void f2_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32], float flt_array[32]);
 void f3_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32], float flt_array[32]);
 void fclass_s(float value, uint32_t *out);
+int breakpointInput(int array[]);
+void breakpointCheck(int bppc[], int numBPs, uint32_t instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float fregs[32], int MemWords);
+void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float fregs[32], int MemWords);
+void watchingUserInput(uint32_t regindex[], uint32_t fregindex[], uint32_t memindex[], uint32_t *numRegs, uint32_t *numFregs, uint32_t *numMems);
+void watchingOutput(int numIntRegs, int numFloatRegs, int numMemLocals, uint32_t watchedRegs[], uint32_t watchedFregs[], uint32_t watchedMem[], uint32_t reg[32], char names[32][8], float freg[32], uint32_t mem[32]);
 
 //Instruction Function Protoytpes
 void load(uint8_t function, uint8_t destination, uint8_t source, int32_t immediate, uint32_t array[], int size, uint32_t reg_array[32]);
@@ -75,6 +82,13 @@ int main(int argc, char *argv[]){
     // Set default mode
     int mode = 0;  // 0 is silent
                    // 1 is verbose
+                   // 2 is step through
+
+    // Default to Breakpoints Off
+    int breakpoints = 0;
+
+    // Default to watching to Off
+    int watching = 0;
 
     // Memory & Stack Starting Addresses
     uint32_t stack_address = STACK_ADDRESS;
@@ -94,12 +108,19 @@ int main(int argc, char *argv[]){
         {
             mode = atoi(argv[1]); // Set operation mode
         }
+        else if (strcmp(argv[0], "-bp" ) == 0 ) {
+            breakpoints = atoi(argv[1]); // Set breakpoint mode
+        }
+        else if (strcmp(argv[0], "-w" ) == 0 ) {
+            watching = atoi(argv[1]); // Set watching mode
+        }
         else if (strcmp(argv[0], "-p") == 0)
         {
             if ((strtol(argv[1], NULL, 16) % 4) != 0)
                 fprintf(stderr, "Invalid stack pointer delcaration. Defaulting to 0x10000\n");
             else
                 stack_address = (uint32_t)strtol(argv[1], NULL, 16); // Set stack pointer
+
         }
         else if (strcmp(argv[0], "-s") == 0)
         {
@@ -170,6 +191,13 @@ int main(int argc, char *argv[]){
 
     x[2] = stack_address;
 
+
+    int BreakPC[20];
+    int numBreakpoints = 0;
+    if(breakpoints == 1){
+        numBreakpoints = breakpointInput(BreakPC);
+    }
+
     if (pc > (MemWords * 4)) {
         fprintf(stderr, "PC was set to an address larger than the program size. Exiting...");
         exit(-1);
@@ -178,12 +206,28 @@ int main(int argc, char *argv[]){
         fprintf(stderr, "Stack Address was set to an address larger than the program size. Exiting...");
         exit(-1);
     }
+  
+    int numMemoryLocals = 0;
+    int numRegs = 0;
+    int numFregs = 0;
+    uint32_t watchReg[32];
+    uint32_t watchFreg[32];
+    uint32_t watchMem[100];
+    if(watching == 1){
+    for(int i = 0; i < 32; i++){
+        watchReg[i] = -1;
+        watchFreg[i] = -1;
+    }
+    for(int i = 0; i < 100; i++){
+        watchMem[i] = -1;
+    }
+    
+    watchingUserInput(watchReg, watchFreg, watchMem, &numRegs, &numFregs, &numMemoryLocals);
+    }
 
     // Begin fetching and decoding instructions
-    while(continue_program){
-
+    while(continue_program){        
         fetch_and_decode(MainMem, pc, &current_opcode, mode);
-
         old_pc = pc;
         switch (current_opcode) {
             case REGS_OP:
@@ -264,17 +308,20 @@ int main(int argc, char *argv[]){
 
             case ENVIRO:
                 #ifdef DEBUG
-                fprintf(stderr, "0x%02X is an Environment Instruction\n", current_opcode);
-                fprintf(stderr, "Not implemented yet\n");
+                fprintf(stderr, "E-type Instruction");
                 #endif 
+                e_type(MainMem, MemWords, &pc, x);
+                break;
             default:
                 fprintf(stderr, "0x%02X is an invalid op code.\n", current_opcode);
                 exit(1);
         }
 
+        if (breakpoints == 1) breakpointCheck(BreakPC, numBreakpoints, old_pc, MainMem, MemWords, x, regnames, f, MemWords);
+        if (watching == 1) watchingOutput(numRegs, numFregs, numMemoryLocals, watchReg, watchFreg, watchMem, x, regnames, f, MainMem);
         if (mode == 1) printAllReg(x, regnames);
         if (mode == 1) printAllFPReg(f);
-
+        if (mode == 2) singleStep(old_pc, MainMem, MemWords, x, regnames, f, MemWords);
     }
 
 
@@ -294,12 +341,10 @@ int main(int argc, char *argv[]){
 
 // Memory dump function for debugging (using a log file)
 void printAllMem(uint32_t array[], int size){
-#ifdef DEBUG
 fprintf(stderr,"\n");
 for (int i = 0; i < size; i++){
-    if (array[i] != 0x0) printf( "Array Member: %4d     Memory Address: 0x%08X     Contents: 0x%08X\n", i, 4*i, array[i]);
+    if (array[i] != 0x0) printf( /*Array Member: %4d*/ "Memory Address: 0x%08X     Contents: 0x%08X\n", /*i,*/ 4*i, array[i]);
 }
-#endif
     return;
 }
 
@@ -1132,6 +1177,24 @@ void j_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
 
 }
 
+void e_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]){
+    
+
+    switch(reg_array[17]){
+        case 63: // Read
+            reg_array[10] = _read(reg_array[10], (void*)(uintptr_t)reg_array[11], reg_array[12]);
+            break;
+        case 64: // Write
+            reg_array[10] = _write(reg_array[10], (void*)(uintptr_t)reg_array[11], reg_array[12]);
+        case 94: // Exit
+            exit(reg_array[10]);
+        default:
+            fprintf(stderr, "Invalid or Unknown syscall val %d\n", reg_array[17]);
+            exit(-1);
+    }
+    
+    return;
+}
 
 void f1_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32], float flt_array[32]){
 
@@ -1401,6 +1464,246 @@ void printAllFPReg(float regs[32]){
     return;
 }
 
+int breakpointInput(int array[]){
+    int numBreaks;
+    printf("\nEnter the amount of breakpoints you wish to add in the code (1-20): ");
+    if (scanf("%d", &numBreaks) != 1 || numBreaks < 0 || numBreaks > 20) {
+        printf("\nUnsupported number of breakpoints\n");
+        while(getchar() != '\n');
+        return 0;
+    } 
+    else {
+        for(int i = 0; i < numBreaks; i++){
+            printf("\nEnter the value of the PC where you wish to break (%d): 0x", i+1);
+            if (scanf("%x", &array[i]) != 1 || array[i] < 0 || (array[i] % 4) != 0) {
+                printf("Invalid PC value (must be aligned to 4 bytes)\n");
+                i--;
+                while(getchar() != '\n');
+            }   
+        }
+    printf("\n");
+    while(getchar() != '\n');
+    return numBreaks;
+    }
+}
+
+
+void breakpointCheck(int bppc[], int numBPs, uint32_t instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float fregs[32], int MemWords){
+    for(int i = 0; i < numBPs; i++){
+        if (instruction == bppc[i]){
+            printf("Breakpoint at PC: 0x%05x\n\n", bppc[i]);
+            singleStep(instruction, array, size, regs, regnames, fregs, MemWords);
+        }
+    }
+    return;
+}
+
+void watchingUserInput(uint32_t regindex[], uint32_t fregindex[], uint32_t memindex[], uint32_t *numRegs, uint32_t *numFregs, uint32_t *numMems){
+    char input = '\0';  // Initialize input variable
+    int numIntRegs = 0;
+    int numFloatRegs = 0;
+    int numMemLocals = 0;
+    
+    while(input != 'C') {
+        printf("\nTo watch a memory location enter: [M]\nTo watch a register enter: [R]\nTo continue enter: [C]\n\n");
+        scanf(" %c", &input);
+        switch (input)
+        {
+        case 'R':
+        case 'r':
+            char regCommand;
+            printf("To watch an integer register enter: [X]\nTo watch a floating point register enter: [F]\n\n");
+            scanf(" %c", &regCommand);
+            if (regCommand == 'X' || regCommand == 'x')
+            {
+                printf("\nEnter the amount of integer registers you wish to watch: ");
+                if (scanf("%d", &numIntRegs) != 1 || numIntRegs < 0 || numIntRegs > 31)
+                {
+                    printf("\nInvalid register amount\n");
+                }
+                else
+                {
+                    for (int i = 0; i < numIntRegs; i++)
+                    {
+                        printf("\nEnter the integer register you wish to watch: x");
+                        if (scanf("%d", &regindex[i]) != 1 || regindex[i] < 0 || regindex[i] > 31)
+                        {
+                            printf("Invalid Register Number\n");
+                            i--;
+                            while (getchar() != '\n')
+                                ;
+                        }
+                    }
+                }
+            }
+            else if (regCommand == 'F' || regCommand == 'f')
+            {
+                printf("\nEnter the amount of floating point registers you wish to watch: ");
+                if (scanf("%d", &numFloatRegs) != 1 || numFloatRegs < 0 || numFloatRegs > 31)
+                {
+                    printf("\nInvalid register amount\n");
+                }
+                else
+                {
+                    for (int i = 0; i < numFloatRegs; i++)
+                    {
+                        printf("\nEnter the floating point register you wish to watch: f");
+                        if (scanf("%d", &fregindex[i]) != 1 || fregindex[i] < 0 || fregindex[i] > 31)
+                        {
+                            printf("Invalid Register Number\n");
+                            i--;
+                            while (getchar() != '\n')
+                                ;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                printf("Invalid register command, please try again\n");
+            }
+            break;
+            case 'C':
+            case 'c':
+                while(getchar() != '\n');
+                *numRegs = numIntRegs;
+                *numFregs = numFloatRegs;
+                *numMems = numMemLocals;
+                return;
+            break;
+        default:
+            printf("Invalid command, please try again\n");
+        }
+        while (getchar() != '\n')
+            ;
+    }
+}
+
+void watchingOutput(int numIntRegs, int numFloatRegs, int numMemLocals, uint32_t watchedRegs[], uint32_t watchedFregs[], uint32_t watchedMem[], uint32_t reg[32], char names[32][8], float freg[32], uint32_t mem[32]){
+    
+    uint32_t ui;
+
+    if(numIntRegs > 0 ){
+        printf("\n\nWatched Integer Registers:\n");
+        for(int i = 0; i < numIntRegs; i++){
+            if(watchedRegs[i] != -1){
+                int registernumber = watchedRegs[i];
+                printf("Register x%d %s: 0x%08x\n", registernumber, names[registernumber], reg[registernumber]);
+            }
+        }
+    }
+    //else printf("No integer registers watched\n");
+
+    if (numFloatRegs > 0){
+        printf("\n\nWatched Floating point Registers:\n");
+        for(int i = 0; i < numFloatRegs; i++){
+            if(watchedFregs[i] != -1){
+                memcpy(&ui, &freg[watchedFregs[i]], sizeof(ui));
+                printf("Floating Point Register f%d: 0x%08x\n", watchedFregs[i], ui);
+            }
+        }
+    }
+    //else printf("No floating registers watched\n");
+
+    if (numMemLocals > 0){
+        printf("\nWatched Memory Locations:\n");
+        for(int i = 0; i < numMemLocals; i++){
+            if(watchedMem[i] != -1){
+                int memoryaddress = watchedMem[i];
+                printf("Memory Location 0x%05x: 0x%08x\n", memoryaddress, mem[memoryaddress/4]);
+            }
+        }
+    }
+    //else printf("No memory locations watched\n");
+
+    return;
+}
+
+void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float fregs[32], int MemWords) {
+
+        char input = '\0';  // Initialize input variable
+    
+        while(input != 'C') {
+            printf("To display current instruction enter: [I]\nTo print register contents enter: [R]\nTo print memory contents enter: [M]\nTo continue enter: [C]\n\n");
+            scanf(" %c", &input);
+    
+            switch(input) {
+                case 'R':
+                case 'r': {
+                    char regCommand;
+                    printf("To display all integer registers enter: [R]\nTo display all floating point registers enter: [F]\nTo display a specific integer register enter: [X]\nTo display a specific floating point register enter: [P]\n\n");
+                    scanf(" %c", &regCommand);
+    
+                    if (regCommand == 'R' || regCommand == 'r') {
+                        printf("\n");
+                        printAllReg(regs, regnames);
+                    } else if (regCommand == 'F' || regCommand == 'f') {
+                        printf("\n");
+                        printAllFPReg(fregs);
+                    } else if (regCommand == 'X' || regCommand == 'x') {
+                        int regNumInt;
+                        printf("Enter the integer register number (0-31): ");
+                        if (scanf("%d", &regNumInt) != 1 || regNumInt < 0 || regNumInt > 31) {
+                            printf("Invalid register number\n");
+                        } else {
+                            printf("x%d %s: 0x%08x\n\n", regNumInt, regnames[regNumInt], regs[regNumInt]);
+                        }
+                    } else if (regCommand == 'P' || regCommand == 'p') {
+                        int fregNumInt;
+                        printf("Enter the floating-point register number (0-31): ");
+                        if (scanf("%d", &fregNumInt) != 1 || fregNumInt < 0 || fregNumInt > 31) {
+                            printf("Invalid register number\n");
+                        } else {
+                            printf("f%d: 0x%08x\n\n", fregNumInt, fregs[fregNumInt]);
+                        }
+                    } else {
+                        printf("Invalid register command, please try again\n");
+                    }
+                    break;
+                }
+    
+                case 'M':
+                case 'm': {
+                    char memCommand;
+                    printf("To display all nonzero memory locations enter: [M]\nTo display a specific memory address enter: [A]\n\n");
+                    scanf(" %c", &memCommand);
+                    if (memCommand == 'M' || memCommand == 'm') {
+                        printf("\n");
+                        printAllMem(array, MemWords);
+                        printf("\n");
+                    } else if (memCommand == 'A' || memCommand == 'a') {
+                        printf("\n");
+                        int memAddress;
+                        printf("Enter the desired memory address (Hexadecimal): 0x");
+                        if (scanf("%x", &memAddress) != 1 || memAddress < 0 || memAddress > 0xFFFF) {
+                            printf("\nInvalid register number\n\n");
+                        } else {
+                            printf("\nAddress 0x%05x: 0x%08x\n\n", memAddress, array[memAddress / 4]);
+                        }
+                    } else {
+                        printf("Invalid memory command, please try again\n");
+                    }
+                    break;
+                }
+    
+                case 'I':
+                case 'i':
+                    printf("Current Instruction: 0x%08x\n\n", array[instruction/4]);
+                    break;
+    
+                case 'C':
+                case 'c':
+                    while(getchar() != '\n');
+                    return;  // Exit the loop when 'C' is entered
+    
+                default:
+                    printf("Invalid command, please try again\n");
+            }
+    
+            // Clear the newline left by scanf
+            while(getchar() != '\n');
+        }
+    }
 
 void fclass_s(float value, uint32_t *out) {
     uint32_t bits;
