@@ -97,10 +97,12 @@ int main(int argc, char *argv[]){
             mode = atoi(argv[1]); // Set operation mode
         }
         else if (strcmp(argv[0], "-sp")) {
-            stack_address = (uint32_t)atoi(argv[1]);  // Set stack pointer
+            if ( (atoi(argv[1]) % 4) != 0) fprintf(stderr, "Invalid stack pointer delcaration. Defaulting to 0\n");
+            else stack_address = (uint32_t)atoi(argv[1]);  // Set stack pointer
         }
         else if (strcmp(argv[0], "-s")){
-            prog_start = (uint32_t) atoi(argv[1]); // Set starting address
+            if ( (atoi(argv[1]) % 4) != 0) fprintf(stderr, "Invalid starting PC delcaration. Defaulting to 0\n");
+            else prog_start = (uint32_t) atoi(argv[1]); // Set starting address
         }
         else { 
             printf("\nInvalid Arguments\n"); exit(-1); 
