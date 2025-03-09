@@ -53,12 +53,7 @@ int main(int argc, char *argv[]){
     // Local variables for function use
     uint32_t address, instruction, pc = START_ADDRESS;
     uint32_t current_opcode;
-    bool continue_program = true;
-
-    // Opcode array
-    uint32_t opcodes[10] = {REGS_OP, IMMS_OP,LOAD_OP, STOR_OP, BRAN_OP, 
-                            JAL_OP, JALR_OP, LUI_OP, AUIPC, ENVIRO };
-    
+    bool continue_program = true;    
 
     char regnames[32][8] = {
                     "(zero)", "(ra)", "(sp)", "(gp)", "(tp)", "(t0)", "(t1)", "(t2)",
@@ -89,25 +84,35 @@ int main(int argc, char *argv[]){
     char *filename = default_filename;
 
     // Flags for setting non-default variable values
-    for( argc--, argv++; argc > 0; argc-=2, argv+=2 ) {
-        if (strcmp(argv[0], "-f" ) == 0 ) {
+    for (argc--, argv++; argc > 0; argc -= 2, argv += 2)
+    {
+        if (strcmp(argv[0], "-f") == 0)
+        {
             filename = argv[1]; // Set input file
         }
-        else if (strcmp(argv[0], "-m" ) == 0 ) {
+        else if (strcmp(argv[0], "-m") == 0)
+        {
             mode = atoi(argv[1]); // Set operation mode
         }
-        else if (strcmp(argv[0], "-sp")) {
-            if ( (atoi(argv[1]) % 4) != 0) fprintf(stderr, "Invalid stack pointer delcaration. Defaulting to 65536\n");
-            else stack_address = (uint32_t)atoi(argv[1]);  // Set stack pointer
+        else if (strcmp(argv[0], "-p") == 0)
+        {
+            if ((strtol(argv[1], NULL, 16) % 4) != 0)
+                fprintf(stderr, "Invalid stack pointer delcaration. Defaulting to 0x10000\n");
+            else
+                stack_address = (uint32_t)strtol(argv[1], NULL, 16); // Set stack pointer
         }
-        else if (strcmp(argv[0], "-s")){
-            if ( (atoi(argv[1]) % 4) != 0) fprintf(stderr, "Invalid starting PC delcaration. Defaulting to 0\n");
-            else pc = (uint32_t) atoi(argv[1]); // Set starting address
+        else if (strcmp(argv[0], "-s") == 0)
+        {
+            if ((strtol(argv[1], NULL, 16) % 4) != 0)
+                fprintf(stderr, "Invalid starting PC delcaration. Defaulting to 0\n");
+            else
+                pc = (uint32_t)strtol(argv[1], NULL, 16);   // Set starting address
         }
-        else { 
-            printf("\nInvalid Arguments\n"); exit(-1); 
+        else
+        {
+            printf("\nInvalid Arguments\n");
+            exit(-1);
         }
-
     }
     FILE *file = fopen(filename, "r");
 
@@ -164,6 +169,15 @@ int main(int argc, char *argv[]){
     }
 
     x[2] = stack_address;
+
+    if (pc > (MemWords * 4)) {
+        fprintf(stderr, "PC was set to an address larger than the program size. Exiting...");
+        exit(-1);
+    }  
+    else if (x[2] > (MemWords * 4)){
+        fprintf(stderr, "Stack Address was set to an address larger than the program size. Exiting...");
+        exit(-1);
+    }
 
     // Begin fetching and decoding instructions
     while(continue_program){
