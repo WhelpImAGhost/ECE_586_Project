@@ -1487,65 +1487,61 @@ void watchingUserInput(uint32_t regindex[], uint32_t fregindex[], uint32_t memin
     while(input != 'C') {
         printf("\nTo watch a memory location enter: [M]\nTo watch a register enter: [R]\nTo continue enter: [C]\n\n");
         scanf(" %c", &input);
-        switch(input) {
-            case 'R':
-            case 'r': 
-                char regCommand;
-                printf("To watch an integer register enter: [X]\nTo watch a floating point register enter: [F]\n\n");
-                scanf(" %c", &regCommand);
-                if (regCommand == 'X' || regCommand == 'x') {
-                    printf("\nEnter the amount of integer registers you wish to watch: ");
-                    if (scanf("%d", &numIntRegs) != 1 || numIntRegs < 0 || numIntRegs > 31) {
-                        printf("\nInvalid register amount\n");
-                    }
-                    else{
-                        for(int i = 0; i < numIntRegs; i++){
-                            printf("\nEnter the integer register you wish to watch: x");
-                            if (scanf("%d", &regindex[i]) != 1 || regindex[i] < 0 || regindex[i] > 31) {
-                                printf("Invalid Register Number\n");
-                                i--;
-                                while(getchar() != '\n');
-                            }  
-                        }
-                    } 
+        switch (input)
+        {
+        case 'R':
+        case 'r':
+            char regCommand;
+            printf("To watch an integer register enter: [X]\nTo watch a floating point register enter: [F]\n\n");
+            scanf(" %c", &regCommand);
+            if (regCommand == 'X' || regCommand == 'x')
+            {
+                printf("\nEnter the amount of integer registers you wish to watch: ");
+                if (scanf("%d", &numIntRegs) != 1 || numIntRegs < 0 || numIntRegs > 31)
+                {
+                    printf("\nInvalid register amount\n");
                 }
-                else if (regCommand == 'F' || regCommand == 'f') {
-                        printf("\nEnter the amount of floating point registers you wish to watch: ");
-                        if (scanf("%d", &numFloatRegs) != 1 || numFloatRegs < 0 || numFloatRegs > 31) {
-                            printf("\nInvalid register amount\n");
+                else
+                {
+                    for (int i = 0; i < numIntRegs; i++)
+                    {
+                        printf("\nEnter the integer register you wish to watch: x");
+                        if (scanf("%d", &regindex[i]) != 1 || regindex[i] < 0 || regindex[i] > 31)
+                        {
+                            printf("Invalid Register Number\n");
+                            i--;
+                            while (getchar() != '\n')
+                                ;
                         }
-                        else{
-                            for(int i = 0; i < numFloatRegs; i++){
-                                printf("\nEnter the floating point register you wish to watch: f");
-                                if (scanf("%d", &fregindex[i]) != 1 || fregindex[i] < 0 || fregindex[i] > 31) {
-                                    printf("Invalid Register Number\n");
-                                    i--;
-                                    while(getchar() != '\n');
-                                }     
-                            }
-                        } 
-                        
+                    }
                 }
-                else{
-                    printf("Invalid register command, please try again\n");
-                    }
-                break;
-            case 'M':
-            case 'm': 
-                printf("\nEnter the amount of memory locations you wish to watch (1-100): ");
-                    if (scanf("%d", &numMemLocals) != 1 || numMemLocals < 0 || numMemLocals > 100) {
-                        printf("\nInvalid amount\n");
-                    }
-                    else{
-                        for(int i = 0; i < numMemLocals; i++){
-                            printf("Enter the desired memory address (Hexadecimal): 0x");
-                            if (scanf("%x", &memindex[i]) != 1 || memindex[i] < 0 || memindex[i] > 0xFFFF) {
-                                printf("\nInvalid memory address\n\n");
-                                i--;
-                                while(getchar() != '\n');
-                            }
+            }
+            else if (regCommand == 'F' || regCommand == 'f')
+            {
+                printf("\nEnter the amount of floating point registers you wish to watch: ");
+                if (scanf("%d", &numFloatRegs) != 1 || numFloatRegs < 0 || numFloatRegs > 31)
+                {
+                    printf("\nInvalid register amount\n");
+                }
+                else
+                {
+                    for (int i = 0; i < numFloatRegs; i++)
+                    {
+                        printf("\nEnter the floating point register you wish to watch: f");
+                        if (scanf("%d", &fregindex[i]) != 1 || fregindex[i] < 0 || fregindex[i] > 31)
+                        {
+                            printf("Invalid Register Number\n");
+                            i--;
+                            while (getchar() != '\n')
+                                ;
                         }
-                    } 
+                    }
+                }
+            }
+            else
+            {
+                printf("Invalid register command, please try again\n");
+            }
             break;
             case 'C':
             case 'c':
@@ -1555,15 +1551,18 @@ void watchingUserInput(uint32_t regindex[], uint32_t fregindex[], uint32_t memin
                 *numMems = numMemLocals;
                 return;
             break;
-            default:
-                printf("Invalid command, please try again\n");
+        default:
+            printf("Invalid command, please try again\n");
         }
-        while(getchar() != '\n');
+        while (getchar() != '\n')
+            ;
     }
 }
 
 void watchingOutput(int numIntRegs, int numFloatRegs, int numMemLocals, uint32_t watchedRegs[], uint32_t watchedFregs[], uint32_t watchedMem[], uint32_t reg[32], char names[32][8], float freg[32], uint32_t mem[32]){
     
+    uint32_t ui;
+
     if(numIntRegs > 0 ){
         printf("\n\nWatched Integer Registers:\n");
         for(int i = 0; i < numIntRegs; i++){
@@ -1579,8 +1578,8 @@ void watchingOutput(int numIntRegs, int numFloatRegs, int numMemLocals, uint32_t
         printf("\n\nWatched Floating point Registers:\n");
         for(int i = 0; i < numFloatRegs; i++){
             if(watchedFregs[i] != -1){
-                int fregisternumber = watchedFregs[i];
-                printf("Floating Point Register f%d: 0x%08x\n", watchedFregs[i], (float) freg[watchedFregs[i]]);
+                memcpy(&ui, &freg[watchedFregs[i]], sizeof(ui));
+                printf("Floating Point Register f%d: 0x%08x\n", watchedFregs[i], ui);
             }
         }
     }
