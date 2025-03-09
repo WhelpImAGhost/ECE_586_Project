@@ -1480,9 +1480,9 @@ void breakpointCheck(int bppc[], int numBPs, uint32_t instruction, uint32_t arra
 
 void watchingUserInput(uint32_t regindex[], uint32_t fregindex[], uint32_t memindex[], uint32_t *numRegs, uint32_t *numFregs, uint32_t *numMems){
     char input = '\0';  // Initialize input variable
-    int numIntRegs;
-    int numFloatRegs;
-    int numMemLocals;
+    int numIntRegs = 0;
+    int numFloatRegs = 0;
+    int numMemLocals = 0;
     
     while(input != 'C') {
         printf("\nTo watch a memory location enter: [M]\nTo watch a register enter: [R]\nTo continue enter: [C]\n\n");
@@ -1550,14 +1550,6 @@ void watchingUserInput(uint32_t regindex[], uint32_t fregindex[], uint32_t memin
             case 'C':
             case 'c':
                 while(getchar() != '\n');
-                for (int i = 0; i < 32; i++){
-                    printf("numIntReg %d:   %d\n", i , regindex[i]);
-                    printf("numFloatReg %d: %d\n", i , fregindex[i]);
-                }
-                for (int i = 0; i < 100; i++){
-                    printf("numMemLocals %d: %d\n", i , memindex[i]);
-                }
-                printf("numInt: %d\nnumFloat: %d\nnumMem: %d\n", numIntRegs ,numFloatRegs, numMemLocals);
                 *numRegs = numIntRegs;
                 *numFregs = numFloatRegs;
                 *numMems = numMemLocals;
@@ -1581,18 +1573,18 @@ void watchingOutput(int numIntRegs, int numFloatRegs, int numMemLocals, uint32_t
             }
         }
     }
-    else printf("No integer registers watched\n");
+    //else printf("No integer registers watched\n");
 
     if (numFloatRegs > 0){
         printf("\n\nWatched Floating point Registers:\n");
         for(int i = 0; i < numFloatRegs; i++){
             if(watchedFregs[i] != -1){
                 int fregisternumber = watchedFregs[i];
-                printf("Floating Point Register f%d: 0x%08x\n", fregisternumber, freg[fregisternumber]);
+                printf("Floating Point Register f%d: 0x%08x\n", watchedFregs[i], (float) freg[watchedFregs[i]]);
             }
         }
     }
-    else printf("No floating registers watched\n");
+    //else printf("No floating registers watched\n");
 
     if (numMemLocals > 0){
         printf("\nWatched Memory Locations:\n");
@@ -1603,7 +1595,7 @@ void watchingOutput(int numIntRegs, int numFloatRegs, int numMemLocals, uint32_t
             }
         }
     }
-    else printf("No memory locations watched\n");
+    //else printf("No memory locations watched\n");
 
     return;
 }
