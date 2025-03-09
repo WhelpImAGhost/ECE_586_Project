@@ -45,7 +45,8 @@ void fclass_s(float value, uint32_t *out);
 int breakpointInput(int array[]);
 void breakpointCheck(int bppc[], int numBPs, uint32_t instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float fregs[32], int MemWords);
 void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float fregs[32], int MemWords);
-int watchingUserInput(uint32_t regindex[], float fregindex[], uint32_t memindex[]);
+int watchingUserInput(uint32_t regindex[], uint32_t fregindex[], uint32_t memindex[]);
+void watchingOutput(int numIntRegs, int numFloatRegs, int numMemLocals, uint32_t watchedRegs[], uint32_t watchedFregs[], uint32_t watchedMem[], uint32_t reg[32], char names[32][8], float freg[32], uint32_t mem[32]);
 
 //Instruction Function Protoytpes
 void load(uint8_t function, uint8_t destination, uint8_t source, int32_t immediate, uint32_t array[], int size, uint32_t reg_array[32]);
@@ -189,19 +190,18 @@ int main(int argc, char *argv[]){
     int numMemoryLocals = 0;
     int numRegs = 0;
     int numFregs = 0;
-    if(watching == 1){
-    uint32_t watchReg[31];
-    uint32_t watchFreg[31];
-    for(int i = 0; i < 31; i++){
-        watchReg[i] = -1;
-        watchFreg[i] = -1;
-    }
+    uint32_t watchReg[32];
+    uint32_t watchFreg[32];
     uint32_t watchMem[100];
-    for(int i = 0; i < 100; i++){
+    if(watching == 1){
+    for(int i = 0; i < 32; i++){
         watchReg[i] = -1;
         watchFreg[i] = -1;
     }
-    numRegs, numFregs, numMemoryLocals = watchingUserInput(x, f, MainMem);
+    for(int i = 0; i < 100; i++){
+        watchMem[i] = -1;
+    }
+    numRegs, numFregs, numMemoryLocals = watchingUserInput(watchReg, watchFreg, MainMem);
     }
 
     // Begin fetching and decoding instructions
@@ -296,7 +296,8 @@ int main(int argc, char *argv[]){
                 exit(1);
         }
 
-        if (breakpoints = 1) breakpointCheck(BreakPC, numBreakpoints, old_pc, MainMem, MemWords, x, regnames, f, MemWords);
+        if (breakpoints == 1) breakpointCheck(BreakPC, numBreakpoints, old_pc, MainMem, MemWords, x, regnames, f, MemWords);
+        if (watching == 1) watchingOutput(numRegs, numFregs, numMemoryLocals, watchReg, watchFreg, watchMem, x, regnames, f, MainMem);
         if (mode == 1) printAllReg(x, regnames);
         if (mode == 1) printAllFPReg(f);
         if (mode == 2) singleStep(old_pc, MainMem, MemWords, x, regnames, f, MemWords);
@@ -1476,7 +1477,7 @@ void breakpointCheck(int bppc[], int numBPs, uint32_t instruction, uint32_t arra
     return;
 }
 
-int watchingUserInput(uint32_t regindex[], float fregindex[], uint32_t memindex[]){
+int watchingUserInput(uint32_t regindex[], uint32_t fregindex[], uint32_t memindex[]){
     char input = '\0';  // Initialize input variable
     int numIntRegs;
     int numFloatRegs;
@@ -1536,10 +1537,14 @@ int watchingUserInput(uint32_t regindex[], float fregindex[], uint32_t memindex[
                 printf("\nEnter the amount of memory locations you wish to watch (1-100): ");
                     if (scanf("%d", &numMemLocals) != 1 || numMemLocals < 0 || numMemLocals > 100) {
                         printf("\nInvalid amount\n");
+                    }
+                    else{
                         for(int i = 0; i < numMemLocals; i++){
                             printf("Enter the desired memory address (Hexadecimal): 0x");
                             if (scanf("%x", &memindex[memAddress]) != 1 || memindex[memAddress] < 0 || memindex[memAddress] > 0xFFFF) {
                                 printf("\nInvalid memory address\n\n");
+                                i--;
+                                while(getchar() != '\n');
                             }
                         }
                     } 
@@ -1547,19 +1552,38 @@ int watchingUserInput(uint32_t regindex[], float fregindex[], uint32_t memindex[
             case 'C':
             case 'c':
                 while(getchar() != '\n');
-                break;  // Exit the loop when 'C' is entered
-
+                return numIntRegs, numFloatRegs, numMemLocals;
+            break;
             default:
                 printf("Invalid command, please try again\n");
         }
         while(getchar() != '\n');
-
-        return numIntRegs, numFloatRegs, numMemLocals;
     }
 }
 
-void watchingOutput(){
-    
+void watchingOutput(int numIntRegs, int numFloatRegs, int numMemLocals, uint32_t watchedRegs[], uint32_t watchedFregs[], uint32_t watchedMem[], uint32_t reg[32], char names[32][8], float freg[32], uint32_t mem[32]){
+    for(int i = 0; i < numIntRegs; i++){
+        printf("\n\nWatched Integer Registers:\n");
+        if(watchedRegs[i] != -1){
+            int registernumber = watchedRegs[i];
+            printf("Register x%d %s: 0x%08x\n", registernumber, names[registernumber], reg[registernumber]);
+        }
+    }
+    for(int i = 0; i < numFloatRegs; i++){
+        printf("\n\nWatched Floating point Registers:\n");
+        if(watchedFregs[i] != -1){
+            int fregisternumber = watchedFregs[i];
+            printf("Floating Point Register x%d: 0x%08x\n", fregisternumber, freg[fregisternumber]);
+        }
+    }
+    for(int i = 0; i < numMemLocals; i++){
+        printf("\n\nWatched Memory Locations:\n");
+        if(watchedMem[i] != -1){
+            int memoryaddress = watchedMem[i];
+            printf("Memory Location 0x%05x: 0x%08x\n", memoryaddress, mem[memoryaddress/4]);
+        }
+    }
+    return;
 }
 
 void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float fregs[32], int MemWords) {
