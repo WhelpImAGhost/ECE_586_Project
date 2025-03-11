@@ -20,3 +20,6 @@
 !make_instruction.c
 !main.py
 /.vscode
+.vscode/settings.json
+*.json
+*.json
