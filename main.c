@@ -64,8 +64,8 @@ void immediateop(uint8_t function, uint8_t destination, uint8_t source, int32_t 
 
 int main(int argc, char *argv[]){
 
-    setvbuf(stdout, NULL, _IOLBF, 0);
-    setvbuf(stderr, NULL, _IOLBF, 0);
+    // setvbuf(stdout, NULL, _IOLBF, 0);
+    // setvbuf(stderr, NULL, _IOLBF, 0);
 
     uint32_t test_word;
     char test_str[10];
@@ -368,6 +368,7 @@ void printAllReg(uint32_t regs[32], char regnames[32][8] ){
 
     }
     printf("\n\n");
+    fflush(stdout);
 }
 
 // Function to read a specific byte from memory
@@ -1468,6 +1469,7 @@ void printAllFPReg(float regs[32]){
 
     }
     printf("\n\n");
+    fflush(stdout);
     return;
 }
 
@@ -1515,6 +1517,7 @@ void watchingUserInput(uint32_t regindex[], uint32_t fregindex[], uint32_t memin
     while (input != 'C')
     {
         fprintf(stdout,"\nTo watch a memory location enter: [M]\nTo watch a register enter: [R]\nTo continue enter: [C]\n\n");
+        fflush(stdout);   
         scanf(" %c", &input);
         switch (input)
         {
@@ -1522,10 +1525,12 @@ void watchingUserInput(uint32_t regindex[], uint32_t fregindex[], uint32_t memin
         case 'r':
             
             fprintf(stdout, "To watch an integer register enter: [X]\nTo watch a floating point register enter: [F]\n\n");
+            fflush(stdout);   
             scanf(" %c", &regCommand);
             if (regCommand == 'X' || regCommand == 'x')
             {
                 fprintf(stdout, "\nEnter the amount of integer registers you wish to watch: ");
+                fflush(stdout);   
                 if (scanf("%d", &numIntRegs) != 1 || numIntRegs < 0 || numIntRegs > 31)
                 {
                     fprintf(stderr, "\nInvalid register amount\n");
@@ -1535,6 +1540,7 @@ void watchingUserInput(uint32_t regindex[], uint32_t fregindex[], uint32_t memin
                     for (int i = 0; i < numIntRegs; i++)
                     {
                         fprintf(stdout, "\nEnter the integer register you wish to watch: x");
+                        fflush(stdout);   
                         if (scanf("%d", &regindex[i]) != 1 || regindex[i] < 0 || regindex[i] > 31)
                         {
                             fprintf(stderr, "Invalid Register Number\n");
@@ -1548,6 +1554,7 @@ void watchingUserInput(uint32_t regindex[], uint32_t fregindex[], uint32_t memin
             else if (regCommand == 'F' || regCommand == 'f')
             {
                 fprintf(stdout, "\nEnter the amount of floating point registers you wish to watch: ");
+                fflush(stdout);
                 if (scanf("%d", &numFloatRegs) != 1 || numFloatRegs < 0 || numFloatRegs > 31)
                 {
                     fprintf(stderr, "\nInvalid register amount\n");
@@ -1557,6 +1564,7 @@ void watchingUserInput(uint32_t regindex[], uint32_t fregindex[], uint32_t memin
                     for (int i = 0; i < numFloatRegs; i++)
                     {
                         fprintf(stdout, "\nEnter the floating point register you wish to watch: f");
+                        fflush(stdout);
                         if (scanf("%d", &fregindex[i]) != 1 || fregindex[i] < 0 || fregindex[i] > 31)
                         {
                             fprintf(stderr, "Invalid Register Number\n");
@@ -1575,6 +1583,7 @@ void watchingUserInput(uint32_t regindex[], uint32_t fregindex[], uint32_t memin
         case 'M':
         case 'm':
             printf("\nEnter the amount of memory locations you wish to watch (1-100): ");
+            fflush(stdout);   
             if (scanf("%d", &numMemLocals) != 1 || numMemLocals < 0 || numMemLocals > 100)
             {
                 fprintf(stderr, "\nInvalid amount\n");
@@ -1584,6 +1593,7 @@ void watchingUserInput(uint32_t regindex[], uint32_t fregindex[], uint32_t memin
                 for (int i = 0; i < numMemLocals; i++)
                 {
                     printf("Enter the desired memory address (Hexadecimal): 0x");
+                    fflush(stdout);   
                     if (scanf("%x", &memindex[i]) != 1 || memindex[i] < 0 || memindex[i] > 0xFFFF)
                     {
                         fprintf(stderr, "\nInvalid memory address\n\n");

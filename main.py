@@ -42,7 +42,14 @@ class MainWindow(QWidget):
         self.send_button.clicked.connect(self.send_input)
         self.send_button.setEnabled(False)  # Disabled until process starts
 
-        self.process = None  # Will hold the running process
+        self.process = None
+
+        # Connect Enter key in program and arguments inputs to start_process
+        self.program_input.returnPressed.connect(self.start_process)
+        self.args_input.returnPressed.connect(self.start_process)
+
+        # Connect Enter key in the send input field to send_input
+        self.input_line.returnPressed.connect(self.send_input)
 
     def start_process(self):
         self.text_output.clear()
@@ -58,7 +65,9 @@ class MainWindow(QWidget):
         self.process.readyReadStandardError.connect(self.read_error)
         self.process.finished.connect(self.process_finished)
 
-        self.text_output.append(f"Starting: {program} {' '.join(args)}\n")
+        # Debugging: Show that the program will start
+        self.text_output.append(f"Starting program: {program} with arguments: {' '.join(args)}\n")
+
         self.process.start(program, args)
 
         if self.process.state() == QProcess.ProcessState.Running:
@@ -66,17 +75,28 @@ class MainWindow(QWidget):
 
     def read_output(self):
         output = self.process.readAllStandardOutput().data().decode()
-        self.text_output.append(f"{output}")
+        if output:  # Only append if there is output
+            self.text_output.append(f"{output}")
+        else:
+            self.text_output.append("No output received.\n")  # Debug message
 
     def read_error(self):
         error_output = self.process.readAllStandardError().data().decode()
-        self.text_output.append(f"STDERR: {error_output}")
+        if error_output:  # Only append if there is error output
+            self.text_output.append(f"Error: {error_output}")
+        else:
+            self.text_output.append("No error output received.\n")  # Debug message
 
     def send_input(self):
-        input_text = self.input_line.text() + "\n"
-        if self.process and self.process.state() == QProcess.ProcessState.Running:
-            self.process.write(input_text.encode())
-            self.process.waitForBytesWritten()
+        input_text = self.input_line.text()
+        if input_text:  # Only send if the input is not empty
+            self.text_output.append(f"{input_text}")  # Show input in the output display
+            self.input_line.clear()  # Clear the input field after sending
+
+            if self.process and self.process.state() == QProcess.ProcessState.Running:
+                input_text_with_newline = input_text + "\n"
+                self.process.write(input_text_with_newline.encode())
+                self.process.waitForBytesWritten()
 
     def process_finished(self):
         self.text_output.append("Process finished.\n")
