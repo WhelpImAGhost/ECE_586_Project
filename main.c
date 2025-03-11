@@ -15,12 +15,16 @@
     #include <io.h>
     #define _READ _read
     #define _WRITE _write
+    #define EXPORT __declspec(dllexport)
 #else
     #include <unistd.h>
     #define _READ read
     #define _WRITE write
+    #define EXPORT __attribute__((visibility("default")))
 #endif
 #include "defines.c"
+
+
 
 // Debug function to print memory info
 void printAllMem(uint32_t array[], int size);
@@ -61,6 +65,26 @@ void load(uint8_t function, uint8_t destination, uint8_t source, int32_t immedia
 void immediateop(uint8_t function, uint8_t destination, uint8_t source, int32_t immediate, uint32_t array[], int size, uint32_t reg_array[32]);
 
 
+// Set default mode
+int mode = 1;  // 0 is silent
+                   // 1 is verbose
+                   // 2 is step through
+
+// Default to Breakpoints Off
+int breakpoints = 1;
+
+// Default to watching to Off
+int watching = 0;
+
+// Default to step Off
+int step = 0;
+
+
+// Exported functions for GUI
+EXPORT int get_mode() { return mode; }
+EXPORT int get_breakpoints() { return breakpoints; }
+EXPORT int get_watching() { return watching; }
+EXPORT int get_step() { return step; }
 
 int main(int argc, char *argv[]){
 
@@ -92,19 +116,7 @@ int main(int argc, char *argv[]){
     float f[32];
 
     uint32_t old_pc = 0;
-    // Set default mode
-    int mode = 0;  // 0 is silent
-                   // 1 is verbose
-                   // 2 is step through
 
-    // Default to Breakpoints Off
-    int breakpoints = 0;
-
-    // Default to watching to Off
-    int watching = 0;
-
-    // Default to step Off
-    int step = 0;
 
     // Memory & Stack Starting Addresses
     uint32_t stack_address = STACK_ADDRESS;
@@ -1809,3 +1821,5 @@ void fclass_s(float value, uint32_t *out) {
 
     *out = result;
 }
+
+
