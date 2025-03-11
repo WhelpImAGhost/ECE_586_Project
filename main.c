@@ -51,7 +51,7 @@ void f2_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32
 void f3_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32], float flt_array[32]);
 void fclass_s(float value, uint32_t *out);
 int breakpointInput(int array[]);
-void breakpointCheck(int bppc[], int numBPs, uint32_t instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float fregs[32], int MemWords, int step);
+int breakpointCheck(int bppc[], int numBPs, uint32_t instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float fregs[32], int MemWords, int step);
 int singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float fregs[32], int MemWords, int step);
 void watchingUserInput(uint32_t regindex[], uint32_t fregindex[], uint32_t memindex[], int *numRegs, int *numFregs, int *numMems);
 void watchingOutput(int numIntRegs, int numFloatRegs, int numMemLocals, uint32_t watchedRegs[], uint32_t watchedFregs[], uint32_t watchedMem[], uint32_t reg[32], char names[32][8], float freg[32], uint32_t mem[32]);
@@ -331,7 +331,7 @@ int main(int argc, char *argv[]){
                 exit(1);
         }
 
-        if (breakpoints == 1) breakpointCheck(BreakPC, numBreakpoints, old_pc, MainMem, MemWords, x, regnames, f, MemWords, step);
+        if (breakpoints == 1) step = breakpointCheck(BreakPC, numBreakpoints, old_pc, MainMem, MemWords, x, regnames, f, MemWords, step);
         if (watching == 1) watchingOutput(numRegs, numFregs, numMemoryLocals, watchReg, watchFreg, watchMem, x, regnames, f, MainMem);
         if (mode == 1) printAllReg(x, regnames);
         if (mode == 1) printAllFPReg(f);
@@ -1504,14 +1504,14 @@ int breakpointInput(int array[]){
 }
 
 
-void breakpointCheck(int bppc[], int numBPs, uint32_t instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float fregs[32], int MemWords, int step){
+int breakpointCheck(int bppc[], int numBPs, uint32_t instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float fregs[32], int MemWords, int step){
     for(int i = 0; i < numBPs; i++){
         if (instruction == bppc[i]){
             printf("Breakpoint at PC: 0x%05x\n\n", bppc[i]);
-            singleStep(instruction, array, size, regs, regnames, fregs, MemWords, step);
+            step = singleStep(instruction, array, size, regs, regnames, fregs, MemWords, step);
         }
     }
-    return;
+    return step;
 }
 
 void watchingUserInput(uint32_t regindex[], uint32_t fregindex[], uint32_t memindex[], int *numRegs, int *numFregs, int *numMems){
