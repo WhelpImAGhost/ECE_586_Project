@@ -1483,6 +1483,7 @@ void printAllFPReg(float regs[32]){
 int breakpointInput(int array[]){
     int numBreaks;
     printf("\nEnter the amount of breakpoints you wish to add in the code (1-20): ");
+    fflush(stdout);
     if (scanf("%d", &numBreaks) != 1 || numBreaks < 0 || numBreaks > 20) {
         fprintf(stderr, "\nUnsupported number of breakpoints\n");
         while(getchar() != '\n');
@@ -1491,6 +1492,7 @@ int breakpointInput(int array[]){
     else {
         for(int i = 0; i < numBreaks; i++){
             printf("\nEnter the value of the PC where you wish to break (%d): 0x", i+1);
+            fflush(stdout);
             if (scanf("%x", &array[i]) != 1 || array[i] < 0 || (array[i] % 4) != 0) {
                 fprintf(stderr, "Invalid PC value (must be aligned to 4 bytes)\n");
                 i--;
@@ -1686,6 +1688,7 @@ int singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[3
     
         while(input != 'C') {
             printf("To display current instruction enter: [I]\nTo print register contents enter: [R]\nTo print memory contents enter: [M]\nTo continue enter: [C]\nTo exit single step mode enter : [D]\n");
+            fflush(stdout);
             scanf(" %c", &input);
     
             switch(input) {
@@ -1693,6 +1696,7 @@ int singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[3
                 case 'r': {
                     char regCommand;
                     printf("To display all integer registers enter: [R]\nTo display all floating point registers enter: [F]\nTo display a specific integer register enter: [X]\nTo display a specific floating point register enter: [P]\n\n");
+                    fflush(stdout);
                     scanf(" %c", &regCommand);
     
                     if (regCommand == 'R' || regCommand == 'r') {
@@ -1704,6 +1708,7 @@ int singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[3
                     } else if (regCommand == 'X' || regCommand == 'x') {
                         int regNumInt;
                         printf("Enter the integer register number (0-31): ");
+                        fflush(stdout);
                         if (scanf("%d", &regNumInt) != 1 || regNumInt < 0 || regNumInt > 31) {
                             fprintf(stderr, "Invalid register number\n");
                         } else {
@@ -1712,6 +1717,7 @@ int singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[3
                     } else if (regCommand == 'P' || regCommand == 'p') {
                         int fregNumInt;
                         printf("Enter the floating-point register number (0-31): ");
+                        fflush(stdout);
                         if (scanf("%d", &fregNumInt) != 1 || fregNumInt < 0 || fregNumInt > 31) {
                             fprintf(stderr, "Invalid register number\n");
                         } else {
@@ -1726,6 +1732,7 @@ int singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[3
                 case 'm': {
                     char memCommand;
                     printf("To display all nonzero memory locations enter: [M]\nTo display a specific memory address enter: [A]\n\n");
+                    fflush(stdout);
                     scanf(" %c", &memCommand);
                     if (memCommand == 'M' || memCommand == 'm') {
                         printf("\n");
@@ -1735,6 +1742,7 @@ int singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[3
                         printf("\n");
                         int memAddress;
                         printf("Enter the desired memory address (Hexadecimal): 0x");
+                        fflush(stdout);
                         if (scanf("%x", &memAddress) != 1 || memAddress < 0 || memAddress > 0xFFFF) {
                             fprintf(stderr, "\nInvalid register number\n\n");
                         } else {
