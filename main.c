@@ -53,7 +53,7 @@ void fclass_s(float value, uint32_t *out);
 int breakpointInput(int array[]);
 void breakpointCheck(int bppc[], int numBPs, uint32_t instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float fregs[32], int MemWords);
 void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float fregs[32], int MemWords);
-void watchingUserInput(uint32_t regindex[], uint32_t fregindex[], uint32_t memindex[], uint32_t *numRegs, uint32_t *numFregs, uint32_t *numMems);
+void watchingUserInput(uint32_t regindex[], uint32_t fregindex[], uint32_t memindex[], int *numRegs, int *numFregs, int *numMems);
 void watchingOutput(int numIntRegs, int numFloatRegs, int numMemLocals, uint32_t watchedRegs[], uint32_t watchedFregs[], uint32_t watchedMem[], uint32_t reg[32], char names[32][8], float freg[32], uint32_t mem[32]);
 
 //Instruction Function Protoytpes
@@ -1506,11 +1506,12 @@ void breakpointCheck(int bppc[], int numBPs, uint32_t instruction, uint32_t arra
     return;
 }
 
-void watchingUserInput(uint32_t regindex[], uint32_t fregindex[], uint32_t memindex[], uint32_t *numRegs, uint32_t *numFregs, uint32_t *numMems){
+void watchingUserInput(uint32_t regindex[], uint32_t fregindex[], uint32_t memindex[], int *numRegs, int *numFregs, int *numMems){
     char input = '\0';  // Initialize input variable
     int numIntRegs = 0;
     int numFloatRegs = 0;
     int numMemLocals = 0;
+    char regCommand;
 
     while (input != 'C')
     {
@@ -1520,7 +1521,7 @@ void watchingUserInput(uint32_t regindex[], uint32_t fregindex[], uint32_t memin
         {
         case 'R':
         case 'r':
-            char regCommand;
+            
             printf("To watch an integer register enter: [X]\nTo watch a floating point register enter: [F]\n\n");
             scanf(" %c", &regCommand);
             if (regCommand == 'X' || regCommand == 'x')
