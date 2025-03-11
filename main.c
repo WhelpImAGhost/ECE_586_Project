@@ -51,8 +51,8 @@ void f2_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32
 void f3_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32], float flt_array[32]);
 void fclass_s(float value, uint32_t *out);
 int breakpointInput(int array[]);
-void breakpointCheck(int bppc[], int numBPs, uint32_t instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float fregs[32], int MemWords);
-void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float fregs[32], int MemWords);
+void breakpointCheck(int bppc[], int numBPs, uint32_t instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float fregs[32], int MemWords, int step);
+int singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float fregs[32], int MemWords, int step);
 void watchingUserInput(uint32_t regindex[], uint32_t fregindex[], uint32_t memindex[], int *numRegs, int *numFregs, int *numMems);
 void watchingOutput(int numIntRegs, int numFloatRegs, int numMemLocals, uint32_t watchedRegs[], uint32_t watchedFregs[], uint32_t watchedMem[], uint32_t reg[32], char names[32][8], float freg[32], uint32_t mem[32]);
 
@@ -103,6 +103,9 @@ int main(int argc, char *argv[]){
     // Default to watching to Off
     int watching = 0;
 
+    // Default to step Off
+    int step = 0;
+
     // Memory & Stack Starting Addresses
     uint32_t stack_address = STACK_ADDRESS;
 
@@ -120,6 +123,10 @@ int main(int argc, char *argv[]){
         else if (strcmp(argv[0], "-m") == 0)
         {
             mode = atoi(argv[1]); // Set operation mode
+        }
+        else if (strcmp(argv[0], "-step") == 0)
+        {
+            step = atoi(argv[1]); // Set operation mode
         }
         else if (strcmp(argv[0], "-bp" ) == 0 ) {
             breakpoints = atoi(argv[1]); // Set breakpoint mode
@@ -324,11 +331,11 @@ int main(int argc, char *argv[]){
                 exit(1);
         }
 
-        if (breakpoints == 1) breakpointCheck(BreakPC, numBreakpoints, old_pc, MainMem, MemWords, x, regnames, f, MemWords);
+        if (breakpoints == 1) breakpointCheck(BreakPC, numBreakpoints, old_pc, MainMem, MemWords, x, regnames, f, MemWords, step);
         if (watching == 1) watchingOutput(numRegs, numFregs, numMemoryLocals, watchReg, watchFreg, watchMem, x, regnames, f, MainMem);
         if (mode == 1) printAllReg(x, regnames);
         if (mode == 1) printAllFPReg(f);
-        if (mode == 2) singleStep(old_pc, MainMem, MemWords, x, regnames, f, MemWords);
+        if (step == 1) step = singleStep(old_pc, MainMem, MemWords, x, regnames, f, MemWords, step);
     }
 
 
@@ -1499,11 +1506,11 @@ int breakpointInput(int array[]){
 }
 
 
-void breakpointCheck(int bppc[], int numBPs, uint32_t instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float fregs[32], int MemWords){
+void breakpointCheck(int bppc[], int numBPs, uint32_t instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float fregs[32], int MemWords, int step){
     for(int i = 0; i < numBPs; i++){
         if (instruction == bppc[i]){
             printf("Breakpoint at PC: 0x%05x\n\n", bppc[i]);
-            singleStep(instruction, array, size, regs, regnames, fregs, MemWords);
+            singleStep(instruction, array, size, regs, regnames, fregs, MemWords, step);
         }
     }
     return;
@@ -1675,12 +1682,12 @@ void watchingOutput(int numIntRegs, int numFloatRegs, int numMemLocals, uint32_t
     return;
 }
 
-void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float fregs[32], int MemWords) {
+int singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float fregs[32], int MemWords, int step) {
 
         char input = '\0';  // Initialize input variable
     
         while(input != 'C') {
-            printf("To display current instruction enter: [I]\nTo print register contents enter: [R]\nTo print memory contents enter: [M]\nTo continue enter: [C]\n\n");
+            printf("To display current instruction enter: [I]\nTo print register contents enter: [R]\nTo print memory contents enter: [M]\nTo continue enter: [C]\nTo exit single step mode enter : [D]\n");
             fflush(stdout);
             scanf(" %c", &input);
     
@@ -1721,7 +1728,6 @@ void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[
                     }
                     break;
                 }
-    
                 case 'M':
                 case 'm': {
                     char memCommand;
@@ -1747,7 +1753,6 @@ void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[
                     }
                     break;
                 }
-    
                 case 'I':
                 case 'i':
                     printf("Current Instruction: 0x%08x\n\n", array[instruction/4]);
@@ -1756,8 +1761,15 @@ void singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[
                 case 'C':
                 case 'c':
                     while(getchar() != '\n');
-                    return;  // Exit the loop when 'C' is entered
-    
+                    step = 1;
+                    return step;  // Exit the loop when 'C' is entered
+                    break;
+                case 'D':
+                case 'd':
+                    step = 0;
+                    while(getchar() != '\n');
+                    return step;  // Exit the loop when 'C' is entered
+                    break;
                 default:
                     fprintf(stderr, "Invalid command, please try again\n");
             }
