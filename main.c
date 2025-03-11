@@ -1511,8 +1511,9 @@ void watchingUserInput(uint32_t regindex[], uint32_t fregindex[], uint32_t memin
     int numIntRegs = 0;
     int numFloatRegs = 0;
     int numMemLocals = 0;
-    
-    while(input != 'C') {
+
+    while (input != 'C')
+    {
         printf("\nTo watch a memory location enter: [M]\nTo watch a register enter: [R]\nTo continue enter: [C]\n\n");
         scanf(" %c", &input);
         switch (input)
@@ -1571,13 +1572,46 @@ void watchingUserInput(uint32_t regindex[], uint32_t fregindex[], uint32_t memin
                 printf("Invalid register command, please try again\n");
             }
             break;
-            case 'C':
-            case 'c':
-                while(getchar() != '\n');
-                *numRegs = numIntRegs;
-                *numFregs = numFloatRegs;
-                *numMems = numMemLocals;
-                return;
+        case 'M':
+        case 'm':
+            printf("\nEnter the amount of memory locations you wish to watch (1-100): ");
+            if (scanf("%d", &numMemLocals) != 1 || numMemLocals < 0 || numMemLocals > 100)
+            {
+                printf("\nInvalid amount\n");
+            }
+            else
+            {
+                for (int i = 0; i < numMemLocals; i++)
+                {
+                    printf("Enter the desired memory address (Hexadecimal): 0x");
+                    if (scanf("%x", &memindex[i]) != 1 || memindex[i] < 0 || memindex[i] > 0xFFFF)
+                    {
+                        printf("\nInvalid memory address\n\n");
+                        i--;
+                        while (getchar() != '\n')
+                            ;
+                    }
+                }
+            }
+            break;
+        case 'C':
+        case 'c':
+            while (getchar() != '\n')
+                ;
+            for (int i = 0; i < 32; i++)
+            {
+                printf("numIntReg %d:   %d\n", i, regindex[i]);
+                printf("numFloatReg %d: %d\n", i, fregindex[i]);
+            }
+            for (int i = 0; i < 100; i++)
+            {
+                printf("numMemLocals %d: %d\n", i, memindex[i]);
+            }
+            printf("numInt: %d\nnumFloat: %d\nnumMem: %d\n", numIntRegs, numFloatRegs, numMemLocals);
+            *numRegs = numIntRegs;
+            *numFregs = numFloatRegs;
+            *numMems = numMemLocals;
+            return;
             break;
         default:
             printf("Invalid command, please try again\n");
@@ -1586,6 +1620,7 @@ void watchingUserInput(uint32_t regindex[], uint32_t fregindex[], uint32_t memin
             ;
     }
 }
+
 
 void watchingOutput(int numIntRegs, int numFloatRegs, int numMemLocals, uint32_t watchedRegs[], uint32_t watchedFregs[], uint32_t watchedMem[], uint32_t reg[32], char names[32][8], float freg[32], uint32_t mem[32]){
     
