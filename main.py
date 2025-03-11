@@ -1,4 +1,5 @@
 import sys
+import ctypes
 from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QTextEdit, QLineEdit, QLabel, QMessageBox
 from PyQt6.QtCore import QProcess
 
