@@ -343,11 +343,12 @@ int main(int argc, char *argv[]){
                 exit(1);
         }
 
-        if (breakpoints == 1) step = breakpointCheck(BreakPC, numBreakpoints, old_pc, MainMem, MemWords, x, regnames, f, MemWords, step);
+        if (breakpoints == 1 && step == 0) step = breakpointCheck(BreakPC, numBreakpoints, old_pc, MainMem, MemWords, x, regnames, f, MemWords, step);
+        else if (breakpoints == 1 && step == 1) step = singleStep(old_pc, MainMem, MemWords, x, regnames, f, MemWords, step);
+        else if (breakpoints == 0 && step == 1) step = singleStep(old_pc, MainMem, MemWords, x, regnames, f, MemWords, step);
         if (watching == 1) watchingOutput(numRegs, numFregs, numMemoryLocals, watchReg, watchFreg, watchMem, x, regnames, f, MainMem);
         if (mode == 1) printAllReg(x, regnames);
         if (mode == 1) printAllFPReg(f);
-        if (step == 1) step = singleStep(old_pc, MainMem, MemWords, x, regnames, f, MemWords, step);
     }
 
 
