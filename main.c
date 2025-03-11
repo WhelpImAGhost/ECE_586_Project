@@ -11,7 +11,15 @@
 #include <stdbool.h>
 #include <string.h>
 #include <math.h>
-#include <io.h>
+#ifdef _WIN32
+    #include <io.h>
+    #define _READ _read
+    #define _WRITE _write
+#else
+    #include <unistd.h>
+    #define _READ read
+    #define _WRITE write
+#endif
 #include "defines.c"
 
 // Debug function to print memory info
@@ -1182,10 +1190,10 @@ void e_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
 
     switch(reg_array[17]){
         case 63: // Read
-            reg_array[10] = _read(reg_array[10], (void*)(uintptr_t)reg_array[11], reg_array[12]);
+            reg_array[10] = _READ(reg_array[10], (void*)(uintptr_t)reg_array[11], reg_array[12]);
             break;
         case 64: // Write
-            reg_array[10] = _write(reg_array[10], (void*)(uintptr_t)reg_array[11], reg_array[12]);
+            reg_array[10] = _WRITE(reg_array[10], (void*)(uintptr_t)reg_array[11], reg_array[12]);
         case 94: // Exit
             exit(reg_array[10]);
         default:
