@@ -18,5 +18,8 @@
 !Mem_files/Float_mem/
 !Mem_files/Float_mem/*
 !make_instruction.c
+!main.py
 /.vscode
 .vscode/settings.json
+*.json
+*.json
