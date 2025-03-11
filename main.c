@@ -34,7 +34,11 @@ uint32_t readWord(uint32_t array[], int size, int address);
 int writeByte(uint32_t array[], int size, int address, uint32_t value);
 int writeHalfWord(uint32_t array[], int size, int address, uint32_t value);
 int writeWord(uint32_t array[], int size, int address, uint32_t value);
-
+int breakpointInput(int array[]);
+int breakpointCheck(int bppc[], int numBPs, uint32_t instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float fregs[32], int MemWords, int step);
+int singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float fregs[32], int MemWords, int step);
+void watchingUserInput(uint32_t regindex[], uint32_t fregindex[], uint32_t memindex[], int *numRegs, int *numFregs, int *numMems);
+void watchingOutput(int numIntRegs, int numFloatRegs, int numMemLocals, uint32_t watchedRegs[], uint32_t watchedFregs[], uint32_t watchedMem[], uint32_t reg[32], char names[32][8], float freg[32], uint32_t mem[32]);
 void fetch_and_decode(uint32_t array[], uint32_t pc, uint32_t* opcode, int mode);
 
 //Addressing Mode Function Prototypes
@@ -50,17 +54,10 @@ float flt_round(float value, int rm);
 void f2_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32], float flt_array[32]);
 void f3_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32], float flt_array[32]);
 void fclass_s(float value, uint32_t *out);
-int breakpointInput(int array[]);
-int breakpointCheck(int bppc[], int numBPs, uint32_t instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float fregs[32], int MemWords, int step);
-int singleStep(uint32_t instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float fregs[32], int MemWords, int step);
-void watchingUserInput(uint32_t regindex[], uint32_t fregindex[], uint32_t memindex[], int *numRegs, int *numFregs, int *numMems);
-void watchingOutput(int numIntRegs, int numFloatRegs, int numMemLocals, uint32_t watchedRegs[], uint32_t watchedFregs[], uint32_t watchedMem[], uint32_t reg[32], char names[32][8], float freg[32], uint32_t mem[32]);
 
 //Instruction Function Protoytpes
 void load(uint8_t function, uint8_t destination, uint8_t source, int32_t immediate, uint32_t array[], int size, uint32_t reg_array[32]);
 void immediateop(uint8_t function, uint8_t destination, uint8_t source, int32_t immediate, uint32_t array[], int size, uint32_t reg_array[32]);
-
-
 
 int main(int argc, char *argv[]){
 
@@ -75,6 +72,7 @@ int main(int argc, char *argv[]){
     uint32_t current_opcode;
     bool continue_program = true;    
 
+    // Register name strings for printing
     char regnames[32][8] = {
                     "(zero)", "(ra)", "(sp)", "(gp)", "(tp)", "(t0)", "(t1)", "(t2)",
                     "(s0)", "(s1)", "(a0)", "(a1)", "(a2)", "(a3)", "(a4)", "(a5)",
@@ -91,6 +89,7 @@ int main(int argc, char *argv[]){
     // Floating point Register Declarations
     float f[32];
 
+    
     uint32_t old_pc = 0;
     // Set default mode
     int mode = 0;  // 0 is silent
@@ -182,7 +181,7 @@ int main(int argc, char *argv[]){
 
     // File used for execution
     #ifdef DEBUG
-    fprintf(stdout, "Using file: '%s'\n", filename);
+        fprintf(stdout, "Using file: '%s'\n", filename);
     #endif
 
     // Allocating Memory Size (64KB by default)
@@ -203,21 +202,23 @@ int main(int argc, char *argv[]){
 
         // Body for parsing lines
         #ifdef DEBUG
-        fprintf(stdout, "Extracted memory addresss:      0x%08X\n", address);
-        fprintf(stdout, "Extracted instruction contents: 0x%08X\n", instruction);
+            fprintf(stdout, "Extracted memory addresss:      0x%08X\n", address);
+            fprintf(stdout, "Extracted instruction contents: 0x%08X\n", instruction);
         #endif
 
     }
 
+    // Set sp
     x[2] = stack_address;
 
-
+    // Get user breakpoints
     int BreakPC[20];
     int numBreakpoints = 0;
     if(breakpoints == 1){
         numBreakpoints = breakpointInput(BreakPC);
     }
 
+    // PC error handling
     if (pc > (MemWords * 4)) {
         fprintf(stderr, "PC was set to an address larger than the program size. Exiting...");
         exit(-1);
@@ -227,6 +228,7 @@ int main(int argc, char *argv[]){
         exit(-1);
     }
   
+    // Setup for "watching" feature
     int numMemoryLocals = 0;
     int numRegs = 0;
     int numFregs = 0;
@@ -234,32 +236,32 @@ int main(int argc, char *argv[]){
     uint32_t watchFreg[32];
     uint32_t watchMem[100];
     if(watching == 1){
-    for(int i = 0; i < 32; i++){
-        watchReg[i] = -1;
-        watchFreg[i] = -1;
-    }
-    for(int i = 0; i < 100; i++){
-        watchMem[i] = -1;
-    }
-    
-    watchingUserInput(watchReg, watchFreg, watchMem, &numRegs, &numFregs, &numMemoryLocals);
+        for(int i = 0; i < 32; i++){
+            watchReg[i] = -1;
+            watchFreg[i] = -1;
+        }
+        for(int i = 0; i < 100; i++){
+            watchMem[i] = -1;
+        }
+        watchingUserInput(watchReg, watchFreg, watchMem, &numRegs, &numFregs, &numMemoryLocals);
     }
 
     // Begin fetching and decoding instructions
-    while(continue_program){        
+    while(continue_program){    
+        // Get Opcode    
         fetch_and_decode(MainMem, pc, &current_opcode, mode);
         old_pc = pc;
         switch (current_opcode) {
-            case REGS_OP:
+            case REGS_OP: //Register Operations
                 #ifdef DEBUG
                 fprintf(stdout, "0x%02X is a Register Instruction\n", current_opcode);
                 #endif
                 r_type(MainMem, MemWords, &pc, x);
                 pc += 4;
                 break;
-            case IMMS_OP:
-            case LOAD_OP:
-            case JALR_OP:
+            case IMMS_OP: //Immediate Arithmetic Operations
+            case LOAD_OP: //Load Operations
+            case JALR_OP: //Jump and Link Register Operation
                 #ifdef DEBUG
                 fprintf(stdout, "0x%02X is an Immediate Instruction\n", current_opcode);
                 #endif
@@ -271,20 +273,20 @@ int main(int argc, char *argv[]){
                     continue_program = false;
                 }
                 break;
-            case STOR_OP:
+            case STOR_OP: //Store Operations
                 #ifdef DEBUG
                 fprintf(stdout, "0x%02X is a Store Instruction\n", current_opcode);
                 #endif
                 s_type(MainMem, MemWords, &pc, x);
                 pc += 4;
                 break;
-            case BRAN_OP:
+            case BRAN_OP: //Branch Operations
                 #ifdef DEBUG
                 fprintf(stdout, "0x%02X is a Branch Instruction\n", current_opcode);
                 #endif
                 b_type(MainMem, MemWords, &pc, x);
                 break;
-            case JAL_OP:
+            case JAL_OP: //Jump and Link
                 #ifdef DEBUG
                 fprintf(stdout, "0x%02X is a Jump Instruction\n", current_opcode);
                 #endif
@@ -297,7 +299,7 @@ int main(int argc, char *argv[]){
                     continue_program = false;
                 }
                 break;
-            case LUI_OP:
+            case LUI_OP: //Upper Operations
             case AUIPC:
                 #ifdef DEBUG
                 fprintf(stdout, "0x%02X is an 'Upper Immediate' Instruction\n", current_opcode);
@@ -305,7 +307,7 @@ int main(int argc, char *argv[]){
                 u_type(MainMem, MemWords, &pc, x);
                 pc += 4;
                 break;
-            case FLW:
+            case FLW: //Floating Point Load & Store
             case FSW:
                 f2_type(MainMem, MemWords, &pc, x, f);
                 break;
