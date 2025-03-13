@@ -56,7 +56,6 @@ class MainWindow(QWidget):
         self.text_output.clear()
         program = self.program_input.text().strip()
         args = self.args_input.text().strip().split()  # Split by spaces
-
         if not program:
             QMessageBox.warning(self, "Error", "Please enter a program name.")
             return
