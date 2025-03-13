@@ -1,7 +1,0 @@
-GAS LISTING fsw.s 			page 1
-
-
-   1 0000 13050008 	addi a0, x0, 0x80
-   2 0004 07200500 	flw f0, 0(a0)
-   3 0008 27220500 	fsw f0, 4(a0)
-   4 000c 67800000 	jr ra
