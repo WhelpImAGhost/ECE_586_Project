@@ -1,0 +1,27 @@
+GAS LISTING flt.s 			page 1
+
+
+   1 0000 130560FF 	li a0, -10
+   2 0004 930560FF 	li a1, -10
+   3 0008 D37005D0 	fcvt.s.w f1, a0
+   4 000c 53F105D0 	fcvt.s.w f2, a1
+   5 0010 539920A0 	flt.s s2, f1, f2
+   6 0014 1305A000 	li a0, 10
+   7 0018 930560FF 	li a1, -10
+   8 001c D37005D0 	fcvt.s.w f1, a0
+   9 0020 53F105D0 	fcvt.s.w f2, a1
+  10 0024 D39920A0 	flt.s s3, f1, f2
+  11 0028 130560FF 	li a0, -10
+  12 002c 9305A000 	li a1, 10
+  13 0030 D37005D0 	fcvt.s.w f1, a0
+  14 0034 53F105D0 	fcvt.s.w f2, a1
+  15 0038 539A20A0 	flt.s s4, f1, f2
+  16 003c 1305A000 	li a0, 10
+  17 0040 930560FF 	li a1, -10
+  18 0044 13060000 	li a2, 0
+  19 0048 D37005D0 	fcvt.s.w f1, a0
+  20 004c 53F105D0 	fcvt.s.w f2, a1
+  21 0050 537206D0 	fcvt.s.w f4, a2
+  22 0054 D3F04018 	fdiv.s f1, f1, f4
+  23 0058 D39A20A0 	flt.s s5, f1, f2
+  24 005c 67800000 	jr ra

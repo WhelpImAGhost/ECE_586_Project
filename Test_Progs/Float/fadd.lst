@@ -1,0 +1,34 @@
+GAS LISTING fadd.s 			page 1
+
+
+   1 0000 13054000 	li a0, 4
+   2 0004 93052000 	li a1, 2
+   3 0008 D37005D0 	fcvt.s.w f1, a0
+   4 000c 53F105D0 	fcvt.s.w f2, a1
+   5 0010 D37110D0 	fcvt.s.wu f3, x0
+   6 0014 D3F12000 	fadd.s f3, f1, f2
+   7 0018 13054000 	li a0, 4
+   8 001c 9305E0FF 	li a1, -2
+   9 0020 D37005D0 	fcvt.s.w f1, a0
+  10 0024 53F105D0 	fcvt.s.w f2, a1
+  11 0028 537210D0 	fcvt.s.wu f4, x0
+  12 002c 53F22000 	fadd.s f4, f1, f2
+  13 0030 1305C0FF 	li a0, -4
+  14 0034 93052000 	li a1, 2
+  15 0038 D37005D0 	fcvt.s.w f1, a0
+  16 003c 53F105D0 	fcvt.s.w f2, a1
+  17 0040 D37210D0 	fcvt.s.wu f5, x0
+  18 0044 D3F22000 	fadd.s f5, f1, f2
+  19 0048 1305C0FF 	li a0, -4
+  20 004c 9305E0FF 	li a1, -2
+  21 0050 D37005D0 	fcvt.s.w f1, a0
+  22 0054 53F105D0 	fcvt.s.w f2, a1
+  23 0058 537310D0 	fcvt.s.wu f6, x0
+  24 005c 53F32000 	fadd.s f6, f1, f2
+  25 0060 1305A000 	li a0, 10
+  26 0064 93050000 	li a1, 0
+  27 0068 D37005D0 	fcvt.s.w f1, a0
+  28 006c 53F105D0 	fcvt.s.w f2, a1
+  29 0070 D37310D0 	fcvt.s.wu f7, x0
+  30 0074 D3F32000 	fadd.s f7, f1, f2
+  31 0078 67800000 	jr ra

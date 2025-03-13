@@ -1,0 +1,11 @@
+li a0, 0xFFEEDDCC
+li a1, 0x11223344
+sb a0, 0x80(x0)
+sb a0, 0x82(x0)
+sb a0, 0x84(x0)
+sb a0, 0x86(x0)
+sb a1, 0x88(x0)
+sb a1, 0x91(x0)
+sb a1, 0x93(x0)
+sb a1, 0x95(x0)
+jalr x0, x0, 0

@@ -1,0 +1,21 @@
+GAS LISTING fcvtwus.s 			page 1
+
+
+   1 0000 13050000 	li a0, 0
+   2 0004 D37005D0 	fcvt.s.w f1, a0
+   3 0008 37790100 	li s2, 94203
+   3      1309B9FF 
+   4 0010 53F910C0 	fcvt.wu.s s2, f1
+   5 0014 3745FFFF 	li a0, -50230
+   5      1305A5BC 
+   6 001c 537105D0 	fcvt.s.w f2, a0
+   7 0020 B7790100 	li s3, 94203
+   7      9389B9FF 
+   8 0028 D37911C0 	fcvt.wu.s s3, f2
+   9 002c 37150000 	li a0, 5656
+   9      13058561 
+  10 0034 D37105D0 	fcvt.s.w f3, a0
+  11 0038 377A0100 	li s4, 94203
+  11      130ABAFF 
+  12 0040 53FA11C0 	fcvt.wu.s s4, f3
+  13 0044 67800000 	jr ra

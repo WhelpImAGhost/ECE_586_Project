@@ -1,0 +1,35 @@
+GAS LISTING fmul.s 			page 1
+
+
+   1 0000 13056000 	li a0, 6
+   2 0004 93056000 	li a1, 6
+   3 0008 D37005D0 	fcvt.s.w f1, a0
+   4 000c 53F105D0 	fcvt.s.w f2, a1
+   5 0010 D37110D0 	fcvt.s.wu f3, x0
+   6 0014 D3F12010 	fmul.s f3, f1, f2
+   7 0018 13056000 	li a0, 6
+   8 001c 930570FF 	li a1, -9
+   9 0020 D37005D0 	fcvt.s.w f1, a0
+  10 0024 53F105D0 	fcvt.s.w f2, a1
+  11 0028 537210D0 	fcvt.s.wu f4, x0
+  12 002c 53F22010 	fmul.s f4, f1, f2 
+  13 0030 130570FF 	li a0, -9
+  14 0034 93052000 	li a1, 2
+  15 0038 D37005D0 	fcvt.s.w f1, a0
+  16 003c 53F105D0 	fcvt.s.w f2, a1
+  17 0040 D37210D0 	fcvt.s.wu f5, x0
+  18 0044 D3F22010 	fmul.s f5, f1, f2 
+  19 0048 1305B0FF 	li a0, -5
+  20 004c 930570FF 	li a1, -9
+  21 0050 D37005D0 	fcvt.s.w f1, a0
+  22 0054 53F105D0 	fcvt.s.w f2, a1
+  23 0058 537310D0 	fcvt.s.wu f6, x0
+  24 005c 53F32010 	fmul.s f6, f1, f2 
+  25 0060 37850000 	li a0, 33333
+  25      13055523 
+  26 0068 93050000 	li a1, 0
+  27 006c D37005D0 	fcvt.s.w f1, a0
+  28 0070 53F105D0 	fcvt.s.w f2, a1
+  29 0074 D37310D0 	fcvt.s.wu f7, x0
+  30 0078 D3F32010 	fmul.s f7, f1, f2 
+  31 007c 67800000 	jr ra

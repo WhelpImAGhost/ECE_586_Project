@@ -1,0 +1,6 @@
+li s2, 0xFFFFFFFF
+lui s2, 0xEFDCB
+li s3, 0x10101010
+lui s3, 0xF0F0F
+li s4, 0x22222222
+lui s4, 0x0

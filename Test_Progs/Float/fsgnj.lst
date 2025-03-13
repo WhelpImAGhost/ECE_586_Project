@@ -1,0 +1,32 @@
+GAS LISTING fsgnj.s 			page 1
+
+
+   1 0000 37550100 	li a0, 85000
+   1      130585C0 
+   2 0008 93051000 	li a1, 1
+   3 000c D37005D0 	fcvt.s.w f1, a0
+   4 0010 53F105D0 	fcvt.s.w f2, a1
+   5 0014 D37110D0 	fcvt.s.wu f3, x0
+   6 0018 D3812020 	fsgnj.s f3, f1, f2
+   7 001c 37550100 	li a0, 85000
+   7      130585C0 
+   8 0024 9305F0FF 	li a1, -1
+   9 0028 D37005D0 	fcvt.s.w f1, a0
+  10 002c 53F105D0 	fcvt.s.w f2, a1
+  11 0030 537210D0 	fcvt.s.wu f4, x0
+  12 0034 53822020 	fsgnj.s f4, f1, f2
+  13 0038 37B5FEFF 	li a0, -85000
+  13      1305853F 
+  14 0040 93051000 	li a1, 1
+  15 0044 D37005D0 	fcvt.s.w f1, a0
+  16 0048 53F105D0 	fcvt.s.w f2, a1
+  17 004c D37210D0 	fcvt.s.wu f5, x0
+  18 0050 D3822020 	fsgnj.s f5, f1, f2
+  19 0054 37B5FEFF 	li a0, -85000
+  19      1305853F 
+  20 005c 9305F0FF 	li a1, -1
+  21 0060 D37005D0 	fcvt.s.w f1, a0
+  22 0064 53F105D0 	fcvt.s.w f2, a1
+  23 0068 537310D0 	fcvt.s.wu f6, x0
+  24 006c 53832020 	fsgnj.s f6, f1, f2
+  25 0070 67800000 	jr ra

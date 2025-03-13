@@ -1,0 +1,39 @@
+GAS LISTING float.s 			page 1
+
+
+   1              		.file	"float.c"
+   2              		.option pic
+   3              		.attribute arch, "rv32i2p0_m2p0_f2p0"
+   4              		.attribute unaligned_access, 0
+   5              		.attribute stack_align, 16
+   6              		.text
+   7              		.align	2
+   8              		.globl	main
+  10              	main:
+  11 0000 130101FE 		addi	sp,sp,-32
+  12 0004 232E8100 		sw	s0,28(sp)
+  13 0008 13040102 		addi	s0,sp,32
+  14 000c 97070000 		lla	a5,.LC0
+  14      93870700 
+  15 0014 87A70700 		flw	fa5,0(a5)
+  16 0018 2726F4FE 		fsw	fa5,-20(s0)
+  17 001c 97070000 		lla	a5,.LC1
+  17      93870700 
+  18 0024 87A70700 		flw	fa5,0(a5)
+  19 0028 2724F4FE 		fsw	fa5,-24(s0)
+  20 002c 0727C4FE 		flw	fa4,-20(s0)
+  21 0030 872784FE 		flw	fa5,-24(s0)
+  22 0034 D377F700 		fadd.s	fa5,fa4,fa5
+  23 0038 2722F4FE 		fsw	fa5,-28(s0)
+  24 003c 13000000 		nop
+  25 0040 0324C101 		lw	s0,28(sp)
+  26 0044 13010102 		addi	sp,sp,32
+  27 0048 67800000 		jr	ra
+  29              		.section	.rodata
+  30              		.align	2
+  31              	.LC0:
+  32 0000 6666A640 		.word	1084647014
+  33              		.align	2
+  34              	.LC1:
+  35 0004 33338340 		.word	1082340147
+  36              		.ident	"GCC: (GNU) 10.2.0"

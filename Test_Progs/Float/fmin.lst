@@ -1,0 +1,59 @@
+GAS LISTING fmin.s 			page 1
+
+
+   1 0000 37650000 	li a0, 25000
+   1      1305851A 
+   2 0008 B7150000 	li a1, 3500
+   2      9385C5DA 
+   3 0010 D37005D0 	fcvt.s.w f1, a0
+   4 0014 53F105D0 	fcvt.s.w f2, a1
+   5 0018 D37110D0 	fcvt.s.wu f3, x0
+   6 001c D3812028 	fmin.s f3, f1, f2
+   7 0020 37150000 	li a0, 5767
+   7      13057568 
+   8 0028 B7150000 	li a1, 5777
+   8      93851569 
+   9 0030 D37005D0 	fcvt.s.w f1, a0
+  10 0034 53F105D0 	fcvt.s.w f2, a1
+  11 0038 537210D0 	fcvt.s.wu f4, x0
+  12 003c 53822028 	fmin.s f4, f1, f2
+  13 0040 13051000 	li a0, 1
+  14 0044 930580F3 	li a1, -200
+  15 0048 D37005D0 	fcvt.s.w f1, a0
+  16 004c 53F105D0 	fcvt.s.w f2, a1
+  17 0050 D37210D0 	fcvt.s.wu f5, x0
+  18 0054 D3822028 	fmin.s f5, f1, f2
+  19 0058 37B5FEFF 	li a0, -86000
+  19      13050501 
+  20 0060 B7250000 	li a1, 8323
+  20      93853508 
+  21 0068 D37005D0 	fcvt.s.w f1, a0
+  22 006c 53F105D0 	fcvt.s.w f2, a1
+  23 0070 537310D0 	fcvt.s.wu f6, x0
+  24 0074 53832028 	fmin.s f6, f1, f2
+  25 0078 1305F0FF 	li a0, -1
+  26 007c 9305B0FF 	li a1, -5
+  27 0080 D37005D0 	fcvt.s.w f1, a0
+  28 0084 53F105D0 	fcvt.s.w f2, a1
+  29 0088 D37310D0 	fcvt.s.wu f7, x0
+  30 008c D3832028 	fmin.s f7, f1, f2
+  31 0090 3745FFFF 	li a0, -50320
+  31      130505B7 
+  32 0098 930520DE 	li a1, -542
+  33 009c D37005D0 	fcvt.s.w f1, a0
+  34 00a0 53F105D0 	fcvt.s.w f2, a1
+  35 00a4 537410D0 	fcvt.s.wu f8, x0
+  36 00a8 53842028 	fmin.s f8, f1, f2
+  37 00ac 13050000 	li a0, 0
+  38 00b0 93054006 	li a1, 100
+  39 00b4 D37005D0 	fcvt.s.w f1, a0
+  40 00b8 53F105D0 	fcvt.s.w f2, a1
+  41 00bc D37410D0 	fcvt.s.wu f9, x0
+  42 00c0 D3842028 	fmin.s f9, f1, f2
+  43 00c4 13050000 	li a0, 0
+  44 00c8 9305C0F9 	li a1, -100
+  45 00cc D37005D0 	fcvt.s.w f1, a0
+  46 00d0 53F105D0 	fcvt.s.w f2, a1
+  47 00d4 537510D0 	fcvt.s.wu f10, x0
+  48 00d8 53852028 	fmin.s f10, f1, f2
+  49 00dc 67800000 	jr ra

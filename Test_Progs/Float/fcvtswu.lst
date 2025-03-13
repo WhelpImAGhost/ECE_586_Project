@@ -1,0 +1,14 @@
+GAS LISTING fcvtswu.s 			page 1
+
+
+   1 0000 13050000 	li a0, 0
+   2 0004 D37015D0 	fcvt.s.wu f1, a0
+   3 0008 37A5FFFF 	li a0, -25000
+   3      130585E5 
+   4 0010 537115D0 	fcvt.s.wu f2, a0
+   5 0014 37650000 	li a0, 25000
+   5      1305851A 
+   6 001c D37115D0 	fcvt.s.wu f3, a0
+   7 0020 03250008 	lw a0, 0x80(x0)
+   8 0024 537215D0 	fcvt.s.wu f4, a0
+   9 0028 67800000 	jr ra

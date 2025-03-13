@@ -1,0 +1,10 @@
+GAS LISTING fmvwx.s 			page 1
+
+
+   1 0000 13057003 	li a0, 55
+   2 0004 D30005F0 	fmv.w.x f1, a0
+   3 0008 130590FC 	li a0, -55
+   4 000c 530105F0 	fmv.w.x f2, a0
+   5 0010 13050000 	li a0, 0
+   6 0014 D30105F0 	fmv.w.x f3, a0
+   7 0018 67800000 	jr ra
