@@ -25,8 +25,8 @@ The .mem memory files used for testing our program can be found in the [Mem_file
 
 ## Documentation
 
-# Project Report
+### Project Report
 ([ECE 586 RISC-V ISA Simulation Final Report](https://www.overleaf.com/read/fvhgtfznjnkt#011c4b))
 
-# Test Plan
+### Test Plan
 ([ECE 586 RISC-V ISA Simulation Test Plan (Team #2)](https://www.overleaf.com/read/pkxwrkrxyvph#52e191))
