@@ -1,0 +1,9 @@
+li a0, 0xFFEEDDCC
+li a1, 0x11223344
+sh a0, 0x80(x0)
+sh a0, 0x82(x0)
+sh a1, 0x84(x0)
+sh a1, 0x86(x0)
+sh a1, 0x81(x0)
+sh a1, 0x83(x0)
+jalr x0, x0, 0

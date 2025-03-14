@@ -1,0 +1,3 @@
+li a0, 0xFFEEDDCC
+sw a0, 0x80(x0)
+sw a0, 0x84(x0)

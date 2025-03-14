@@ -1,0 +1,25 @@
+li a0, 9
+fcvt.s.wu f1, a0
+fcvt.s.wu f2, x0
+fsqrt.s f2, f1
+li a0, 5
+fcvt.s.wu f1, a0
+fcvt.s.wu f3, x0
+fsqrt.s f3, f1
+li a0, 0
+fcvt.s.wu f1, a0
+fcvt.s.wu f4, x0
+fsqrt.s f4, f1
+li a0, 1
+fcvt.s.wu f1, a0
+fcvt.s.wu f5, x0
+fsqrt.s f5, f1
+li a0, 90000
+fcvt.s.wu f1, a0
+fcvt.s.wu f6, x0
+fsqrt.s f6, f1
+li a0, -81
+fcvt.s.w f1, a0
+fcvt.s.wu f7, x0
+fsqrt.s f7, f1
+jr ra
