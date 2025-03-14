@@ -1,4 +1,4 @@
-# ECE 586 FINAL PROJECT (Winter 2026) <br /> RISC-V ISA Simulation 
+# ECE 586 FINAL PROJECT (Winter 2025) <br /> RISC-V ISA Simulation 
 ### Chris Kane-Pardy & Violet Monti
 
 ## Description of main.c
@@ -26,7 +26,7 @@ The .mem memory files used for testing our program can be found in the [Mem_file
 ## Documentation
 
 ### Project Report
-([ECE 586 RISC-V ISA Simulation Final Report](https://www.overleaf.com/read/fvhgtfznjnkt#011c4b))
+([ECE 586 RISC-V ISA Simulation Final Report (Team #2)](https://www.overleaf.com/read/fvhgtfznjnkt#011c4b))
 
 ### Test Plan
 ([ECE 586 RISC-V ISA Simulation Test Plan (Team #2)](https://www.overleaf.com/read/pkxwrkrxyvph#52e191))
