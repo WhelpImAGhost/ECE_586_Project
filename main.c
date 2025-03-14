@@ -209,12 +209,13 @@ int main(int argc, char *argv[]){
     int numBreakpoints = 0;
     if(breakpoints == 1) numBreakpoints = breakpointInput(BreakPC);
 
-    // 
+    // Check if PC is outside of our memory range
     if (pc > (MemWords * 4)) {
         fprintf(stderr, "PC was set to an address larger than the program size. Exiting...");
         exit(-1);
     }  
 
+    // Check if stack address is outside of memory range
     else if (x[2] > (MemWords * 4)){
         fprintf(stderr, "Stack Address was set to an address larger than the program size. Exiting...");
         exit(-1);
@@ -461,13 +462,13 @@ int writeHalfWord(uint32_t array[], int size, int address, uint32_t value) {
             value = value << 16;
             array[target_block] = value | selected_word;
             
-        } else {
+        } 
+        else {
             target_hw = 0;
             uint32_t selected_word = array[target_block];
             selected_word = selected_word & 0xFFFF0000;
             array[target_block] = value | selected_word;
         }
-
         return 0;
     }
 
@@ -491,7 +492,6 @@ int writeWord(uint32_t array[], int size, int address, uint32_t value) {
 void fetch_and_decode(uint32_t array[], uint32_t pc, uint32_t *opcode, int mode){
 
     uint32_t selected_instruction = array[pc / 4];
-
     *opcode = selected_instruction & 0x0000007F;
 
     if (mode == 1)fprintf(stdout, "Current PC:          0x%08X\n", pc);
@@ -636,7 +636,7 @@ void r_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
                 default:
                     fprintf(stderr, "0x%X is not a valid FUNC7 code for FUNC3 code 0x%X\n", func7, func3);
                     exit(1);
-                }
+            }
             break;
         case 0x5: // Shift Right
             switch (func7){
@@ -686,7 +686,6 @@ void r_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
                 default:
                     fprintf(stderr, "0x%X is not a valid FUNC7 code for FUNC3 code 0x%X\n", func7, func3);
                     exit(1);
-                
             }
             break;
         case 0x3:
@@ -707,7 +706,6 @@ void r_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
                 default:
                     fprintf(stderr, "0x%X is not a valid FUNC7 code for FUNC3 code 0x%X\n", func7, func3);
                     exit(1);
-
             }
             break;
         default:
