@@ -69,8 +69,8 @@ void watchingOutput(int numIntRegs, int numFloatRegs, int numMemLocals, uint32_t
 
 // Set default mode
 int mode = 0;  // 0 is silent
-                   // 1 is verbose
-                   // 2 is step through
+                // 1 is verbose
+                // 2 is step through
 
 // Default to Breakpoints Off
 int breakpoints = 0;
@@ -81,7 +81,7 @@ int watching = 0;
 // Default to step Off
 int step = 0;
 
-
+// Main
 int main(int argc, char *argv[]){
 
     uint32_t test_word;
@@ -208,8 +208,7 @@ int main(int argc, char *argv[]){
     int BreakPC[20];
     int numBreakpoints = 0;
     if(breakpoints == 1) numBreakpoints = breakpointInput(BreakPC);
-
-    // 
+ 
     if (pc > (MemWords * 4)) {
         fprintf(stderr, "PC was set to an address larger than the program size. Exiting...");
         exit(-1);
@@ -1453,7 +1452,7 @@ void printAllFPReg(float regs[32]){
     return;
 }
 
-
+// Function to take breakpoint inputs
 int breakpointInput(int array[]){
     int numBreaks;
     printf("\nEnter the amount of breakpoints you wish to add in the code (1-20): ");
@@ -1480,7 +1479,7 @@ int breakpointInput(int array[]){
     }
 }
 
-// Function to verify currnet mem location is / is not within the breakpoint array
+// Function to check if current mem location is / is not within the breakpoint array
 int breakpointCheck(int bppc[], int numBPs, uint32_t instruction, uint32_t array[], int size, uint32_t regs[32], char regnames[32][8], float fregs[32], int MemWords, int step){
     for(int i = 0; i < numBPs; i++){
         if (instruction == bppc[i]){
@@ -1491,7 +1490,6 @@ int breakpointCheck(int bppc[], int numBPs, uint32_t instruction, uint32_t array
     return step;
 }
 
-
 // Function to set up and initialize watch locations within memory and registers
 void watchingUserInput(uint32_t regindex[], uint32_t fregindex[], uint32_t memindex[], int *numRegs, int *numFregs, int *numMems){
     char input = '\0';  
@@ -1499,7 +1497,6 @@ void watchingUserInput(uint32_t regindex[], uint32_t fregindex[], uint32_t memin
     int numFloatRegs = 0;
     int numMemLocals = 0;
     char regCommand;
-
 
     // Continue loop until given exit command
     while (input != 'C'){
@@ -1556,7 +1553,6 @@ void watchingUserInput(uint32_t regindex[], uint32_t fregindex[], uint32_t memin
                     }
                 }
                 else fprintf(stderr, "Invalid register command, please try again\n");
-                
                 break;
 
             // Set memory watch point
