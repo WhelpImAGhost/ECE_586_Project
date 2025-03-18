@@ -740,6 +740,7 @@ void i_type(uint32_t mem_array[], int size, uint32_t* pc, uint32_t reg_array[32]
         imm = imm & ~(0xFFFFF000);
     }
 
+    uint32_t ex_address = *pc + imm;
     #ifdef DEBUG
     fprintf(stdout, "I-Type instruction breakdown:\n    Opcode: 0x%02X\n    R_Des: 0x%02X\n    Func3: 0x%02X\n    R_S1: 0x%02X\n    Immediate: 0x%03X\n", opcode, rd, func3, rs1, imm);
     #endif
@@ -758,6 +759,14 @@ void i_type(uint32_t mem_array[], int size, uint32_t* pc, uint32_t reg_array[32]
         #ifdef DEBUG
             fprintf(stdout, "pc before jump: 0x%08x \n", *pc);
         #endif
+            if ((ex_address % 4) != 0){
+                fprintf(stderr, "Error: computed address 0x%08X is not word aligned\n", ex_address);
+                exit(1);
+            }
+            else if ((ex_address > (size * 4)) || ex_address < 0){
+                fprintf(stderr, "Error: computed address 0x%08X is out of program range\n", ex_address);
+                exit(1);
+            }
             reg_array[rd] = *pc + 4;
             reg_array[0] = 0x00000000;
             *pc = (reg_array[rs1] + imm) & 0xFFFFFFFE;
@@ -991,6 +1000,7 @@ void b_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
 
     int32_t rs1_signed = reg_array[rs1];
     int32_t rs2_signed = reg_array[rs2];
+    uint32_t ex_address = *pc + imm;
 
     #ifdef DEBUG
     fprintf(stdout, "B-Type instruction breakdown:\n    Opcode: 0x%02X\n    Func3: 0x%02X\n    R_S1: 0x%02X\n    R_S2: 0x%02X\n    Immediate: 0x%04X\n", opcode, func3, rs1, rs2, imm);
@@ -1007,6 +1017,14 @@ void b_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
                 #ifdef DEBUG
                 fprintf(stdout, "Branch taken, adding 0x%03X to PC\n", imm);
                 #endif
+                if ((ex_address % 4) != 0){
+                    fprintf(stderr, "Error: computed address 0x%08X is not word aligned\n", ex_address);
+                    exit(1);
+                }
+                else if ((ex_address > (size * 4)) || ex_address < 0){
+                    fprintf(stderr, "Error: computed address 0x%08X is out of program range\n", ex_address);
+                    exit(1);
+                }
                 *pc += imm;
             }
             else{
@@ -1024,6 +1042,14 @@ void b_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
                 #ifdef DEBUG
                 fprintf(stdout, "Branch taken, adding 0x%03X to PC\n", imm);
                 #endif
+                if ((ex_address % 4) != 0){
+                    fprintf(stderr, "Error: computed address 0x%08X is not word aligned\n", ex_address);
+                    exit(1);
+                }
+                else if ((ex_address > (size * 4)) || ex_address < 0){
+                    fprintf(stderr, "Error: computed address 0x%08X is out of program range\n", ex_address);
+                    exit(1);
+                }
                 *pc += imm;
             }
             else{
@@ -1041,6 +1067,14 @@ void b_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
                 #ifdef DEBUG
                 fprintf(stdout, "Branch taken, adding 0x%03X to PC\n", imm);
                 #endif
+                if ((ex_address % 4) != 0){
+                    fprintf(stderr, "Error: computed address 0x%08X is not word aligned\n", ex_address);
+                    exit(1);
+                }
+                else if ((ex_address > (size * 4)) || ex_address < 0){
+                    fprintf(stderr, "Error: computed address 0x%08X is out of program range\n", ex_address);
+                    exit(1);
+                }
                 *pc += imm;
             }
             else{
@@ -1058,6 +1092,14 @@ void b_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
                 #ifdef DEBUG
                 fprintf(stdout, "Branch taken, adding 0x%03X to PC\n", imm);
                 #endif
+                if ((ex_address % 4) != 0){
+                    fprintf(stderr, "Error: computed address 0x%08X is not word aligned\n", ex_address);
+                    exit(1);
+                }
+                else if ((ex_address > (size * 4)) || ex_address < 0){
+                    fprintf(stderr, "Error: computed address 0x%08X is out of program range\n", ex_address);
+                    exit(1);
+                }
                 *pc += imm;
             }
             else{
@@ -1075,6 +1117,14 @@ void b_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
                 #ifdef DEBUG
                 fprintf(stdout, "Branch taken, adding 0x%03X to PC\n", imm);
                 #endif
+                if ((ex_address % 4) != 0){
+                    fprintf(stderr, "Error: computed address 0x%08X is not word aligned\n", ex_address);
+                    exit(1);
+                }
+                else if ((ex_address > (size * 4)) || ex_address < 0){
+                    fprintf(stderr, "Error: computed address 0x%08X is out of program range\n", ex_address);
+                    exit(1);
+                }
                 *pc += imm;
             }
             else{
@@ -1092,6 +1142,14 @@ void b_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
                 #ifdef DEBUG
                 fprintf(stdout, "Branch taken, adding 0x%03X to PC\n", imm);
                 #endif
+                if ((ex_address % 4) != 0){
+                    fprintf(stderr, "Error: computed address 0x%08X is not word aligned\n", ex_address);
+                    exit(1);
+                }
+                else if ((ex_address > (size * 4)) || ex_address < 0){
+                    fprintf(stderr, "Error: computed address 0x%08X is out of program range\n", ex_address);
+                    exit(1);
+                }
                 *pc += imm;
             }
             else{
@@ -1157,12 +1215,21 @@ void j_type(uint32_t mem_array[], int size, uint32_t *pc, uint32_t reg_array[32]
     if (immmsb == 1) imm = imm | 0xFFE00000;
     else imm = imm & ~(0xFFE00000);
     
+    uint32_t ex_address = *pc + imm;
 
     #ifdef DEBUG
     fprintf(stdout, "J-Type instruction breakdown:\n    Opcode: 0x%02X\n    R_Des: 0x%02X\n    Immediate: 0x%06X\n", opcode, rd, imm);
     fprintf(stdout, "Storing 0x%08X into register x%d, then adding 0x%05X to PC\n", *pc + 4, rd, imm);
     #endif
 
+    if ((ex_address % 4) != 0){
+        fprintf(stderr, "Error: computed address 0x%08X is not word aligned\n", ex_address);
+        exit(1);
+    }
+    else if ((ex_address > (size * 4)) || ex_address < 0){
+        fprintf(stderr, "Error: computed address 0x%08X is out of program range\n", ex_address);
+        exit(1);
+    }
     reg_array[rd] = *pc + 4;
     *pc += imm;
 
